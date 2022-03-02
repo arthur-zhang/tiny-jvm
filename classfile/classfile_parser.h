@@ -38,9 +38,9 @@ public:
 
     FieldInfo **fields = nullptr;            // [fields_count]
     u2 methods_count = 0;
-    method_info **methods = nullptr;            // [methods_count];
+    MethodInfo **methods = nullptr;            // [methods_count];
     u2 attributes_count = 0;
-    attribute_info **attributes = nullptr;    // [attributes_count];
+    AttributeInfo **attributes = nullptr;    // [attributes_count];
     void parse();
 
 private:
@@ -67,7 +67,7 @@ private:
 u2 toAttributeTag(u2 attribute_name_index,
                   ConstantPool *constant_pool);
 
-void print_methods(method_info **bufs, int length, ConstantPool *constant_pool);
+void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool);
 
 #endif //TINY_JVM_CLASSFILE_PARSER_H
 

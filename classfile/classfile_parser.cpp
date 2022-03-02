@@ -149,7 +149,7 @@ std::string recursive_parse_annotation(annotation *target) {
     return total_str.str();
 };
 
-void print_attributes(attribute_info *ptr, ConstantPool *cp) {
+void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
     auto constant_pool = cp->getConstantPool();
     int attribute_tag = toAttributeTag(ptr->attribute_name_index, cp);
     switch (attribute_tag) {
@@ -810,7 +810,7 @@ void print_attributes(attribute_info *ptr, ConstantPool *cp) {
     }
 }
 
-void print_methods(method_info **bufs, int length, ConstantPool *constant_pool) {
+void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool) {
     std::cout << "(DEBUG)" << std::endl;
     for (int i = 0; i < length; i++) {
         std::stringstream ss;
@@ -1155,9 +1155,9 @@ void ClassFile::readMethods() {
 
     methods_count = reader.readUint16();
     if (methods_count != 0)
-        methods = new method_info *[methods_count];
+        methods = new MethodInfo *[methods_count];
     for (int pos = 0; pos < methods_count; pos++) {
-        methods[pos] = new method_info(reader, constantPool, 1);
+        methods[pos] = new MethodInfo(reader, constantPool, 1);
     }
     if (methods_count != 0) {
         std::cout << "(DEBUG) method_number: " << methods_count << std::endl;
@@ -1169,7 +1169,7 @@ void ClassFile::readMethods() {
 void ClassFile::readAttributes() {
     attributes_count = reader.readUint16();
     if (attributes_count != 0)
-        attributes = new attribute_info *[attributes_count];
+        attributes = new AttributeInfo *[attributes_count];
     for (int pos = 0; pos < attributes_count; pos++) {
         attributes[pos] = parseAttribute(reader, constantPool);
     }
@@ -1237,7 +1237,7 @@ u2 toAttributeTag(u2 attribute_name_index,
     }
 }
 
-static attribute_info *parseAttribute(ClassReader &reader, ConstantPool *constant_pool) {
+static AttributeInfo *parseAttribute(ClassReader &reader, ConstantPool *constant_pool) {
 
     u2 attribute_name_index = reader.peek2();
     u2 attribute_tag = toAttributeTag(attribute_name_index, constant_pool);

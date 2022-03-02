@@ -11,31 +11,15 @@
 
 class FieldInfo {
 public:
-    FieldInfo(ClassReader &reader, ConstantPool *constantPool) {
-        access_flags = reader.readUint16();
-        name_index = reader.readUint16();
-        descriptor_index = reader.readUint16();
-        attributes_count = reader.readUint16();
-        if (attributes_count != 0)        // !!!!! attention !!!!!
-            attributes = new attribute_info *[attributes_count];
-        for (int pos = 0; pos < attributes_count; pos++) {
-            attributes[pos] = parseAttribute(reader, constantPool);
-        }
-    }
+    FieldInfo(ClassReader &reader, ConstantPool *constantPool);
 
     u2 access_flags;
     u2 name_index;
     u2 descriptor_index;
     u2 attributes_count;
-    attribute_info **attributes = nullptr;        // [attributes_count]
-    ~FieldInfo() {
-        if (attributes != nullptr) {
-            for (int i = 0; i < attributes_count; i++) {
-                delete attributes[i];
-            }
-            delete[] attributes;
-        }
-    }
+    AttributeInfo **attributes = nullptr;
+
+    ~FieldInfo();
 };
 
 #endif //TINY_JVM_FIELD_INFO_H

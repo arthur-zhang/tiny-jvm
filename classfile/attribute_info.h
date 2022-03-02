@@ -10,23 +10,21 @@
 #include "String.h"
 #include "constant_pool.h"
 
-class attribute_info {
+class AttributeInfo {
 public:
     u2 attribute_name_index;
     u4 attribute_length;
 
-    attribute_info(ClassReader &reader) {
+    AttributeInfo(ClassReader &reader) {
         attribute_name_index = reader.readUint16();
         attribute_length = reader.readUint32();
     }
 };
 
 
-
-
-class ConstantValue_attribute : public attribute_info {
+class ConstantValue_attribute : public AttributeInfo {
 public:
-    ConstantValue_attribute(ClassReader &reader) : attribute_info(reader) {
+    ConstantValue_attribute(ClassReader &reader) : AttributeInfo(reader) {
         constantvalue_index = reader.readUint16();
     }
 
@@ -48,9 +46,9 @@ public:
     }
 };
 
-static attribute_info *parseAttribute(ClassReader &reader, ConstantPool *constant_pool);
+static AttributeInfo *parseAttribute(ClassReader &reader, ConstantPool *constant_pool);
 
-class Code_attribute : public attribute_info {
+class Code_attribute : public AttributeInfo {
 public:
     u2 max_stack;
     u2 max_locals;
@@ -62,9 +60,9 @@ public:
     exception_table_t **exception_table;
 
     u2 attributes_count;
-    attribute_info **attributes;
+    AttributeInfo **attributes;
 
-    Code_attribute(ClassReader &reader, ConstantPool *constantPool) : attribute_info(reader) {
+    Code_attribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
         max_stack = reader.readUint16();
         max_locals = reader.readUint16();
         code_length = reader.readUint32();
@@ -81,7 +79,7 @@ public:
         }
         attributes_count = reader.readUint16();
         if (attributes_count != 0)
-            attributes = new attribute_info *[attributes_count];
+            attributes = new AttributeInfo *[attributes_count];
         for (int pos = 0; pos < attributes_count; pos++) {
             attributes[pos] = parseAttribute(reader, constantPool);
         }
@@ -92,19 +90,19 @@ public:
 //    void init(ClassFileStream &stream, cp_info **constant_pool);
 };
 
-class StackMapTable_attribute : public attribute_info {
+class StackMapTable_attribute : public AttributeInfo {
 public:
-    StackMapTable_attribute(ClassReader &reader) : attribute_info(reader) {
+    StackMapTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
         reader.readBytes(attribute_length);
     }
 };
 
-class Exceptions_attribute : public attribute_info {
+class Exceptions_attribute : public AttributeInfo {
 public:
     u2 number_of_exceptions;
     u2 *exception_index_table = nullptr;
 
-    Exceptions_attribute(ClassReader &reader) : attribute_info(reader) {
+    Exceptions_attribute(ClassReader &reader) : AttributeInfo(reader) {
         number_of_exceptions = reader.readUint16();
         if (number_of_exceptions != 0)
             exception_index_table = new u2[number_of_exceptions];
@@ -114,7 +112,7 @@ public:
     }
 };
 
-class InnerClasses_attribute : public attribute_info {
+class InnerClasses_attribute : public AttributeInfo {
 public:
     u2 number_of_classes;
 
@@ -133,7 +131,7 @@ public:
         }
     } **classes = nullptr;
 
-    InnerClasses_attribute(ClassReader &reader) : attribute_info(reader) {
+    InnerClasses_attribute(ClassReader &reader) : AttributeInfo(reader) {
         number_of_classes = reader.readUint16();
         // struct classes_t has no polymorphism. so dont need to define: `struct classes_t **classes`, use `struct classes_t *class` is okay.
         if (number_of_classes != 0)
@@ -145,42 +143,42 @@ public:
 
 };
 
-class EnclosingMethod_attribute : public attribute_info {
+class EnclosingMethod_attribute : public AttributeInfo {
 public:
     u2 class_index;
     u2 method_index;
-    EnclosingMethod_attribute(ClassReader &reader) : attribute_info(reader) {
+    EnclosingMethod_attribute(ClassReader &reader) : AttributeInfo(reader) {
         class_index = reader.readUint16();
         method_index = reader.readUint16();
     }
 };
 
-class Synthetic_attribute : public attribute_info {
+class Synthetic_attribute : public AttributeInfo {
 public:
-    Synthetic_attribute(ClassReader &reader) : attribute_info(reader) {}
+    Synthetic_attribute(ClassReader &reader) : AttributeInfo(reader) {}
 };
 
-class Signature_attribute : public attribute_info {
+class Signature_attribute : public AttributeInfo {
 public:
     u2 signature_index;
 
-    Signature_attribute(ClassReader &reader) : attribute_info(reader) {
+    Signature_attribute(ClassReader &reader) : AttributeInfo(reader) {
         signature_index = reader.readUint16();
     }
 };
 
-class SourceFile_attribute : public attribute_info {
+class SourceFile_attribute : public AttributeInfo {
 public:
     u2 sourcefile_index;
-    SourceFile_attribute(ClassReader &reader) : attribute_info(reader) {
+    SourceFile_attribute(ClassReader &reader) : AttributeInfo(reader) {
         sourcefile_index = reader.readUint16();
     }
 };
 
-class SourceDebugExtension_attribute : public attribute_info {
+class SourceDebugExtension_attribute : public AttributeInfo {
 public:
     u1 *debug_extension = nullptr;        // [attribute_length];
-    SourceDebugExtension_attribute(ClassReader &reader) : attribute_info(reader) {
+    SourceDebugExtension_attribute(ClassReader &reader) : AttributeInfo(reader) {
         if (attribute_length != 0)
             debug_extension = new u1[attribute_length];
         debug_extension = reader.readBytes(attribute_length);
@@ -188,7 +186,7 @@ public:
 };
 
 
-class LineNumberTable_attribute : public attribute_info {
+class LineNumberTable_attribute : public AttributeInfo {
 public:
     u2 line_number_table_length;
 
@@ -203,7 +201,7 @@ public:
         }
     } **line_number_table = nullptr;        // [line_number_table_length]
 
-    LineNumberTable_attribute(ClassReader &reader) : attribute_info(reader) {
+    LineNumberTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
         line_number_table_length = reader.readUint16();
         if (line_number_table_length != 0)
             line_number_table = new LineNumberTable_attribute::line_number_table_t *[line_number_table_length];
@@ -213,7 +211,7 @@ public:
     }
 };
 
-class LocalVariableTable_attribute : public attribute_info {
+class LocalVariableTable_attribute : public AttributeInfo {
 public:
     u2 local_variable_table_length;
 
@@ -233,7 +231,7 @@ public:
         }
 
     } **local_variable_table = nullptr;    // [local_variable_table_length]
-    LocalVariableTable_attribute(ClassReader &reader) : attribute_info(reader) {
+    LocalVariableTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
         local_variable_table_length = reader.readUint16();
         if (local_variable_table_length != 0)
             local_variable_table = new LocalVariableTable_attribute::local_variable_table_t *[local_variable_table_length];
@@ -243,7 +241,7 @@ public:
     }
 };
 
-class LocalVariableTypeTable_attribute : public attribute_info {
+class LocalVariableTypeTable_attribute : public AttributeInfo {
 public:
     u2 local_variable_type_table_length;
 
@@ -263,7 +261,7 @@ public:
             index = reader.readUint16();
         }
     } **local_variable_type_table = nullptr;// [local_variable_type_table_length]
-    LocalVariableTypeTable_attribute(ClassReader &reader) : attribute_info(reader) {
+    LocalVariableTypeTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
         local_variable_type_table_length = reader.readUint16();
         if (local_variable_type_table_length != 0)
             local_variable_type_table = new LocalVariableTypeTable_attribute::local_variable_type_table_t *[local_variable_type_table_length];
@@ -274,9 +272,9 @@ public:
 
 };
 
-class Deprecated_attribute : public attribute_info {
+class Deprecated_attribute : public AttributeInfo {
 public:
-    Deprecated_attribute(ClassReader &reader) : attribute_info(reader) {
+    Deprecated_attribute(ClassReader &reader) : AttributeInfo(reader) {
 
     }
 };
@@ -475,30 +473,30 @@ public:
     CodeStub stub;
 };
 
-class RuntimeVisibleAnnotations_attribute : public attribute_info {
+class RuntimeVisibleAnnotations_attribute : public AttributeInfo {
 public:
     parameter_annotations_t parameter_annotations;
 
-    RuntimeVisibleAnnotations_attribute(ClassReader &reader) : attribute_info(reader), parameter_annotations(reader) {
+    RuntimeVisibleAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader), parameter_annotations(reader) {
     }
 };
 
-class RuntimeInvisibleAnnotations_attribute : public attribute_info {
+class RuntimeInvisibleAnnotations_attribute : public AttributeInfo {
 public:
     parameter_annotations_t *parameter_annotations;
 
-    RuntimeInvisibleAnnotations_attribute(ClassReader &reader) : attribute_info(reader) {
+    RuntimeInvisibleAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
         parameter_annotations = new parameter_annotations_t(reader);
     }
 };
 
-class RuntimeVisibleParameterAnnotations_attribute : public attribute_info {
+class RuntimeVisibleParameterAnnotations_attribute : public AttributeInfo {
 public:
     u1 num_parameters;
     parameter_annotations_t **parameter_annotations = nullptr;        // [num_parameters];
     CodeStub stub;
 
-    RuntimeVisibleParameterAnnotations_attribute(ClassReader &reader) : attribute_info(reader) {
+    RuntimeVisibleParameterAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
         num_parameters = reader.readUint8();
         if (num_parameters != 0)
             parameter_annotations = new parameter_annotations_t *[num_parameters];
@@ -520,7 +518,7 @@ public:
     }
 };
 
-class RuntimeInvisibleParameterAnnotations_attribute : public attribute_info {
+class RuntimeInvisibleParameterAnnotations_attribute : public AttributeInfo {
 public:
     u1 num_parameters;
     parameter_annotations_t **parameter_annotations = nullptr;        // [num_parameters];
@@ -528,7 +526,7 @@ public:
 
     ~RuntimeInvisibleParameterAnnotations_attribute();
 
-    RuntimeInvisibleParameterAnnotations_attribute(ClassReader &reader) : attribute_info(reader) {
+    RuntimeInvisibleParameterAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
         num_parameters = reader.readUint8();
         if (num_parameters != 0)
             parameter_annotations = new parameter_annotations_t *[num_parameters];
@@ -623,9 +621,9 @@ struct type_annotation {
     ~type_annotation();
     CodeStub stub;
 };
-class RuntimeVisibleTypeAnnotations_attribute : public attribute_info {
+class RuntimeVisibleTypeAnnotations_attribute : public AttributeInfo {
 public:
-    RuntimeVisibleTypeAnnotations_attribute(ClassReader &reader) : attribute_info(reader) {
+    RuntimeVisibleTypeAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
         reader.readBytes(attribute_length);
     }
 
@@ -633,9 +631,9 @@ public:
     type_annotation *annotations = nullptr;					// [num_annotations];
 };
 
-class RuntimeInvisibleTypeAnnotations_attribute : public attribute_info {
+class RuntimeInvisibleTypeAnnotations_attribute : public AttributeInfo {
 public:
-    RuntimeInvisibleTypeAnnotations_attribute(ClassReader &reader) : attribute_info(reader) {
+    RuntimeInvisibleTypeAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
         reader.readBytes(attribute_length);
     }
 
@@ -645,9 +643,9 @@ public:
 //    ~RuntimeInvisibleTypeAnnotations_attribute();
 };
 
-class AnnotationDefault_attribute : public attribute_info {
+class AnnotationDefault_attribute : public AttributeInfo {
 public:
-    AnnotationDefault_attribute(ClassReader &reader) : attribute_info(reader) {
+    AnnotationDefault_attribute(ClassReader &reader) : AttributeInfo(reader) {
         default_value = new element_value(reader);
         stub += default_value->stub;
     }
@@ -657,9 +655,9 @@ public:
     CodeStub stub;
 };
 
-class BootstrapMethods_attribute : public attribute_info {
+class BootstrapMethods_attribute : public AttributeInfo {
 public:
-    BootstrapMethods_attribute(ClassReader &reader) : attribute_info(reader) {
+    BootstrapMethods_attribute(ClassReader &reader) : AttributeInfo(reader) {
         num_bootstrap_methods = reader.readUint16();
         if (num_bootstrap_methods != 0)
             bootstrap_methods = new BootstrapMethods_attribute::bootstrap_methods_t *[num_bootstrap_methods];
@@ -690,7 +688,7 @@ public:
     } **bootstrap_methods = nullptr;                            // [num_bootstrap_methods];
 };
 
-class MethodParameters_attribute : public attribute_info {
+class MethodParameters_attribute : public AttributeInfo {
 public:
     u1 parameters_count;
 
@@ -704,7 +702,7 @@ public:
             access_flags = reader.readUint16();
         }
     } **parameters = nullptr;                                    // [parameters_count];
-    MethodParameters_attribute(ClassReader &reader) : attribute_info(reader) {
+    MethodParameters_attribute(ClassReader &reader) : AttributeInfo(reader) {
         parameters_count = reader.readUint8();
         if (parameters_count != 0)
             parameters = new MethodParameters_attribute::parameters_t *[parameters_count];
