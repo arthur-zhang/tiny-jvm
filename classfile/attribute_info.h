@@ -17,24 +17,24 @@ public:
     u4 attribute_length;
 
     AttributeInfo(ClassReader &reader);
+
     static AttributeInfo *parseAttribute(ClassReader &reader, ConstantPool *constant_pool);
+
     static u2 toAttributeTag(u2 attribute_name_index,
-                      ConstantPool *constant_pool);
+                             ConstantPool *constant_pool);
 };
 
 
-class ConstantValue_attribute : public AttributeInfo {
+class ConstantValueAttribute : public AttributeInfo {
 public:
-    ConstantValue_attribute(ClassReader &reader) : AttributeInfo(reader) {
-        constantvalue_index = reader.readUint16();
+    ConstantValueAttribute(ClassReader &reader) : AttributeInfo(reader) {
+        constant_value_index = reader.readUint16();
     }
-    u2 constantvalue_index;
+
+    u2 constant_value_index;
 };
 
-
-
-
-class Code_attribute : public AttributeInfo {
+class CodeAttribute : public AttributeInfo {
 public:
     u2 max_stack;
     u2 max_locals;
@@ -43,12 +43,12 @@ public:
     u1 *code;
 
     u2 exception_table_length;
-    exception_table **exception_table;
+    ExceptionTable **exception_table;
 
     u2 attributes_count;
     AttributeInfo **attributes;
 
-    Code_attribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
+    CodeAttribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
         max_stack = reader.readUint16();
         max_locals = reader.readUint16();
         code_length = reader.readUint32();
@@ -58,9 +58,9 @@ public:
         }
         exception_table_length = reader.readUint16();
         if (exception_table_length != 0) {
-            exception_table = new class exception_table *[exception_table_length];
+            exception_table = new ExceptionTable *[exception_table_length];
             for (int pos = 0; pos < exception_table_length; pos++) {
-                exception_table[pos] = new class exception_table(reader);
+                exception_table[pos] = new ExceptionTable(reader);
             }
         }
         attributes_count = reader.readUint16();
@@ -70,25 +70,21 @@ public:
             attributes[pos] = parseAttribute(reader, constantPool);
         }
     }
-
-//    ~Code_attribute() override;
-
-//    void init(ClassFileStream &stream, cp_info **constant_pool);
 };
 
-class StackMapTable_attribute : public AttributeInfo {
+class StackMapTableAttribute : public AttributeInfo {
 public:
-    StackMapTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    StackMapTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
         reader.readBytes(attribute_length);
     }
 };
 
-class Exceptions_attribute : public AttributeInfo {
+class ExceptionsAttribute : public AttributeInfo {
 public:
     u2 number_of_exceptions;
     u2 *exception_index_table = nullptr;
 
-    Exceptions_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    ExceptionsAttribute(ClassReader &reader) : AttributeInfo(reader) {
         number_of_exceptions = reader.readUint16();
         if (number_of_exceptions != 0)
             exception_index_table = new u2[number_of_exceptions];
@@ -98,170 +94,176 @@ public:
     }
 };
 
-class InnerClasses_attribute : public AttributeInfo {
+class InnerClass {
+public:
+    u2 inner_class_info_index;
+    u2 outer_class_info_index;
+    u2 inner_name_index;
+    u2 inner_class_access_flags;
+
+    InnerClass(ClassReader &reader) {
+        inner_class_info_index = reader.readUint16();
+        outer_class_info_index = reader.readUint16();
+        inner_name_index = reader.readUint16();
+        inner_class_access_flags = reader.readUint16();
+    }
+};
+
+class InnerClassesAttribute : public AttributeInfo {
 public:
     u2 number_of_classes;
+    InnerClass **classes = nullptr;
 
-    class classes_t {
-    public:
-        u2 inner_class_info_index;
-        u2 outer_class_info_index;
-        u2 inner_name_index;
-        u2 inner_class_access_flags;
-
-        classes_t(ClassReader &reader) {
-            inner_class_info_index = reader.readUint16();
-            outer_class_info_index = reader.readUint16();
-            inner_name_index = reader.readUint16();
-            inner_class_access_flags = reader.readUint16();
-        }
-    } **classes = nullptr;
-
-    InnerClasses_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    InnerClassesAttribute(ClassReader &reader) : AttributeInfo(reader) {
         number_of_classes = reader.readUint16();
-        // struct classes_t has no polymorphism. so dont need to define: `struct classes_t **classes`, use `struct classes_t *class` is okay.
         if (number_of_classes != 0)
-            classes = new classes_t *[number_of_classes];
+            classes = new InnerClass *[number_of_classes];
         for (int pos = 0; pos < number_of_classes; pos++) {
-            classes[pos] = new classes_t(reader);
+            classes[pos] = new InnerClass(reader);
         }
     }
 
 };
 
-class EnclosingMethod_attribute : public AttributeInfo {
+class EnclosingMethodAttribute : public AttributeInfo {
 public:
     u2 class_index;
     u2 method_index;
-    EnclosingMethod_attribute(ClassReader &reader) : AttributeInfo(reader) {
+
+    EnclosingMethodAttribute(ClassReader &reader) : AttributeInfo(reader) {
         class_index = reader.readUint16();
         method_index = reader.readUint16();
     }
 };
 
-class Synthetic_attribute : public AttributeInfo {
+class SyntheticAttribute : public AttributeInfo {
 public:
-    Synthetic_attribute(ClassReader &reader) : AttributeInfo(reader) {}
+    SyntheticAttribute(ClassReader &reader) : AttributeInfo(reader) {}
 };
 
-class Signature_attribute : public AttributeInfo {
+class SignatureAttribute : public AttributeInfo {
 public:
     u2 signature_index;
 
-    Signature_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    SignatureAttribute(ClassReader &reader) : AttributeInfo(reader) {
         signature_index = reader.readUint16();
     }
 };
 
-class SourceFile_attribute : public AttributeInfo {
+class SourceFileAttribute : public AttributeInfo {
 public:
     u2 sourcefile_index;
-    SourceFile_attribute(ClassReader &reader) : AttributeInfo(reader) {
+
+    SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
         sourcefile_index = reader.readUint16();
     }
 };
 
-class SourceDebugExtension_attribute : public AttributeInfo {
+class SourceDebugExtensionAttribute : public AttributeInfo {
 public:
     u1 *debug_extension = nullptr;        // [attribute_length];
-    SourceDebugExtension_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    SourceDebugExtensionAttribute(ClassReader &reader) : AttributeInfo(reader) {
         if (attribute_length != 0)
             debug_extension = new u1[attribute_length];
         debug_extension = reader.readBytes(attribute_length);
     }
 };
 
+class LineNumber {
+public:
+    u2 start_pc;
+    u2 line_number;
 
-class LineNumberTable_attribute : public AttributeInfo {
+    LineNumber(ClassReader &reader) {
+        start_pc = reader.readUint16();
+        line_number = reader.readUint16();
+    }
+};
+
+class LineNumberTableAttribute : public AttributeInfo {
 public:
     u2 line_number_table_length;
 
-    class line_number_table_t {
-    public:
-        u2 start_pc;
-        u2 line_number;
+    LineNumber **line_number_table = nullptr;        // [line_number_table_length]
 
-        line_number_table_t(ClassReader &reader) {
-            start_pc = reader.readUint16();
-            line_number = reader.readUint16();
-        }
-    } **line_number_table = nullptr;        // [line_number_table_length]
-
-    LineNumberTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    LineNumberTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
         line_number_table_length = reader.readUint16();
         if (line_number_table_length != 0)
-            line_number_table = new LineNumberTable_attribute::line_number_table_t *[line_number_table_length];
+            line_number_table = new LineNumber *[line_number_table_length];
         for (int pos = 0; pos < line_number_table_length; pos++) {
-            line_number_table[pos] = new LineNumberTable_attribute::line_number_table_t(reader);
+            line_number_table[pos] = new LineNumber(reader);
         }
     }
 };
 
-class LocalVariableTable_attribute : public AttributeInfo {
+class LocalVariable {
+    u2 start_pc;
+    u2 length;
+    u2 name_index;
+    u2 descriptor_index;
+    u2 index;
+public:
+    LocalVariable(ClassReader &reader) {
+        start_pc = reader.readUint16();
+        length = reader.readUint16();
+        name_index = reader.readUint16();
+        descriptor_index = reader.readUint16();
+        index = reader.readUint16();
+    }
+
+};
+
+class LocalVariableTableAttribute : public AttributeInfo {
 public:
     u2 local_variable_table_length;
 
-    class local_variable_table_t {
-        u2 start_pc;
-        u2 length;
-        u2 name_index;
-        u2 descriptor_index;
-        u2 index;
-    public:
-        local_variable_table_t(ClassReader &reader) {
-            start_pc = reader.readUint16();
-            length = reader.readUint16();
-            name_index = reader.readUint16();
-            descriptor_index = reader.readUint16();
-            index = reader.readUint16();
-        }
-
-    } **local_variable_table = nullptr;    // [local_variable_table_length]
-    LocalVariableTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    LocalVariable **local_variable_table = nullptr;    // [local_variable_table_length]
+    LocalVariableTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
         local_variable_table_length = reader.readUint16();
         if (local_variable_table_length != 0)
-            local_variable_table = new LocalVariableTable_attribute::local_variable_table_t *[local_variable_table_length];
+            local_variable_table = new LocalVariable *[local_variable_table_length];
         for (int pos = 0; pos < local_variable_table_length; pos++) {
-            local_variable_table[pos] = new LocalVariableTable_attribute::local_variable_table_t(reader);
+            local_variable_table[pos] = new LocalVariable(reader);
         }
     }
 };
 
-class LocalVariableTypeTable_attribute : public AttributeInfo {
+class LocalVariableType {
+public:
+    u2 start_pc;
+    u2 length;
+    u2 name_index;
+    u2 signature_index;
+    u2 index;
+
+    LocalVariableType(ClassReader &reader) {
+        start_pc = reader.readUint16();
+        length = reader.readUint16();
+        name_index = reader.readUint16();
+        signature_index = reader.readUint16();
+        index = reader.readUint16();
+    }
+};
+
+class LocalVariableTypeTableAttribute : public AttributeInfo {
 public:
     u2 local_variable_type_table_length;
-
-    class local_variable_type_table_t {
-    public:
-        u2 start_pc;
-        u2 length;
-        u2 name_index;
-        u2 signature_index;
-        u2 index;
-
-        local_variable_type_table_t(ClassReader &reader) {
-            start_pc = reader.readUint16();
-            length = reader.readUint16();
-            name_index = reader.readUint16();
-            signature_index = reader.readUint16();
-            index = reader.readUint16();
-        }
-    } **local_variable_type_table = nullptr;// [local_variable_type_table_length]
-    LocalVariableTypeTable_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    LocalVariableType **local_variable_type_table = nullptr;// [local_variable_type_table_length]
+    LocalVariableTypeTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
         local_variable_type_table_length = reader.readUint16();
         if (local_variable_type_table_length != 0)
-            local_variable_type_table = new LocalVariableTypeTable_attribute::local_variable_type_table_t *[local_variable_type_table_length];
+            local_variable_type_table = new LocalVariableType *[local_variable_type_table_length];
         for (int pos = 0; pos < local_variable_type_table_length; pos++) {
-            local_variable_type_table[pos] = new local_variable_type_table_t(reader);
+            local_variable_type_table[pos] = new LocalVariableType(reader);
         }
     }
 
 };
 
-class Deprecated_attribute : public AttributeInfo {
+class DeprecatedAttribute : public AttributeInfo {
 public:
-    Deprecated_attribute(ClassReader &reader) : AttributeInfo(reader) {
-
+    DeprecatedAttribute(ClassReader &reader) : AttributeInfo(reader) {
+        reader.readBytes(attribute_length);
     }
 };
 
@@ -321,37 +323,38 @@ public:
     }
 };
 
-class value_t {
+class ElementValue {
 public:
+
     CodeStub stub;
 
-    virtual ~value_t() {}
+    virtual ~ElementValue() {}
 };
 
-class const_value_t : public value_t {
+class ConstantElementValue : public ElementValue {
 public:
     u2 const_value_index;
 
-    const_value_t(ClassReader &reader) {
+    ConstantElementValue(ClassReader &reader) {
         const_value_index = reader.readUint16();
         stub.inject(const_value_index);
     }
 };
 
-class class_info_t : public value_t {
+class ClassElementValue : public ElementValue {
 public:
     u2 class_info_index;
 
-    class_info_t(ClassReader &reader) {
+    ClassElementValue(ClassReader &reader) {
         class_info_index = reader.readUint16();
         stub.inject(class_info_index);
     }
 
 };
 
-class enum_const_value_t : public value_t {
+class EnumElementValue : public ElementValue {
 public:
-    enum_const_value_t(ClassReader &reader) {
+    EnumElementValue(ClassReader &reader) {
         type_name_index = reader.readUint16();
         const_name_index = reader.readUint16();
         stub.inject(type_name_index);
@@ -366,19 +369,19 @@ public:
 class element_value {
 public:
     u1 tag;
-    value_t *value = nullptr;    // [1]
+    ElementValue *value = nullptr;    // [1]
     CodeStub stub;
 
     element_value(ClassReader &reader);
 };
 
 
-class array_value_t : public value_t {
+class ArrayElementValue : public ElementValue {
 public:
     u2 num_values;
     element_value **values = nullptr;        // [num_values]
 
-    array_value_t(ClassReader &reader) {
+    ArrayElementValue(ClassReader &reader) {
         num_values = reader.readUint16();
         if (num_values !=
             0)        // 这里写成了 values...... 本来就是 nullptr 是 0 ....... 结果调了一个小时...... 一直显示在下边 f >> values[pos] 进入函数中的第一行出错...... 唉（ 还以为是标准库错了（逃 我真是个白痴（打脸
@@ -394,15 +397,32 @@ public:
     }
 };
 
-class annotation : public value_t {
+class ElementValuePair {
 public:
-    annotation(ClassReader &reader) : value_t() {
+    ElementValuePair(ClassReader &reader) {
+        element_name_index = reader.readUint16();
+//            f >> value;
+        value = new element_value(reader);
+        // CodeStub
+        stub.inject(element_name_index);
+        stub += value->stub;
+    }
+
+    u2 element_name_index;
+    element_value *value;
+
+    CodeStub stub;
+};
+
+class AnnotationElementValue : public ElementValue {
+public:
+    AnnotationElementValue(ClassReader &reader) : ElementValue() {
         type_index = reader.readUint16();
         num_element_value_pairs = reader.readUint16();
         if (num_element_value_pairs != 0)
-            element_value_pairs = new annotation::element_value_pairs_t *[num_element_value_pairs];
+            element_value_pairs = new ElementValuePair *[num_element_value_pairs];
         for (int pos = 0; pos < num_element_value_pairs; pos++) {
-            element_value_pairs[pos] = new annotation::element_value_pairs_t(reader);
+            element_value_pairs[pos] = new ElementValuePair(reader);
         }
         // CodeStub
         stub.inject(type_index);
@@ -415,22 +435,7 @@ public:
     u2 type_index;
     u2 num_element_value_pairs;
 
-    class element_value_pairs_t {
-    public:
-        element_value_pairs_t(ClassReader &reader) {
-            element_name_index = reader.readUint16();
-//            f >> value;
-            value = new element_value(reader);
-            // CodeStub
-            stub.inject(element_name_index);
-            stub += value->stub;
-        }
-
-        u2 element_name_index;
-        element_value *value;
-
-        CodeStub stub;
-    } **element_value_pairs = nullptr;        // [num_element_value_pairs]
+    ElementValuePair **element_value_pairs = nullptr;        // [num_element_value_pairs]
 
 
 };
@@ -441,9 +446,9 @@ public:
     parameter_annotations_t(ClassReader &reader) {
         num_annotations = reader.readUint16();
         if (num_annotations != 0)
-            annotations = new annotation *[num_annotations];
+            annotations = new AnnotationElementValue *[num_annotations];
         for (int pos = 0; pos < num_annotations; pos++) {
-            annotations[pos] = new annotation(reader);
+            annotations[pos] = new AnnotationElementValue(reader);
         }
         // CodeStub
         stub.inject(num_annotations);
@@ -453,7 +458,7 @@ public:
     }
 
     u2 num_annotations;
-    annotation **annotations = nullptr;    // [num_annotations]
+    AnnotationElementValue **annotations = nullptr;    // [num_annotations]
 
 
     CodeStub stub;
@@ -528,85 +533,118 @@ public:
         assert(attribute_length == total_anno_length);
     }
 };
+
 struct type_annotation {
     // target_type
     struct target_info_t {
         CodeStub stub;
+
         virtual ~target_info_t() {}
     };
+
     struct type_parameter_target : target_info_t {
         u1 type_parameter_index;
-        friend std::istream & operator >> (std::istream & f, type_annotation::type_parameter_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::type_parameter_target &i);
     };
+
     struct supertype_target : target_info_t {
         u2 supertype_index;
-        friend std::istream & operator >> (std::istream & f, type_annotation::supertype_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::supertype_target &i);
     };
+
     struct type_parameter_bound_target : target_info_t {
         u1 type_parameter_index;
         u1 bound_index;
-        friend std::istream & operator >> (std::istream & f, type_annotation::type_parameter_bound_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::type_parameter_bound_target &i);
     };
+
     struct empty_target : target_info_t {
-        friend std::istream & operator >> (std::istream & f, type_annotation::empty_target & i);
+        friend std::istream &operator>>(std::istream &f, type_annotation::empty_target &i);
     };
+
     struct formal_parameter_target : target_info_t {
         u1 formal_parameter_index;
-        friend std::istream & operator >> (std::istream & f, type_annotation::formal_parameter_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::formal_parameter_target &i);
     };
+
     struct throws_target : target_info_t {
         u2 throws_type_index;
-        friend std::istream & operator >> (std::istream & f, type_annotation::throws_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::throws_target &i);
     };
+
     struct localvar_target : target_info_t {
         u2 table_length;
+
         struct table_t {
             u2 start_pc;
             u2 length;
             u2 index;
-            friend std::istream & operator >> (std::istream & f, type_annotation::localvar_target::table_t & i);
+
+            friend std::istream &operator>>(std::istream &f, type_annotation::localvar_target::table_t &i);
+
             CodeStub stub;
-        } *table = nullptr;				// [table_length];
-        friend std::istream & operator >> (std::istream & f, type_annotation::localvar_target & i);
+        } *table = nullptr;                // [table_length];
+        friend std::istream &operator>>(std::istream &f, type_annotation::localvar_target &i);
+
         ~localvar_target();
     };
+
     struct catch_target : target_info_t {
         u2 exception_table_index;
-        friend std::istream & operator >> (std::istream & f, type_annotation::catch_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::catch_target &i);
     };
+
     struct offset_target : target_info_t {
         u2 offset;
-        friend std::istream & operator >> (std::istream & f, type_annotation::offset_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::offset_target &i);
     };
+
     struct type_argument_target : target_info_t {
         u2 offset;
         u1 type_argument_index;
-        friend std::istream & operator >> (std::istream & f, type_annotation::type_argument_target & i);
+
+        friend std::istream &operator>>(std::istream &f, type_annotation::type_argument_target &i);
     };
+
     // type_path
     struct type_path {
         u1 path_length;
+
         struct path_t {
             u1 type_path_kind;
             u1 type_argument_index;
-            friend std::istream & operator >> (std::istream & f, type_annotation::type_path::path_t & i);
+
+            friend std::istream &operator>>(std::istream &f, type_annotation::type_path::path_t &i);
+
             CodeStub stub;
-        } *path = nullptr;				// [path_length];
-        friend std::istream & operator >> (std::istream & f, type_annotation::type_path & i);
+        } *path = nullptr;                // [path_length];
+        friend std::istream &operator>>(std::istream &f, type_annotation::type_path &i);
+
         ~type_path();
+
         CodeStub stub;
     };
 
     // basic
     u1 target_type;
-    target_info_t *target_info = nullptr;	// [1]
+    target_info_t *target_info = nullptr;    // [1]
     type_path target_path;
-    annotation *anno = nullptr;				// [1]
+    AnnotationElementValue *anno = nullptr;                // [1]
 
-    friend std::istream & operator >> (std::istream & f, type_annotation & i);
+    friend std::istream &operator>>(std::istream &f, type_annotation &i);
+
     ~type_annotation();
+
     CodeStub stub;
 };
+
 class RuntimeVisibleTypeAnnotations_attribute : public AttributeInfo {
 public:
     RuntimeVisibleTypeAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
@@ -614,7 +652,7 @@ public:
     }
 
     u2 num_annotations;
-    type_annotation *annotations = nullptr;					// [num_annotations];
+    type_annotation *annotations = nullptr;                    // [num_annotations];
 };
 
 class RuntimeInvisibleTypeAnnotations_attribute : public AttributeInfo {
@@ -699,9 +737,6 @@ public:
 
     ~MethodParameters_attribute();
 };
-
-
-
 
 
 #endif //TINY_JVM_ATTRIBUTE_INFO_H

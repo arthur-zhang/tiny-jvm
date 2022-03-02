@@ -6,64 +6,63 @@
 #include "const.h"
 
 AttributeInfo *AttributeInfo::parseAttribute(ClassReader &reader, ConstantPool *constant_pool) {
-
     u2 attribute_name_index = reader.peek2();
     u2 attribute_tag = toAttributeTag(attribute_name_index, constant_pool);
     switch (attribute_tag) {
         case 0: {
-            ConstantValue_attribute *result = new ConstantValue_attribute(reader);
+            ConstantValueAttribute *result = new ConstantValueAttribute(reader);
             return result;
         }
         case 1: {
-            Code_attribute *result = new Code_attribute(reader, constant_pool);
+            CodeAttribute *result = new CodeAttribute(reader, constant_pool);
             return result;
         }
         case 2: {
-            StackMapTable_attribute *result = new StackMapTable_attribute(reader);
+            StackMapTableAttribute *result = new StackMapTableAttribute(reader);
             return result;
         }
         case 3: {
-            Exceptions_attribute *result = new Exceptions_attribute(reader);
+            ExceptionsAttribute *result = new ExceptionsAttribute(reader);
             return result;
         }
         case 4: {
-            InnerClasses_attribute *result = new InnerClasses_attribute(reader);
+            InnerClassesAttribute *result = new InnerClassesAttribute(reader);
             return result;
         }
         case 5: {
-            EnclosingMethod_attribute *result = new EnclosingMethod_attribute(reader);
+            EnclosingMethodAttribute *result = new EnclosingMethodAttribute(reader);
             return result;
         }
         case 6: {
-            Synthetic_attribute *result = new Synthetic_attribute(reader);
+            SyntheticAttribute *result = new SyntheticAttribute(reader);
             return result;
         }
         case 7: {
-            Signature_attribute *result = new Signature_attribute(reader);
+            SignatureAttribute *result = new SignatureAttribute(reader);
             return result;
         }
         case 8: {
-            SourceFile_attribute *result = new SourceFile_attribute(reader);
+            SourceFileAttribute *result = new SourceFileAttribute(reader);
             return result;
         }
         case 9: {
-            SourceDebugExtension_attribute *result = new SourceDebugExtension_attribute(reader);
+            SourceDebugExtensionAttribute *result = new SourceDebugExtensionAttribute(reader);
             return result;
         }
         case 10: {
-            LineNumberTable_attribute *result = new LineNumberTable_attribute(reader);
+            LineNumberTableAttribute *result = new LineNumberTableAttribute(reader);
             return result;
         }
         case 11: {
-            LocalVariableTable_attribute *result = new LocalVariableTable_attribute(reader);
+            LocalVariableTableAttribute *result = new LocalVariableTableAttribute(reader);
             return result;
         }
         case 12: {
-            LocalVariableTypeTable_attribute *result = new LocalVariableTypeTable_attribute(reader);
+            LocalVariableTypeTableAttribute *result = new LocalVariableTypeTableAttribute(reader);
             return result;
         }
         case 13: {
-            Deprecated_attribute *result = new Deprecated_attribute(reader);
+            DeprecatedAttribute *result = new DeprecatedAttribute(reader);
             return result;
         }
         case 14: {
@@ -108,7 +107,6 @@ AttributeInfo *AttributeInfo::parseAttribute(ClassReader &reader, ConstantPool *
         default: {
             std::cerr << "can't go there! map has not this error tag " << attribute_tag << "!" << std::endl;
             assert(false);
-            return nullptr;
         }
     }
 }
@@ -122,9 +120,7 @@ u2 AttributeInfo::toAttributeTag(std::uint16_t attribute_name_index, ConstantPoo
     String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
     if (attribute_table.find(str) != attribute_table.end()) {
         return attribute_table[str];
-    } else {
-        std::cerr << "my jvm don't alloc a new attribute, because we don't have a compiler~" << std::endl;
-        assert(false);
     }
-    return 0;
+    std::cerr << "my jvm don't alloc a new attribute, because we don't have a compiler~" << std::endl;
+    assert(false);
 };

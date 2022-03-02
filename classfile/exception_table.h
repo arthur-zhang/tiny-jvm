@@ -8,19 +8,13 @@
 #include "types.h"
 #include "class_reader.h"
 
-class exception_table {
+class ExceptionTable {
 public:
     u2 start_pc;
     u2 end_pc;
     u2 handler_pc;
     u2 catch_type;
-
-    exception_table(ClassReader &reader) {
-        start_pc = reader.readUint16();
-        end_pc = reader.readUint16();
-        handler_pc = reader.readUint16();
-        catch_type = reader.readUint16();
-    }
+    ExceptionTable(ClassReader &reader);
 };
 
 

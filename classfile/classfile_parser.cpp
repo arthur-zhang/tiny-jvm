@@ -69,7 +69,7 @@ wstring decodeMUTF8(unsigned char *bytearr, int len) {
     return wstring(chararr, chararr + chararr_count);
 }
 
-std::string recursive_parse_annotation(annotation *target);
+std::string recursive_parse_annotation(AnnotationElementValue *target);
 
 std::string parse_inner_element_value(element_value *inner_ev) {
     std::stringstream ss;
@@ -84,26 +84,26 @@ std::string parse_inner_element_value(element_value *inner_ev) {
         case 'Z':
         case 's': {
             ss << "s#"
-               << ((const_value_t *) inner_ev->value)->const_value_index;        // bug2: 指针强转不会有错误提示！！因此......这里原先写得是((const_value_t *)inner_ev)，但其实 inner_ev 内部的 inner_ev->value 才是真正应该被转换的......编译器不给报错！！
+               << ((ConstantElementValue *) inner_ev->value)->const_value_index;        // bug2: 指针强转不会有错误提示！！因此......这里原先写得是((const_value_t *)inner_ev)，但其实 inner_ev 内部的 inner_ev->value 才是真正应该被转换的......编译器不给报错！！
             break;
         }
         case 'e': {
-            ss << "e#" << ((enum_const_value_t *) inner_ev->value)->type_name_index << "."
-               << ((enum_const_value_t *) inner_ev->value)->const_name_index;
+            ss << "e#" << ((EnumElementValue *) inner_ev->value)->type_name_index << "."
+               << ((EnumElementValue *) inner_ev->value)->const_name_index;
             break;
         }
         case 'c': {
-            ss << "c#" << ((class_info_t *) inner_ev)->class_info_index;
+            ss << "c#" << ((ClassElementValue *) inner_ev)->class_info_index;
             break;
         }
         case '@': {
             ss << "@"
-               << recursive_parse_annotation((annotation *) inner_ev->value);    // recursive call outer function.
+               << recursive_parse_annotation((AnnotationElementValue *) inner_ev->value);    // recursive call outer function.
             break;
         }
         case '[': {
             ss << "[";
-            int length = ((array_value_t *) inner_ev->value)->num_values;
+            int length = ((ArrayElementValue *) inner_ev->value)->num_values;
             for (int pos = 0; pos < length; pos++) {
                 // bug 3 ！！调试时间最长的 bug！！在这里我不小心定义了和这个函数的参数一模一样的 inner_ev 变量！！在程序走到这里的时候，发生了如下错误！！重新定义一个和原先名字一模一样的变量 clang++ 竟然不报错吗 ???
                 /**
@@ -118,7 +118,7 @@ std::string parse_inner_element_value(element_value *inner_ev) {
 
                     */
                 // element_value *inner_ev = &((array_value_t *)inner_ev->value)->values[pos];	// error: Couldn't apply expression side effects : Couldn't dematerialize a result variable: couldn't read its memory
-                element_value *inner_ev_2 = ((array_value_t *) inner_ev->value)->values[pos];
+                element_value *inner_ev_2 = ((ArrayElementValue *) inner_ev->value)->values[pos];
                 ss << parse_inner_element_value(inner_ev_2);        // recursive !
                 if (pos != length - 1) ss << ",";
             }
@@ -133,7 +133,7 @@ std::string parse_inner_element_value(element_value *inner_ev) {
     return ss.str();
 };
 
-std::string recursive_parse_annotation(annotation *target) {
+std::string recursive_parse_annotation(AnnotationElementValue *target) {
     std::stringstream total_str;
     total_str << "#" << target->type_index << "(";    // print key: #12
 
@@ -155,7 +155,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
     switch (attribute_tag) {
         case 0: {        // ConstantValue
             std::cout << "(DEBUG)   ConstantValue: ";
-            u2 index = ((ConstantValue_attribute *) ptr)->constantvalue_index;
+            u2 index = ((ConstantValueAttribute *) ptr)->constant_value_index;
             switch (constant_pool[index - 1]->tag) {
                 case CONSTANT_Long: {
                     std::cout << "long " << ((CONSTANT_Long_info *) constant_pool[index - 1])->get_value() << "l"
@@ -213,7 +213,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
         }
         case 1: {    // Code
             std::cout << "(DEBUG)   Code: " << std::endl;
-            auto *code_ptr = (Code_attribute *) ptr;
+            auto *code_ptr = (CodeAttribute *) ptr;
             std::cout << "(DEBUG)     stack=" << code_ptr->max_stack << ", locals="
                       << code_ptr->max_locals /*<< ", args_size=" << args_size*/
                       << std::endl;    // output arg_size need parse descriptor. not important.
@@ -368,7 +368,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                 printf("(DEBUG)%8sfrom%6sto%2starget%4stype\n", "", "", "", "");
             }
             for (int pos = 0; pos < code_ptr->exception_table_length; pos++) {
-                exception_table *table = code_ptr->exception_table[pos];
+                ExceptionTable *table = code_ptr->exception_table[pos];
                 printf("(DEBUG)%8s%4d%4s%4d%4s%4d%4s%4d\n", "", table->start_pc, "", table->end_pc, "",
                        table->handler_pc, "", table->catch_type);
             }
@@ -439,7 +439,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
 //        }
         case 3: {    // Exceptions
             std::cout << "(DEBUG)   Exceptions: " << std::endl;
-            auto *throws_ptr = (Exceptions_attribute *) ptr;
+            auto *throws_ptr = (ExceptionsAttribute *) ptr;
             std::cout << "(DEBUG)     throws ";
             for (int k = 0; k < throws_ptr->number_of_exceptions; k++) {        // same as print_method().
                 assert (constant_pool[throws_ptr->exception_index_table[k] - 1]->tag ==
@@ -458,7 +458,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
         }
         case 4: {    // InnerClass
             std::cout << "(DEBUG) InnerClasses:" << std::endl;
-            auto *inner_ptr = (InnerClasses_attribute *) ptr;
+            auto *inner_ptr = (InnerClassesAttribute *) ptr;
             for (int i = 0; i < inner_ptr->number_of_classes; i++) {
                 // get all indexes
                 int inner_class_info_index = inner_ptr->classes[i]->inner_class_info_index;
@@ -554,7 +554,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             break;
         }
         case 5: {    // Enclosing Method
-            auto *enclosing_ptr = (EnclosingMethod_attribute *) ptr;
+            auto *enclosing_ptr = (EnclosingMethodAttribute *) ptr;
             std::cout << "(DEBUG) EnclosingMethod: #" << enclosing_ptr->class_index << ".#"
                       << enclosing_ptr->method_index;
             wstring class_info = ((CONSTANT_Utf8_info *) constant_pool[
@@ -575,7 +575,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             break;
         }
         case 7: {    // Signature
-            auto *signature_ptr = (Signature_attribute *) ptr;
+            auto *signature_ptr = (SignatureAttribute *) ptr;
             assert (constant_pool[signature_ptr->signature_index - 1]->tag == CONSTANT_Utf8);
             std::wcout << "(DEBUG)   Signature: #" << signature_ptr->signature_index << " "
                        << ((CONSTANT_Utf8_info *) constant_pool[signature_ptr->signature_index -
@@ -583,7 +583,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             break;
         }
         case 8: {    // SourceFile
-            auto *sourcefile_ptr = (SourceFile_attribute *) ptr;
+            auto *sourcefile_ptr = (SourceFileAttribute *) ptr;
             std::wcout << "(DEBUG) SourceFile: \""
                        << ((CONSTANT_Utf8_info *) constant_pool[sourcefile_ptr->sourcefile_index -
                                                                 1])->getConstant() << "\"" << std::endl;
@@ -594,7 +594,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
         }
         case 10: {    // LineNumberTable (Inside the Code Attribution)
             std::cout << "(DEBUG)     LineNumberTable:" << std::endl;
-            auto *line_table = (LineNumberTable_attribute *) ptr;
+            auto *line_table = (LineNumberTableAttribute *) ptr;
             for (int pos = 0; pos < line_table->line_number_table_length; pos++) {
                 auto *table = line_table->line_number_table[pos];
                 printf("(DEBUG)%7sline: %4d, start_pc: %-4d\n", "", table->line_number, table->start_pc);
@@ -619,7 +619,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                 std::cout << "(DEBUG)   RuntimeInisibleAnnotations:" << std::endl;
             auto *annotations_ptr = (RuntimeVisibleAnnotations_attribute *) ptr;
             for (int i = 0; i < annotations_ptr->parameter_annotations.num_annotations; i++) {
-                annotation *target = annotations_ptr->parameter_annotations.annotations[i];
+                AnnotationElementValue *target = annotations_ptr->parameter_annotations.annotations[i];
                 std::cout << "(DEBUG)     " << i << ": ";
                 std::cout << recursive_parse_annotation(target) << std::endl;
             }
@@ -634,7 +634,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             auto *annotations_ptr = (RuntimeVisibleParameterAnnotations_attribute *) ptr;
             for (int i = 0; i < annotations_ptr->num_parameters; i++) {
                 for (int j = 0; j < annotations_ptr->parameter_annotations[i]->num_annotations; j++) {
-                    annotation *target = annotations_ptr->parameter_annotations[i]->annotations[j];
+                    AnnotationElementValue *target = annotations_ptr->parameter_annotations[i]->annotations[j];
                     std::cout << "(DEBUG)     " << j << ": ";
                     std::cout << recursive_parse_annotation(target) << std::endl;
                 }
@@ -651,7 +651,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             for (int i = 0; i < annotations_ptr->num_annotations; i++) {
                 type_annotation *ta = &annotations_ptr->annotations[i];
                 // 1. print [annotation]
-                annotation *target = ta->anno;
+                AnnotationElementValue *target = ta->anno;
                 std::cout << "(DEBUG)     ";
                 std::cout << recursive_parse_annotation(target) << std::endl;
                 // 2. print [target_info]
@@ -904,7 +904,7 @@ void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool) {
                     has_exception = true;
                     std::cout << " throws ";
                 }
-                auto *throws_ptr = (Exceptions_attribute *) bufs[i]->attributes[pos];
+                auto *throws_ptr = (ExceptionsAttribute *) bufs[i]->attributes[pos];
                 for (int k = 0; k < throws_ptr->number_of_exceptions; k++) {
                     assert (constant_pool->getConstantPool()[throws_ptr->exception_index_table[k] - 1]->tag ==
                             CONSTANT_Class);    // throw a Exception class
@@ -1154,7 +1154,6 @@ void ClassFile::readFields() {
 }
 
 void ClassFile::readMethods() {
-
     methods_count = reader.readUint16();
     if (methods_count != 0)
         methods = new MethodInfo *[methods_count];
@@ -1199,23 +1198,23 @@ element_value::element_value(ClassReader &reader) {
         case 'S':
         case 'Z':
         case 's': {
-            value = new const_value_t(reader);
+            value = new ConstantElementValue(reader);
             break;
         }
         case 'e': {
-            value = new enum_const_value_t(reader);
+            value = new EnumElementValue(reader);
             break;
         }
         case 'c': {
-            value = new class_info_t(reader);
+            value = new ClassElementValue(reader);
             break;
         }
         case '@': {
-            value = new annotation(reader);
+            value = new AnnotationElementValue(reader);
             break;
         }
         case '[': {
-            value = new array_value_t(reader);
+            value = new ArrayElementValue(reader);
             break;
         }
         default: {
