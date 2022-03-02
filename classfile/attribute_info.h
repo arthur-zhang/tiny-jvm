@@ -267,67 +267,9 @@ public:
     }
 };
 
-
-class CodeStub {
-public:
-    std::vector<u1> stub;
-
-    void inject(u1 code) {
-        stub.push_back(code);
-    }
-
-    void inject(u2 code) {
-        inject((u1) ((code >> 8) & 0xFF));
-        inject((u1) (code & 0xFF));
-    }
-
-    void inject(u4 code) {
-        inject((u1) ((code >> 24) & 0xFF));
-        inject((u1) ((code >> 16) & 0xFF));
-        inject((u1) ((code >> 8) & 0xFF));
-        inject((u1) (code & 0xFF));
-    }
-
-    void inject(u1 *bytes, int num) {
-        for (int i = 0; i < num; i++) {
-            inject((u1) bytes[i]);
-        }
-    }
-
-    void inject(u2 *bytes, int num) {
-        for (int i = 0; i < num; i++) {
-            inject((u2) bytes[i]);
-        }
-    }
-
-    CodeStub &operator+=(const CodeStub &rhs) {
-        this->stub.insert(this->stub.end(), rhs.stub.begin(), rhs.stub.end());
-        return *this;
-    }
-
-    CodeStub operator+(const CodeStub &rhs) {
-        CodeStub tmp;
-        tmp += *this;
-        tmp += rhs;
-        return tmp;
-    }
-
-    void print() {
-        std::wcout << "===---------------- CodeStub -------------------===" << std::endl;
-        for (int i = 0; i < stub.size(); i++) {
-            std::wcout << std::hex << (unsigned) stub[i] << " ";
-            if ((i + 1) % 8 == 0) std::wcout << std::endl;
-        }
-        std::wcout << std::endl;
-        std::wcout << "===---------------------------------------------===" << std::endl;
-    }
-};
-
 class ElementValue {
 public:
     u1 tag;
-
-    CodeStub stub;
 
     ElementValue(ClassReader &reader, u1 tag_) : tag(tag_) {}
 
@@ -342,7 +284,6 @@ public:
 
     SimpleElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         const_value_index = reader.readUint16();
-        stub.inject(const_value_index);
     }
 };
 
@@ -352,7 +293,6 @@ public:
 
     ClassElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         class_info_index = reader.readUint16();
-        stub.inject(class_info_index);
     }
 
 };
@@ -362,8 +302,6 @@ public:
     EnumElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         type_name_index = reader.readUint16();
         const_name_index = reader.readUint16();
-        stub.inject(type_name_index);
-        stub.inject(const_name_index);
     }
 
     u2 type_name_index;
@@ -383,11 +321,6 @@ public:
         for (int pos = 0; pos < num_values; pos++) {
             values[pos] = ElementValue::readElementValue(reader);
         }
-        // CodeStub
-        stub.inject(num_values);
-        for (int pos = 0; pos < num_values; pos++) {
-            stub += values[pos]->stub;
-        }
     }
 };
 
@@ -395,17 +328,12 @@ class ElementValuePair {
 public:
     ElementValuePair(ClassReader &reader) {
         element_name_index = reader.readUint16();
-//            f >> value;
         value = ElementValue::readElementValue(reader);
-        // CodeStub
-        stub.inject(element_name_index);
-        stub += value->stub;
     }
 
     u2 element_name_index;
     ElementValue *value;
 
-    CodeStub stub;
 };
 
 class AnnotationElementValue : public ElementValue {
@@ -417,12 +345,6 @@ public:
             element_value_pairs = new ElementValuePair *[num_element_value_pairs];
         for (int pos = 0; pos < num_element_value_pairs; pos++) {
             element_value_pairs[pos] = new ElementValuePair(reader);
-        }
-        // CodeStub
-        stub.inject(type_index);
-        stub.inject(num_element_value_pairs);
-        for (int pos = 0; pos < num_element_value_pairs; pos++) {
-            stub += element_value_pairs[pos]->stub;
         }
     }
 
@@ -444,18 +366,10 @@ public:
         for (int pos = 0; pos < num_annotations; pos++) {
             annotations[pos] = new AnnotationElementValue(reader, '@'); // todo
         }
-        // CodeStub
-        stub.inject(num_annotations);
-        for (int pos = 0; pos < num_annotations; pos++) {
-            stub += annotations[pos]->stub;
-        }
     }
 
     u2 num_annotations;
     AnnotationElementValue **annotations = nullptr;    // [num_annotations]
-
-
-    CodeStub stub;
 };
 
 class RuntimeVisibleAnnotations_attribute : public AttributeInfo {
@@ -479,7 +393,6 @@ class RuntimeVisibleParameterAnnotations_attribute : public AttributeInfo {
 public:
     u1 num_parameters;
     parameter_annotations_t **parameter_annotations = nullptr;        // [num_parameters];
-    CodeStub stub;
 
     RuntimeVisibleParameterAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
         num_parameters = reader.readUint8();
@@ -487,18 +400,6 @@ public:
             parameter_annotations = new parameter_annotations_t *[num_parameters];
         for (int pos = 0; pos < num_parameters; pos++) {
             parameter_annotations[pos] = new parameter_annotations_t(reader);
-        }
-        // check
-        int total_anno_length = 0;
-        total_anno_length += 1;
-        for (int pos = 0; pos < num_parameters; pos++) {
-            total_anno_length += parameter_annotations[pos]->stub.stub.size();
-        }
-        assert(attribute_length == total_anno_length);
-        // CodeStub
-        stub.inject(num_parameters);
-        for (int pos = 0; pos < num_parameters; pos++) {
-            stub += parameter_annotations[pos]->stub;
         }
     }
 };
@@ -518,20 +419,12 @@ public:
         for (int pos = 0; pos < num_parameters; pos++) {
             parameter_annotations[pos] = new parameter_annotations_t(reader);
         }
-        // check
-        int total_anno_length = 0;
-        total_anno_length += 1;
-        for (int pos = 0; pos < num_parameters; pos++) {
-            total_anno_length += parameter_annotations[pos]->stub.stub.size();
-        }
-        assert(attribute_length == total_anno_length);
     }
 };
 
 struct type_annotation {
     // target_type
     struct target_info_t {
-        CodeStub stub;
 
         virtual ~target_info_t() {}
     };
@@ -581,7 +474,6 @@ struct type_annotation {
 
             friend std::istream &operator>>(std::istream &f, type_annotation::localvar_target::table_t &i);
 
-            CodeStub stub;
         } *table = nullptr;                // [table_length];
         friend std::istream &operator>>(std::istream &f, type_annotation::localvar_target &i);
 
@@ -617,13 +509,11 @@ struct type_annotation {
 
             friend std::istream &operator>>(std::istream &f, type_annotation::type_path::path_t &i);
 
-            CodeStub stub;
         } *path = nullptr;                // [path_length];
         friend std::istream &operator>>(std::istream &f, type_annotation::type_path &i);
 
         ~type_path();
 
-        CodeStub stub;
     };
 
     // basic
@@ -636,7 +526,6 @@ struct type_annotation {
 
     ~type_annotation();
 
-    CodeStub stub;
 };
 
 class RuntimeVisibleTypeAnnotations_attribute : public AttributeInfo {
@@ -665,12 +554,9 @@ class AnnotationDefault_attribute : public AttributeInfo {
 public:
     AnnotationDefault_attribute(ClassReader &reader) : AttributeInfo(reader) {
         default_value = ElementValue::readElementValue(reader);
-        stub += default_value->stub;
     }
 
     ElementValue *default_value;
-
-    CodeStub stub;
 };
 
 class BootstrapMethods_attribute : public AttributeInfo {
