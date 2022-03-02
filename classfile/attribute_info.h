@@ -325,17 +325,22 @@ public:
 
 class ElementValue {
 public:
+    u1 tag;
 
     CodeStub stub;
+
+    ElementValue(ClassReader &reader, u1 tag_) : tag(tag_) {}
+
+    static ElementValue *readElementValue(ClassReader &reader);
 
     virtual ~ElementValue() {}
 };
 
-class ConstantElementValue : public ElementValue {
+class SimpleElementValue : public ElementValue {
 public:
     u2 const_value_index;
 
-    ConstantElementValue(ClassReader &reader) {
+    SimpleElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         const_value_index = reader.readUint16();
         stub.inject(const_value_index);
     }
@@ -345,7 +350,7 @@ class ClassElementValue : public ElementValue {
 public:
     u2 class_info_index;
 
-    ClassElementValue(ClassReader &reader) {
+    ClassElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         class_info_index = reader.readUint16();
         stub.inject(class_info_index);
     }
@@ -354,7 +359,7 @@ public:
 
 class EnumElementValue : public ElementValue {
 public:
-    EnumElementValue(ClassReader &reader) {
+    EnumElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         type_name_index = reader.readUint16();
         const_name_index = reader.readUint16();
         stub.inject(type_name_index);
@@ -365,29 +370,18 @@ public:
     u2 const_name_index;
 };
 
-
-class element_value {
-public:
-    u1 tag;
-    ElementValue *value = nullptr;    // [1]
-    CodeStub stub;
-
-    element_value(ClassReader &reader);
-};
-
-
 class ArrayElementValue : public ElementValue {
 public:
     u2 num_values;
-    element_value **values = nullptr;        // [num_values]
+    ElementValue **values = nullptr;        // [num_values]
 
-    ArrayElementValue(ClassReader &reader) {
+    ArrayElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         num_values = reader.readUint16();
         if (num_values !=
             0)        // 这里写成了 values...... 本来就是 nullptr 是 0 ....... 结果调了一个小时...... 一直显示在下边 f >> values[pos] 进入函数中的第一行出错...... 唉（ 还以为是标准库错了（逃 我真是个白痴（打脸
-            values = new element_value *[num_values];
+            values = new ElementValue *[num_values];
         for (int pos = 0; pos < num_values; pos++) {
-            values[pos] = new element_value(reader);
+            values[pos] = ElementValue::readElementValue(reader);
         }
         // CodeStub
         stub.inject(num_values);
@@ -402,21 +396,21 @@ public:
     ElementValuePair(ClassReader &reader) {
         element_name_index = reader.readUint16();
 //            f >> value;
-        value = new element_value(reader);
+        value = ElementValue::readElementValue(reader);
         // CodeStub
         stub.inject(element_name_index);
         stub += value->stub;
     }
 
     u2 element_name_index;
-    element_value *value;
+    ElementValue *value;
 
     CodeStub stub;
 };
 
 class AnnotationElementValue : public ElementValue {
 public:
-    AnnotationElementValue(ClassReader &reader) : ElementValue() {
+    AnnotationElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
         type_index = reader.readUint16();
         num_element_value_pairs = reader.readUint16();
         if (num_element_value_pairs != 0)
@@ -448,7 +442,7 @@ public:
         if (num_annotations != 0)
             annotations = new AnnotationElementValue *[num_annotations];
         for (int pos = 0; pos < num_annotations; pos++) {
-            annotations[pos] = new AnnotationElementValue(reader);
+            annotations[pos] = new AnnotationElementValue(reader, '@'); // todo
         }
         // CodeStub
         stub.inject(num_annotations);
@@ -670,11 +664,11 @@ public:
 class AnnotationDefault_attribute : public AttributeInfo {
 public:
     AnnotationDefault_attribute(ClassReader &reader) : AttributeInfo(reader) {
-        default_value = new element_value(reader);
+        default_value = ElementValue::readElementValue(reader);
         stub += default_value->stub;
     }
 
-    element_value *default_value;
+    ElementValue *default_value;
 
     CodeStub stub;
 };

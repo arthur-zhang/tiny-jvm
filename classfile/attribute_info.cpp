@@ -124,3 +124,40 @@ u2 AttributeInfo::toAttributeTag(std::uint16_t attribute_name_index, ConstantPoo
     std::cerr << "my jvm don't alloc a new attribute, because we don't have a compiler~" << std::endl;
     assert(false);
 };
+
+ElementValue *ElementValue::readElementValue(ClassReader &reader) {
+    u1 tag = reader.readUint8();
+    switch ((char) tag) {
+        case 'B':
+        case 'C':
+        case 'D':
+        case 'F':
+        case 'I':
+        case 'J':
+        case 'S':
+        case 'Z':
+        case 's': {
+            return new SimpleElementValue(reader, tag);
+        }
+        case 'e': {
+            return new EnumElementValue(reader, tag);
+        }
+        case 'c': {
+            return new ClassElementValue(reader, tag);
+            break;
+        }
+        case '@': {
+            return new AnnotationElementValue(reader, tag);
+            break;
+
+        }
+        case '[': {
+            return new ArrayElementValue(reader, tag);
+            break;
+        }
+        default: {
+            std::cerr << "can't get here. in element_value." << std::endl;
+            assert(false);
+        }
+    }
+}

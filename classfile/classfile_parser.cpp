@@ -71,7 +71,7 @@ wstring decodeMUTF8(unsigned char *bytearr, int len) {
 
 std::string recursive_parse_annotation(AnnotationElementValue *target);
 
-std::string parse_inner_element_value(element_value *inner_ev) {
+std::string parse_inner_element_value(ElementValue *inner_ev) {
     std::stringstream ss;
     switch ((char) inner_ev->tag) {
         case 'B':
@@ -84,12 +84,12 @@ std::string parse_inner_element_value(element_value *inner_ev) {
         case 'Z':
         case 's': {
             ss << "s#"
-               << ((ConstantElementValue *) inner_ev->value)->const_value_index;        // bug2: 指针强转不会有错误提示！！因此......这里原先写得是((const_value_t *)inner_ev)，但其实 inner_ev 内部的 inner_ev->value 才是真正应该被转换的......编译器不给报错！！
+               << ((SimpleElementValue *) inner_ev)->const_value_index;        // bug2: 指针强转不会有错误提示！！因此......这里原先写得是((const_value_t *)inner_ev)，但其实 inner_ev 内部的 inner_ev->value 才是真正应该被转换的......编译器不给报错！！
             break;
         }
         case 'e': {
-            ss << "e#" << ((EnumElementValue *) inner_ev->value)->type_name_index << "."
-               << ((EnumElementValue *) inner_ev->value)->const_name_index;
+            ss << "e#" << ((EnumElementValue *) inner_ev)->type_name_index << "."
+               << ((EnumElementValue *) inner_ev)->const_name_index;
             break;
         }
         case 'c': {
@@ -98,12 +98,12 @@ std::string parse_inner_element_value(element_value *inner_ev) {
         }
         case '@': {
             ss << "@"
-               << recursive_parse_annotation((AnnotationElementValue *) inner_ev->value);    // recursive call outer function.
+               << recursive_parse_annotation((AnnotationElementValue *) inner_ev);    // recursive call outer function.
             break;
         }
         case '[': {
             ss << "[";
-            int length = ((ArrayElementValue *) inner_ev->value)->num_values;
+            int length = ((ArrayElementValue *) inner_ev)->num_values;
             for (int pos = 0; pos < length; pos++) {
                 // bug 3 ！！调试时间最长的 bug！！在这里我不小心定义了和这个函数的参数一模一样的 inner_ev 变量！！在程序走到这里的时候，发生了如下错误！！重新定义一个和原先名字一模一样的变量 clang++ 竟然不报错吗 ???
                 /**
@@ -118,7 +118,7 @@ std::string parse_inner_element_value(element_value *inner_ev) {
 
                     */
                 // element_value *inner_ev = &((array_value_t *)inner_ev->value)->values[pos];	// error: Couldn't apply expression side effects : Couldn't dematerialize a result variable: couldn't read its memory
-                element_value *inner_ev_2 = ((ArrayElementValue *) inner_ev->value)->values[pos];
+                ElementValue *inner_ev_2 = ((ArrayElementValue *) inner_ev)->values[pos];
                 ss << parse_inner_element_value(inner_ev_2);        // recursive !
                 if (pos != length - 1) ss << ",";
             }
@@ -140,7 +140,7 @@ std::string recursive_parse_annotation(AnnotationElementValue *target) {
     // bool is_first = false;
     for (int j = 0; j < target->num_element_value_pairs; j++) {
         total_str << "#" << target->element_value_pairs[j]->element_name_index << "=";    // inner value's key: #13
-        element_value *inner_ev = target->element_value_pairs[j]->value;
+        ElementValue *inner_ev = target->element_value_pairs[j]->value;
         total_str << parse_inner_element_value(inner_ev);
         if (j != target->num_element_value_pairs - 1) total_str << ",";
     }
@@ -749,7 +749,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             std::cout << "(DEBUG)    AnnotationDefault:" << std::endl;
             std::cout << "(DEBUG)      default_value: ";
             auto *default_ptr = (AnnotationDefault_attribute *) ptr;
-            element_value *element_value = default_ptr->default_value;
+            ElementValue *element_value = default_ptr->default_value;
             // 1. print [type]
             std::cout << (char) element_value->tag;
             // 2. print [annotation default value pos in constant_pool]
@@ -1185,46 +1185,3 @@ void ClassFile::readAttributes() {
     }
 #endif
 }
-
-element_value::element_value(ClassReader &reader) {
-    tag = reader.readUint8();
-    switch ((char) tag) {
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'F':
-        case 'I':
-        case 'J':
-        case 'S':
-        case 'Z':
-        case 's': {
-            value = new ConstantElementValue(reader);
-            break;
-        }
-        case 'e': {
-            value = new EnumElementValue(reader);
-            break;
-        }
-        case 'c': {
-            value = new ClassElementValue(reader);
-            break;
-        }
-        case '@': {
-            value = new AnnotationElementValue(reader);
-            break;
-        }
-        case '[': {
-            value = new ArrayElementValue(reader);
-            break;
-        }
-        default: {
-            std::cerr << "can't get here. in element_value." << std::endl;
-            assert(false);
-        }
-    }
-    // CodeStub
-    stub.inject(tag);
-    stub += value->stub;
-}
-
-
