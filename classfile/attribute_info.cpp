@@ -5,10 +5,11 @@
 #include "attribute_info.h"
 #include "const.h"
 
-AttributeInfo *AttributeInfo::parseAttribute(ClassReader &reader, ConstantPool *constant_pool) {
+AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
-    u2 attribute_tag = toAttributeTag(attribute_name_index, constant_pool);
-    switch (attribute_tag) {
+    // Compare strings to find known attribute
+    u2 tag = attributeName2Tag(attribute_name_index, constant_pool);
+    switch (tag) {
         case 0: {
             ConstantValueAttribute *result = new ConstantValueAttribute(reader);
             return result;
@@ -22,7 +23,7 @@ AttributeInfo *AttributeInfo::parseAttribute(ClassReader &reader, ConstantPool *
             return result;
         }
         case 3: {
-            ExceptionsAttribute *result = new ExceptionsAttribute(reader);
+            ExceptionTableAttribute *result = new ExceptionTableAttribute(reader);
             return result;
         }
         case 4: {
@@ -93,19 +94,19 @@ AttributeInfo *AttributeInfo::parseAttribute(ClassReader &reader, ConstantPool *
             return result;
         }
         case 20: {
-            AnnotationDefault_attribute *result = new AnnotationDefault_attribute(reader);
+            AnnotationDefaultAttribute *result = new AnnotationDefaultAttribute(reader);
             return result;
         }
         case 21: {
-            BootstrapMethods_attribute *result = new BootstrapMethods_attribute(reader);
+            BootstrapMethodsAttribute *result = new BootstrapMethodsAttribute(reader);
             return result;
         }
         case 22: {
-            MethodParameters_attribute *result = new MethodParameters_attribute(reader);
+            MethodParametersAttribute *result = new MethodParametersAttribute(reader);
             return result;
         }
         default: {
-            std::cerr << "can't go there! map has not this error tag " << attribute_tag << "!" << std::endl;
+            std::cerr << "can't go there! map has not this error tag " << tag << "!" << std::endl;
             assert(false);
         }
     }
@@ -116,7 +117,7 @@ AttributeInfo::AttributeInfo(ClassReader &reader) {
     attribute_length = reader.readUint32();
 }
 
-u2 AttributeInfo::toAttributeTag(std::uint16_t attribute_name_index, ConstantPool *constant_pool) {
+u2 AttributeInfo::attributeName2Tag(std::uint16_t attribute_name_index, ConstantPool *constant_pool) {
     String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
     if (attribute_table.find(str) != attribute_table.end()) {
         return attribute_table[str];
@@ -125,39 +126,104 @@ u2 AttributeInfo::toAttributeTag(std::uint16_t attribute_name_index, ConstantPoo
     assert(false);
 };
 
-ElementValue *ElementValue::readElementValue(ClassReader &reader) {
-    u1 tag = reader.readUint8();
-    switch ((char) tag) {
-        case 'B':
-        case 'C':
-        case 'D':
-        case 'F':
-        case 'I':
-        case 'J':
-        case 'S':
-        case 'Z':
-        case 's': {
-            return new SimpleElementValue(reader, tag);
-        }
-        case 'e': {
-            return new EnumElementValue(reader, tag);
-        }
-        case 'c': {
-            return new ClassElementValue(reader, tag);
-            break;
-        }
-        case '@': {
-            return new AnnotationElementValue(reader, tag);
-            break;
+MethodParametersAttribute::MethodParametersAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    parameters_count = reader.readUint8();
+    if (parameters_count != 0)
+        parameters = new MethodParameter *[parameters_count];
+    for (int pos = 0; pos < parameters_count; pos++) {
+        parameters[pos] = new MethodParameter(reader);
+    }
+}
 
-        }
-        case '[': {
-            return new ArrayElementValue(reader, tag);
-            break;
-        }
-        default: {
-            std::cerr << "can't get here. in element_value." << std::endl;
-            assert(false);
+MethodParametersAttribute::~MethodParametersAttribute() {
+    for (int i = 0; i < parameters_count; ++i) {
+        delete parameters[i];
+    }
+    delete[]parameters;
+}
+
+BootstrapMethodsAttribute::BootstrapMethodsAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    num_bootstrap_methods = reader.readUint16();
+    if (num_bootstrap_methods != 0)
+        bootstrap_methods = new BootstrapMethod *[num_bootstrap_methods];
+    for (int pos = 0; pos < num_bootstrap_methods; pos++) {
+        bootstrap_methods[pos] = new BootstrapMethod(reader);
+    }
+}
+
+BootstrapMethodsAttribute::~BootstrapMethodsAttribute() {
+    for (int i = 0; i < num_bootstrap_methods; ++i) {
+        delete bootstrap_methods[i];
+    }
+    delete[]bootstrap_methods;
+}
+
+BootstrapMethod::BootstrapMethod(ClassReader &reader) {
+    bootstrap_method_ref = reader.readUint16();
+    num_bootstrap_arguments = reader.readUint16();
+    if (num_bootstrap_arguments != 0)
+        bootstrap_arguments = new u2[num_bootstrap_arguments];
+    for (int pos = 0; pos < num_bootstrap_arguments; pos++) {
+        bootstrap_arguments[pos] = reader.readUint16();
+    }
+}
+
+BootstrapMethod::~BootstrapMethod() {
+    delete[]bootstrap_arguments;
+}
+
+AnnotationDefaultAttribute::~AnnotationDefaultAttribute() {
+    delete default_value;
+}
+
+ConstantValueAttribute::ConstantValueAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    constant_value_index = reader.readUint16();
+}
+
+SourceFileAttribute::SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    source_file_index = reader.readUint16();
+}
+
+CodeAttribute::CodeAttribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
+    max_stack = reader.readUint16();
+    max_locals = reader.readUint16();
+    code_length = reader.readUint32();
+    if (code_length != 0) {
+        code = new u1[code_length];
+        code = reader.readBytes(code_length);
+    }
+    exception_table_length = reader.readUint16();
+    if (exception_table_length != 0) {
+        exception_table = new ExceptionTable *[exception_table_length];
+        for (int pos = 0; pos < exception_table_length; pos++) {
+            exception_table[pos] = new ExceptionTable(reader);
         }
     }
+    attributes_count = reader.readUint16();
+    if (attributes_count != 0)
+        attributes = new AttributeInfo *[attributes_count];
+    for (int pos = 0; pos < attributes_count; pos++) {
+        attributes[pos] = readAttribute(reader, constantPool);
+    }
+}
+
+CodeAttribute::~CodeAttribute() {
+    delete[] code;
+    for (int i = 0; i < attributes_count; ++i) {
+        delete attributes[i];
+    }
+    delete[] attributes;
+    for (int i = 0; i < exception_table_length; ++i) {
+        delete exception_table[i];
+    }
+    delete[]exception_table;
+}
+
+StackMapTableAttribute::StackMapTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    // todo later
+    bytes = reader.readBytes(attribute_length);
+}
+
+StackMapTableAttribute::~StackMapTableAttribute() {
+    delete bytes;
 }

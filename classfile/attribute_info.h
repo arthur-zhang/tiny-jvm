@@ -10,6 +10,7 @@
 #include "String.h"
 #include "constant_pool.h"
 #include "exception_table.h"
+#include "element_value.h"
 
 class AttributeInfo {
 public:
@@ -18,18 +19,16 @@ public:
 
     AttributeInfo(ClassReader &reader);
 
-    static AttributeInfo *parseAttribute(ClassReader &reader, ConstantPool *constant_pool);
+    static AttributeInfo *readAttribute(ClassReader &reader, ConstantPool *constant_pool);
 
-    static u2 toAttributeTag(u2 attribute_name_index,
-                             ConstantPool *constant_pool);
+    static u2 attributeName2Tag(u2 attribute_name_index,
+                                ConstantPool *constant_pool);
 };
 
 
 class ConstantValueAttribute : public AttributeInfo {
 public:
-    ConstantValueAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        constant_value_index = reader.readUint16();
-    }
+    ConstantValueAttribute(ClassReader &reader);
 
     u2 constant_value_index;
 };
@@ -48,49 +47,37 @@ public:
     u2 attributes_count;
     AttributeInfo **attributes;
 
-    CodeAttribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
-        max_stack = reader.readUint16();
-        max_locals = reader.readUint16();
-        code_length = reader.readUint32();
-        if (code_length != 0) {
-            code = new u1[code_length];
-            code = reader.readBytes(code_length);
-        }
-        exception_table_length = reader.readUint16();
-        if (exception_table_length != 0) {
-            exception_table = new ExceptionTable *[exception_table_length];
-            for (int pos = 0; pos < exception_table_length; pos++) {
-                exception_table[pos] = new ExceptionTable(reader);
-            }
-        }
-        attributes_count = reader.readUint16();
-        if (attributes_count != 0)
-            attributes = new AttributeInfo *[attributes_count];
-        for (int pos = 0; pos < attributes_count; pos++) {
-            attributes[pos] = parseAttribute(reader, constantPool);
-        }
-    }
+    CodeAttribute(ClassReader &reader, ConstantPool *constantPool);
+
+    virtual ~CodeAttribute();
 };
 
 class StackMapTableAttribute : public AttributeInfo {
 public:
-    StackMapTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        reader.readBytes(attribute_length);
-    }
+    StackMapTableAttribute(ClassReader &reader);
+
+    virtual ~StackMapTableAttribute();
+
+private:
+    u1 *bytes;
 };
 
-class ExceptionsAttribute : public AttributeInfo {
+class ExceptionTableAttribute : public AttributeInfo {
 public:
     u2 number_of_exceptions;
     u2 *exception_index_table = nullptr;
 
-    ExceptionsAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    ExceptionTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
         number_of_exceptions = reader.readUint16();
         if (number_of_exceptions != 0)
             exception_index_table = new u2[number_of_exceptions];
         for (int pos = 0; pos < number_of_exceptions; pos++) {
             exception_index_table[pos] = reader.readUint16();
         }
+    }
+
+    virtual ~ExceptionTableAttribute() {
+        delete[]exception_index_table;
     }
 };
 
@@ -123,6 +110,12 @@ public:
         }
     }
 
+    virtual ~InnerClassesAttribute() {
+        for (int i = 0; i < number_of_classes; ++i) {
+            delete classes[i];
+        }
+        delete[]classes;
+    }
 };
 
 class EnclosingMethodAttribute : public AttributeInfo {
@@ -152,11 +145,9 @@ public:
 
 class SourceFileAttribute : public AttributeInfo {
 public:
-    u2 sourcefile_index;
+    u2 source_file_index;
 
-    SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        sourcefile_index = reader.readUint16();
-    }
+    SourceFileAttribute(ClassReader &reader);
 };
 
 class SourceDebugExtensionAttribute : public AttributeInfo {
@@ -266,96 +257,6 @@ public:
         reader.readBytes(attribute_length);
     }
 };
-
-class ElementValue {
-public:
-    u1 tag;
-
-    ElementValue(ClassReader &reader, u1 tag_) : tag(tag_) {}
-
-    static ElementValue *readElementValue(ClassReader &reader);
-
-    virtual ~ElementValue() {}
-};
-
-class SimpleElementValue : public ElementValue {
-public:
-    u2 const_value_index;
-
-    SimpleElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
-        const_value_index = reader.readUint16();
-    }
-};
-
-class ClassElementValue : public ElementValue {
-public:
-    u2 class_info_index;
-
-    ClassElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
-        class_info_index = reader.readUint16();
-    }
-
-};
-
-class EnumElementValue : public ElementValue {
-public:
-    EnumElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
-        type_name_index = reader.readUint16();
-        const_name_index = reader.readUint16();
-    }
-
-    u2 type_name_index;
-    u2 const_name_index;
-};
-
-class ArrayElementValue : public ElementValue {
-public:
-    u2 num_values;
-    ElementValue **values = nullptr;        // [num_values]
-
-    ArrayElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
-        num_values = reader.readUint16();
-        if (num_values !=
-            0)        // 这里写成了 values...... 本来就是 nullptr 是 0 ....... 结果调了一个小时...... 一直显示在下边 f >> values[pos] 进入函数中的第一行出错...... 唉（ 还以为是标准库错了（逃 我真是个白痴（打脸
-            values = new ElementValue *[num_values];
-        for (int pos = 0; pos < num_values; pos++) {
-            values[pos] = ElementValue::readElementValue(reader);
-        }
-    }
-};
-
-class ElementValuePair {
-public:
-    ElementValuePair(ClassReader &reader) {
-        element_name_index = reader.readUint16();
-        value = ElementValue::readElementValue(reader);
-    }
-
-    u2 element_name_index;
-    ElementValue *value;
-
-};
-
-class AnnotationElementValue : public ElementValue {
-public:
-    AnnotationElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
-        type_index = reader.readUint16();
-        num_element_value_pairs = reader.readUint16();
-        if (num_element_value_pairs != 0)
-            element_value_pairs = new ElementValuePair *[num_element_value_pairs];
-        for (int pos = 0; pos < num_element_value_pairs; pos++) {
-            element_value_pairs[pos] = new ElementValuePair(reader);
-        }
-    }
-
-    u2 type_index;
-    u2 num_element_value_pairs;
-
-    ElementValuePair **element_value_pairs = nullptr;        // [num_element_value_pairs]
-
-
-};
-
 
 class parameter_annotations_t {    // extract from Runtime_XXX_Annotations_attributes
 public:
@@ -550,72 +451,79 @@ public:
 //    ~RuntimeInvisibleTypeAnnotations_attribute();
 };
 
-class AnnotationDefault_attribute : public AttributeInfo {
+/**
+ * Represents the default value of a annotation for a method info
+ */
+class AnnotationDefaultAttribute : public AttributeInfo {
 public:
-    AnnotationDefault_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    AnnotationDefaultAttribute(ClassReader &reader) : AttributeInfo(reader) {
         default_value = ElementValue::readElementValue(reader);
     }
 
     ElementValue *default_value;
+
+    virtual ~AnnotationDefaultAttribute();
 };
 
-class BootstrapMethods_attribute : public AttributeInfo {
+class BootstrapMethod {
 public:
-    BootstrapMethods_attribute(ClassReader &reader) : AttributeInfo(reader) {
-        num_bootstrap_methods = reader.readUint16();
-        if (num_bootstrap_methods != 0)
-            bootstrap_methods = new BootstrapMethods_attribute::bootstrap_methods_t *[num_bootstrap_methods];
-        for (int pos = 0; pos < num_bootstrap_methods; pos++) {
-            bootstrap_methods[pos] = new BootstrapMethods_attribute::bootstrap_methods_t(reader);
-        }
-    }
+    u2 bootstrap_method_ref;
+    u2 num_bootstrap_arguments;
+    u2 *bootstrap_arguments = nullptr;
+
+    BootstrapMethod(ClassReader &reader);
+
+    virtual ~BootstrapMethod();
+};
+
+class BootstrapMethodsAttribute : public AttributeInfo {
+public:
+    BootstrapMethodsAttribute(ClassReader &reader);
 
     u2 num_bootstrap_methods;
-
-    class bootstrap_methods_t {
-    public:
-        u2 bootstrap_method_ref;
-        u2 num_bootstrap_arguments;
-        u2 *bootstrap_arguments = nullptr;                    // [num_bootstrap_arguments];
-        bootstrap_methods_t(ClassReader &reader) {
-            bootstrap_method_ref = reader.readUint16();
-            num_bootstrap_arguments = reader.readUint16();
-            if (num_bootstrap_arguments != 0)
-                bootstrap_arguments = new u2[num_bootstrap_arguments];
-            for (int pos = 0; pos < num_bootstrap_arguments; pos++) {
-                bootstrap_arguments[pos] = reader.readUint16();
-            }
-        }
-
-    private:
-        ~bootstrap_methods_t();
-    } **bootstrap_methods = nullptr;                            // [num_bootstrap_methods];
+    BootstrapMethod **bootstrap_methods = nullptr;                            // [num_bootstrap_methods];
+private:
+    virtual ~BootstrapMethodsAttribute();
 };
 
-class MethodParameters_attribute : public AttributeInfo {
+/**
+ * Entry of the parameters table.
+ *
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.24">
+ * The class File Format : The MethodParameters Attribute</a>
+ */
+class MethodParameter {
+public:
+    u2 name_index;
+    u2 access_flags;
+
+    MethodParameter(ClassReader &reader) {
+        name_index = reader.readUint16();
+        access_flags = reader.readUint16();
+    }
+};
+
+/**
+ * This class represents a MethodParameters attribute.
+ *
+ * @see <a href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.24">
+ MethodParameters_attribute {
+    u2 attribute_name_index;
+    u4 attribute_length;
+    u1 parameters_count;
+    {   u2 name_index;
+        u2 access_flags;
+    } parameters[parameters_count];
+}
+ */
+class MethodParametersAttribute : public AttributeInfo {
 public:
     u1 parameters_count;
+    MethodParameter **parameters = nullptr;                                    // [parameters_count];
 
-    class parameters_t {
-    public:
-        u2 name_index;
-        u2 access_flags;
+    MethodParametersAttribute(ClassReader &reader);
 
-        parameters_t(ClassReader &reader) {
-            name_index = reader.readUint16();
-            access_flags = reader.readUint16();
-        }
-    } **parameters = nullptr;                                    // [parameters_count];
-    MethodParameters_attribute(ClassReader &reader) : AttributeInfo(reader) {
-        parameters_count = reader.readUint8();
-        if (parameters_count != 0)
-            parameters = new MethodParameters_attribute::parameters_t *[parameters_count];
-        for (int pos = 0; pos < parameters_count; pos++) {
-            parameters[pos] = new MethodParameters_attribute::parameters_t(reader);
-        }
-    }
-
-    ~MethodParameters_attribute();
+    ~MethodParametersAttribute();
 };
 
 

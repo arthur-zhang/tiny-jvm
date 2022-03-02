@@ -151,7 +151,7 @@ std::string recursive_parse_annotation(AnnotationElementValue *target) {
 
 void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
     auto constant_pool = cp->getConstantPool();
-    int attribute_tag = AttributeInfo::toAttributeTag(ptr->attribute_name_index, cp);
+    int attribute_tag = AttributeInfo::attributeName2Tag(ptr->attribute_name_index, cp);
     switch (attribute_tag) {
         case 0: {        // ConstantValue
             std::cout << "(DEBUG)   ConstantValue: ";
@@ -439,7 +439,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
 //        }
         case 3: {    // Exceptions
             std::cout << "(DEBUG)   Exceptions: " << std::endl;
-            auto *throws_ptr = (ExceptionsAttribute *) ptr;
+            auto *throws_ptr = (ExceptionTableAttribute *) ptr;
             std::cout << "(DEBUG)     throws ";
             for (int k = 0; k < throws_ptr->number_of_exceptions; k++) {        // same as print_method().
                 assert (constant_pool[throws_ptr->exception_index_table[k] - 1]->tag ==
@@ -585,7 +585,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
         case 8: {    // SourceFile
             auto *sourcefile_ptr = (SourceFileAttribute *) ptr;
             std::wcout << "(DEBUG) SourceFile: \""
-                       << ((CONSTANT_Utf8_info *) constant_pool[sourcefile_ptr->sourcefile_index -
+                       << ((CONSTANT_Utf8_info *) constant_pool[sourcefile_ptr->source_file_index -
                                                                 1])->getConstant() << "\"" << std::endl;
             break;
         }
@@ -748,7 +748,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
         case 20: {    // Annotation Default
             std::cout << "(DEBUG)    AnnotationDefault:" << std::endl;
             std::cout << "(DEBUG)      default_value: ";
-            auto *default_ptr = (AnnotationDefault_attribute *) ptr;
+            auto *default_ptr = (AnnotationDefaultAttribute *) ptr;
             ElementValue *element_value = default_ptr->default_value;
             // 1. print [type]
             std::cout << (char) element_value->tag;
@@ -758,9 +758,9 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
         }
         case 21: {    // BootstrapMethods	// 注：此表全局唯一。是所有的 lambda 动态调用的方法的集合表。invokeDynamic 通过此表查找想要 invoke 的方法。
             std::cout << "(DEBUG)  BootstrapMethods:" << std::endl;
-            auto lambda_tbl = (BootstrapMethods_attribute *) ptr;
+            auto lambda_tbl = (BootstrapMethodsAttribute *) ptr;
             for (int pos = 0; pos < lambda_tbl->num_bootstrap_methods; pos++) {
-                BootstrapMethods_attribute::bootstrap_methods_t *method_handle_msg = lambda_tbl->bootstrap_methods[pos];
+                BootstrapMethodsAttribute::bootstrap_methods_t *method_handle_msg = lambda_tbl->bootstrap_methods[pos];
                 // 1. parse MethodHandle pos in constant_pool
                 std::cout << "(DEBUG)    " << pos << ": [CONSTANT_MethodHandle pos]#"
                           << method_handle_msg->bootstrap_method_ref << std::endl;
@@ -775,7 +775,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
         }
         case 22: {    // MethodParameters	// 注：这个属性只有在：用 java8 编译 + 使用 java.lang.reflect.Parameter 类库 + 用 `javac -parameters` 来进行编译的时候才会生效！ MethodParameters 属性会被注入到 .class 文件中去！
             std::cout << "(DEBUG)  MethodParameters:" << std::endl;
-            auto parameters = (MethodParameters_attribute *) ptr;
+            auto parameters = (MethodParametersAttribute *) ptr;
             for (int pos = 0; pos < parameters->parameters_count; pos++) {
                 int name_index = parameters->parameters[pos]->name_index;
                 int access_flags = parameters->parameters[pos]->access_flags;
@@ -897,14 +897,14 @@ void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool) {
         // first parse Exception_attribute to output name!! because there should be output `throws messages`! in fact this should be written in print_attributes() function...
         bool has_exception = false;
         for (int pos = 0; pos < bufs[i]->attributes_count; pos++) {
-            int attribute_tag = AttributeInfo::toAttributeTag(bufs[i]->attributes[pos]->attribute_name_index,
-                                                              constant_pool);
+            int attribute_tag = AttributeInfo::attributeName2Tag(bufs[i]->attributes[pos]->attribute_name_index,
+                                                                 constant_pool);
             if (attribute_tag == 3) {
                 if (!has_exception) {
                     has_exception = true;
                     std::cout << " throws ";
                 }
-                auto *throws_ptr = (ExceptionsAttribute *) bufs[i]->attributes[pos];
+                auto *throws_ptr = (ExceptionTableAttribute *) bufs[i]->attributes[pos];
                 for (int k = 0; k < throws_ptr->number_of_exceptions; k++) {
                     assert (constant_pool->getConstantPool()[throws_ptr->exception_index_table[k] - 1]->tag ==
                             CONSTANT_Class);    // throw a Exception class
@@ -932,8 +932,8 @@ void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool) {
         std::cout << "(DEBUG)   flags: " << ss.str() << std::endl;
         // parse ConstantValue / Signature / RuntimeVisibleAnnotations / RuntimeInvisibleAnnotations
         for (int pos = 0; pos < bufs[i]->attributes_count; pos++) {
-            int attribute_tag = AttributeInfo::toAttributeTag(bufs[i]->attributes[pos]->attribute_name_index,
-                                                              constant_pool);
+            int attribute_tag = AttributeInfo::attributeName2Tag(bufs[i]->attributes[pos]->attribute_name_index,
+                                                                 constant_pool);
             if (!(attribute_tag == 1 || attribute_tag == 3 || attribute_tag == 6 ||
                   attribute_tag == 7 || attribute_tag == 13 || attribute_tag == 14 ||
                   attribute_tag == 15 || attribute_tag == 16 || attribute_tag == 17 ||
@@ -1172,7 +1172,7 @@ void ClassFile::readAttributes() {
     if (attributes_count != 0)
         attributes = new AttributeInfo *[attributes_count];
     for (int pos = 0; pos < attributes_count; pos++) {
-        attributes[pos] = AttributeInfo::parseAttribute(reader, constantPool);
+        attributes[pos] = AttributeInfo::readAttribute(reader, constantPool);
     }
 #ifdef POOL_DEBUG
     if (attributes_count != 0) {
