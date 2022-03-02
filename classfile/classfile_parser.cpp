@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include "classfile_parser.h"
+#include "field_info.h"
 #include "String.h"
 
 wstring decodeMUTF8(unsigned char *bytearr, int len) {
@@ -1102,7 +1103,6 @@ void ClassFile::parse() {
     readMagic();
     readVersion();
     readConstantPool();
-//    print_constant_pool(constantPool);
     readClassInfo();
     readInterfaces();
     readFields();
@@ -1145,9 +1145,9 @@ void ClassFile::readInterfaces() {
 void ClassFile::readFields() {
     fields_count = reader.readUint16();
     if (fields_count == 0) return;
-    fields = new field_info *[fields_count];
+    fields = new FieldInfo *[fields_count];
     for (int i = 0; i < fields_count; ++i) {
-        fields[i] = new field_info(reader, constantPool);
+        fields[i] = new FieldInfo(reader, constantPool);
     }
 }
 
@@ -1161,7 +1161,6 @@ void ClassFile::readMethods() {
     }
     if (methods_count != 0) {
         std::cout << "(DEBUG) method_number: " << methods_count << std::endl;
-//        print_methods(methods, methods_count, *constantPool);
     } else {
         std::cout << "(DEBUG) no method functions." << std::endl;
     }
