@@ -7,7 +7,7 @@
 
 #include "class_reader.h"
 #include "String.h"
-
+#include "const.h"
 class Constant {
 public:
     int tag;
@@ -18,21 +18,6 @@ protected:
     ClassReader &reader;
 };
 
-//=====
-#define CONSTANT_Class                7
-#define CONSTANT_Fieldref            9
-#define CONSTANT_Methodref            10
-#define CONSTANT_InterfaceMethodref    11
-#define CONSTANT_String                8
-#define CONSTANT_Integer                3
-#define CONSTANT_Float                4
-#define CONSTANT_Long                5
-#define CONSTANT_Double                6
-#define CONSTANT_NameAndType            12
-#define CONSTANT_Utf8                1
-#define CONSTANT_MethodHandle        15
-#define CONSTANT_MethodType            16
-#define CONSTANT_InvokeDynamic        18
 
 class CONSTANT_String_info;
 
