@@ -64,8 +64,7 @@ private:
 
 };
 
-u2 toAttributeTag(u2 attribute_name_index,
-                  ConstantPool *constant_pool);
+
 
 void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool);
 

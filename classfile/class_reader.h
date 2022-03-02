@@ -15,42 +15,16 @@ class ClassReader {
 public:
     ClassReader(const std::string &filePath) : dataStream_(filePath, std::ios::binary) {}
 
-    u2 peek2() {
-        u1 first = dataStream_.get();
-        u1 second = dataStream_.peek();
-        dataStream_.unget();
-        return ((first << 8) + second) & 0xFFFF;
-    }
+    u2 peek2();
 
-    u1 readUint8() {
-        u1 result;
-        dataStream_.read((char *) &result, sizeof(u1));
-        return result;
-    }
+    u1 readUint8();
 
-    u2 readUint16() {
-        u2 result;
-        dataStream_.read((char *) &result, sizeof(u2));
-        return htons(result);
-    }
+    u2 readUint16();
 
-    u4 readUint32() {
-        u4 result;
-        dataStream_.read((char *) &result, sizeof(u4));
-        return htonl(result);
-    }
+    u4 readUint32();
 
-    u1 *readBytes(int n) {
-        u1 *bytes = new u1[n];
-        for (int i = 0; i < n; ++i) {
-            bytes[i] = readUint8();
-        }
-        return bytes;
-    }
+    u1 *readBytes(int n);
 
-    void readUTF(unsigned char *bytes, int length) {
-        dataStream_.read((char *) bytes, length);
-    }
 private:
     std::ifstream dataStream_;
 };

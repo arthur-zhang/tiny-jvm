@@ -3,6 +3,7 @@
 //
 
 #include "field_info.h"
+#include "attribute_info.h"
 
 FieldInfo::FieldInfo(ClassReader &reader, ConstantPool *constantPool) {
     access_flags = reader.readUint16();
@@ -12,7 +13,7 @@ FieldInfo::FieldInfo(ClassReader &reader, ConstantPool *constantPool) {
     if (attributes_count != 0)
         attributes = new AttributeInfo *[attributes_count];
     for (int pos = 0; pos < attributes_count; pos++) {
-        attributes[pos] = parseAttribute(reader, constantPool);
+        attributes[pos] = AttributeInfo::parseAttribute(reader, constantPool);
     }
 }
 

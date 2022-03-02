@@ -151,7 +151,7 @@ std::string recursive_parse_annotation(annotation *target) {
 
 void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
     auto constant_pool = cp->getConstantPool();
-    int attribute_tag = toAttributeTag(ptr->attribute_name_index, cp);
+    int attribute_tag = AttributeInfo::toAttributeTag(ptr->attribute_name_index, cp);
     switch (attribute_tag) {
         case 0: {        // ConstantValue
             std::cout << "(DEBUG)   ConstantValue: ";
@@ -368,7 +368,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                 printf("(DEBUG)%8sfrom%6sto%2starget%4stype\n", "", "", "", "");
             }
             for (int pos = 0; pos < code_ptr->exception_table_length; pos++) {
-                exception_table_t *table = code_ptr->exception_table[pos];
+                exception_table *table = code_ptr->exception_table[pos];
                 printf("(DEBUG)%8s%4d%4s%4d%4s%4d%4s%4d\n", "", table->start_pc, "", table->end_pc, "",
                        table->handler_pc, "", table->catch_type);
             }
@@ -897,7 +897,8 @@ void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool) {
         // first parse Exception_attribute to output name!! because there should be output `throws messages`! in fact this should be written in print_attributes() function...
         bool has_exception = false;
         for (int pos = 0; pos < bufs[i]->attributes_count; pos++) {
-            int attribute_tag = toAttributeTag(bufs[i]->attributes[pos]->attribute_name_index, constant_pool);
+            int attribute_tag = AttributeInfo::toAttributeTag(bufs[i]->attributes[pos]->attribute_name_index,
+                                                              constant_pool);
             if (attribute_tag == 3) {
                 if (!has_exception) {
                     has_exception = true;
@@ -931,7 +932,8 @@ void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool) {
         std::cout << "(DEBUG)   flags: " << ss.str() << std::endl;
         // parse ConstantValue / Signature / RuntimeVisibleAnnotations / RuntimeInvisibleAnnotations
         for (int pos = 0; pos < bufs[i]->attributes_count; pos++) {
-            int attribute_tag = toAttributeTag(bufs[i]->attributes[pos]->attribute_name_index, constant_pool);
+            int attribute_tag = AttributeInfo::toAttributeTag(bufs[i]->attributes[pos]->attribute_name_index,
+                                                              constant_pool);
             if (!(attribute_tag == 1 || attribute_tag == 3 || attribute_tag == 6 ||
                   attribute_tag == 7 || attribute_tag == 13 || attribute_tag == 14 ||
                   attribute_tag == 15 || attribute_tag == 16 || attribute_tag == 17 ||
@@ -1171,7 +1173,7 @@ void ClassFile::readAttributes() {
     if (attributes_count != 0)
         attributes = new AttributeInfo *[attributes_count];
     for (int pos = 0; pos < attributes_count; pos++) {
-        attributes[pos] = parseAttribute(reader, constantPool);
+        attributes[pos] = AttributeInfo::parseAttribute(reader, constantPool);
     }
 #ifdef POOL_DEBUG
     if (attributes_count != 0) {
@@ -1226,121 +1228,4 @@ element_value::element_value(ClassReader &reader) {
     stub += value->stub;
 }
 
-u2 toAttributeTag(u2 attribute_name_index,
-                  ConstantPool *constant_pool) {
-    String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
-    if (attribute_table.find(str) != attribute_table.end()) {
-        return attribute_table[str];
-    } else {
-        std::cerr << "my jvm don't alloc a new attribute, because we don't have a compiler~" << std::endl;
-        assert(false);
-    }
-}
 
-static AttributeInfo *parseAttribute(ClassReader &reader, ConstantPool *constant_pool) {
-
-    u2 attribute_name_index = reader.peek2();
-    u2 attribute_tag = toAttributeTag(attribute_name_index, constant_pool);
-    switch (attribute_tag) {
-        case 0: {
-            ConstantValue_attribute *result = new ConstantValue_attribute(reader);
-            return result;
-        }
-        case 1: {
-            Code_attribute *result = new Code_attribute(reader, constant_pool);
-            return result;
-        }
-        case 2: {
-            StackMapTable_attribute *result = new StackMapTable_attribute(reader);
-            return result;
-        }
-        case 3: {
-            Exceptions_attribute *result = new Exceptions_attribute(reader);
-            return result;
-        }
-        case 4: {
-            InnerClasses_attribute *result = new InnerClasses_attribute(reader);
-            return result;
-        }
-        case 5: {
-            EnclosingMethod_attribute *result = new EnclosingMethod_attribute(reader);
-            return result;
-        }
-        case 6: {
-            Synthetic_attribute *result = new Synthetic_attribute(reader);
-            return result;
-        }
-        case 7: {
-            Signature_attribute *result = new Signature_attribute(reader);
-            return result;
-        }
-        case 8: {
-            SourceFile_attribute *result = new SourceFile_attribute(reader);
-            return result;
-        }
-        case 9: {
-            SourceDebugExtension_attribute *result = new SourceDebugExtension_attribute(reader);
-            return result;
-        }
-        case 10: {
-            LineNumberTable_attribute *result = new LineNumberTable_attribute(reader);
-            return result;
-        }
-        case 11: {
-            LocalVariableTable_attribute *result = new LocalVariableTable_attribute(reader);
-            return result;
-        }
-        case 12: {
-            LocalVariableTypeTable_attribute *result = new LocalVariableTypeTable_attribute(reader);
-            return result;
-        }
-        case 13: {
-            Deprecated_attribute *result = new Deprecated_attribute(reader);
-            return result;
-        }
-        case 14: {
-            RuntimeVisibleAnnotations_attribute *result = new RuntimeVisibleAnnotations_attribute(reader);
-            return result;
-        }
-        case 15: {
-            RuntimeInvisibleAnnotations_attribute *result = new RuntimeInvisibleAnnotations_attribute(reader);
-            return result;
-        }
-        case 16: {
-            RuntimeVisibleParameterAnnotations_attribute *result = new RuntimeVisibleParameterAnnotations_attribute(
-                    reader);
-            return result;
-        }
-        case 17: {
-            RuntimeInvisibleParameterAnnotations_attribute *result = new RuntimeInvisibleParameterAnnotations_attribute(
-                    reader);
-            return result;
-        }
-        case 18: {
-            RuntimeVisibleTypeAnnotations_attribute *result = new RuntimeVisibleTypeAnnotations_attribute(reader);
-            return result;
-        }
-        case 19: {
-            RuntimeInvisibleTypeAnnotations_attribute *result = new RuntimeInvisibleTypeAnnotations_attribute(
-                    reader);    // nashi
-            return result;
-        }
-        case 20: {
-            AnnotationDefault_attribute *result = new AnnotationDefault_attribute(reader);
-            return result;
-        }
-        case 21: {
-            BootstrapMethods_attribute *result = new BootstrapMethods_attribute(reader);
-            return result;
-        }
-        case 22: {
-            MethodParameters_attribute *result = new MethodParameters_attribute(reader);
-            return result;
-        }
-        default: {
-            std::cerr << "can't go there! map has not this error tag " << attribute_tag << "!" << std::endl;
-            assert(false);
-            return nullptr;
-        }
-    }
-};

@@ -17,4 +17,4 @@ add_executable(tiny_jvm
         classfile/constant_pool.h
         classfile/constant.cpp
         classfile/constant.h
-        classfile/attribute_info.cpp classfile/attribute_info.h classfile/const.h classfile/method_info.cpp classfile/method_info.h)
+        classfile/attribute_info.cpp classfile/attribute_info.h classfile/const.h classfile/method_info.cpp classfile/method_info.h classfile/exception_table.cpp classfile/exception_table.h)

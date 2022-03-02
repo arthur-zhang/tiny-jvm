@@ -9,16 +9,17 @@
 #include "class_reader.h"
 #include "String.h"
 #include "constant_pool.h"
+#include "exception_table.h"
 
 class AttributeInfo {
 public:
     u2 attribute_name_index;
     u4 attribute_length;
 
-    AttributeInfo(ClassReader &reader) {
-        attribute_name_index = reader.readUint16();
-        attribute_length = reader.readUint32();
-    }
+    AttributeInfo(ClassReader &reader);
+    static AttributeInfo *parseAttribute(ClassReader &reader, ConstantPool *constant_pool);
+    static u2 toAttributeTag(u2 attribute_name_index,
+                      ConstantPool *constant_pool);
 };
 
 
@@ -27,26 +28,11 @@ public:
     ConstantValue_attribute(ClassReader &reader) : AttributeInfo(reader) {
         constantvalue_index = reader.readUint16();
     }
-
     u2 constantvalue_index;
 };
 
-class exception_table_t {
-public:
-    u2 start_pc;
-    u2 end_pc;
-    u2 handler_pc;
-    u2 catch_type;
 
-    exception_table_t(ClassReader &reader) {
-        start_pc = reader.readUint16();
-        end_pc = reader.readUint16();
-        handler_pc = reader.readUint16();
-        catch_type = reader.readUint16();
-    }
-};
 
-static AttributeInfo *parseAttribute(ClassReader &reader, ConstantPool *constant_pool);
 
 class Code_attribute : public AttributeInfo {
 public:
@@ -57,7 +43,7 @@ public:
     u1 *code;
 
     u2 exception_table_length;
-    exception_table_t **exception_table;
+    exception_table **exception_table;
 
     u2 attributes_count;
     AttributeInfo **attributes;
@@ -72,9 +58,9 @@ public:
         }
         exception_table_length = reader.readUint16();
         if (exception_table_length != 0) {
-            exception_table = new exception_table_t *[exception_table_length];
+            exception_table = new class exception_table *[exception_table_length];
             for (int pos = 0; pos < exception_table_length; pos++) {
-                exception_table[pos] = new exception_table_t(reader);
+                exception_table[pos] = new class exception_table(reader);
             }
         }
         attributes_count = reader.readUint16();
