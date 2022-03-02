@@ -3,4 +3,10 @@ project(tiny_jvm)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(tiny_jvm jvm_main.cpp classfile_parser.cpp classfile_parser.h String.cpp String.h)
+add_executable(tiny_jvm
+        jvm_main.cpp
+        classfile/classfile_parser.cpp
+        classfile/classfile_parser.h
+        classfile/String.cpp
+        classfile/String.h
+        )

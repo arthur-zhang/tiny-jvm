@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "classfile_parser.h"
+#include "classfile/classfile_parser.h"
 
 using namespace std;
 
