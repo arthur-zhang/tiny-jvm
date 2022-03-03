@@ -3,10 +3,11 @@
 //
 #include <map>
 #include <iostream>
-#include <sstream>
 #include "classfile_parser.h"
 #include "field_info.h"
 #include "String.h"
+#include "data_output_stream.hpp"
+#include "constant.hpp"
 
 wstring decodeMUTF8(unsigned char *bytearr, int len) {
     int utflen = len;
@@ -760,7 +761,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             std::cout << "(DEBUG)  BootstrapMethods:" << std::endl;
             auto lambda_tbl = (BootstrapMethodsAttribute *) ptr;
             for (int pos = 0; pos < lambda_tbl->num_bootstrap_methods; pos++) {
-                BootstrapMethodsAttribute::bootstrap_methods_t *method_handle_msg = lambda_tbl->bootstrap_methods[pos];
+                BootstrapMethod *method_handle_msg = lambda_tbl->bootstrap_methods[pos];
                 // 1. parse MethodHandle pos in constant_pool
                 std::cout << "(DEBUG)    " << pos << ": [CONSTANT_MethodHandle pos]#"
                           << method_handle_msg->bootstrap_method_ref << std::endl;
@@ -1114,8 +1115,8 @@ void ClassFile::parse() {
 }
 
 void ClassFile::readVersion() {
-    minor_version = reader.readUint16();
-    major_version = reader.readUint16();
+    minor_version = reader.readUInt16();
+    major_version = reader.readUInt16();
     cout << "version: " << minor_version << ":" << major_version << endl;
 }
 
@@ -1124,7 +1125,7 @@ void ClassFile::readConstantPool() {
 }
 
 void ClassFile::readClassInfo() {
-    access_flags = reader.readUint16();
+    access_flags = reader.readUInt16();
     if ((access_flags & ACC_INTERFACE) != 0) {
         access_flags |= ACC_ABSTRACT;
     }
@@ -1132,20 +1133,20 @@ void ClassFile::readClassInfo() {
         && (access_flags & ACC_FINAL) != 0) {
         assert("Class can't be both final and abstract");
     }
-    this_class = reader.readUint16();
-    super_class = reader.readUint16();
+    this_class = reader.readUInt16();
+    super_class = reader.readUInt16();
 }
 
 void ClassFile::readInterfaces() {
-    interfaces_count = reader.readUint16();
+    interfaces_count = reader.readUInt16();
     interfaces = new u2[interfaces_count];
     for (int i = 0; i < interfaces_count; ++i) {
-        interfaces[i] = reader.readUint16();
+        interfaces[i] = reader.readUInt16();
     }
 }
 
 void ClassFile::readFields() {
-    fields_count = reader.readUint16();
+    fields_count = reader.readUInt16();
     if (fields_count == 0) return;
     fields = new FieldInfo *[fields_count];
     for (int i = 0; i < fields_count; ++i) {
@@ -1154,7 +1155,7 @@ void ClassFile::readFields() {
 }
 
 void ClassFile::readMethods() {
-    methods_count = reader.readUint16();
+    methods_count = reader.readUInt16();
     if (methods_count != 0)
         methods = new MethodInfo *[methods_count];
     for (int pos = 0; pos < methods_count; pos++) {
@@ -1168,7 +1169,7 @@ void ClassFile::readMethods() {
 }
 
 void ClassFile::readAttributes() {
-    attributes_count = reader.readUint16();
+    attributes_count = reader.readUInt16();
     if (attributes_count != 0)
         attributes = new AttributeInfo *[attributes_count];
     for (int pos = 0; pos < attributes_count; pos++) {
@@ -1184,4 +1185,13 @@ void ClassFile::readAttributes() {
         std::cout << "(DEBUG) no class attributes." << std::endl;
     }
 #endif
+}
+
+void ClassFile::dump() {
+    DataOutputStream os{"/Users/arthur/cvt_dev/clion/tiny-jvm/TestDump.class"};
+    os.writeUInt32(magic);
+    os.writeUInt16(minor_version);
+    os.writeUInt16(major_version);
+    constantPool->dump(os);
+    os.flush();
 }

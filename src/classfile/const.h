@@ -7,8 +7,12 @@
 
 #include <unordered_map>
 #include "String.h"
-#include "types.h"
+#include "types.hpp"
 #include <string>
+
+#define JVM_CLASSFILE_MAGIC  0xCAFEBABE
+
+
 #define ACC_PUBLIC        0x0001            // can be visited by all (CFMI)
 #define ACC_PRIVATE        0x0002            // cannot be visited by all (FMI)
 #define ACC_PROTECTED    0x0004            // cannot be visited by this (FMI)
@@ -28,7 +32,6 @@
 #define ACC_ANNOTATION    0x2000            // this is an annotation like @Override. at the same time the `ACC_INTERFACE` should also be settled (CI)
 #define ACC_ENUM            0x4000            // this is an enum like enum {...} (CFI)
 #define ACC_MANDATED        0x8000
-
 
 
 static std::unordered_map<u1, std::pair<std::string, int>> bccode_map{    // pair<bccode_name, bccode_eat_how_many_arguments>

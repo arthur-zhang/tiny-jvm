@@ -39,8 +39,8 @@ ElementValue *ElementValue::readElementValue(ClassReader &reader) {
 }
 
 AnnotationElementValue::AnnotationElementValue(ClassReader &reader, std::uint8_t type) : ElementValue(reader, type) {
-    type_index = reader.readUint16();
-    num_element_value_pairs = reader.readUint16();
+    type_index = reader.readUInt16();
+    num_element_value_pairs = reader.readUInt16();
     if (num_element_value_pairs != 0)
         element_value_pairs = new ElementValuePair *[num_element_value_pairs];
     for (int pos = 0; pos < num_element_value_pairs; pos++) {
@@ -49,7 +49,7 @@ AnnotationElementValue::AnnotationElementValue(ClassReader &reader, std::uint8_t
 }
 
 ArrayElementValue::ArrayElementValue(ClassReader &reader, std::uint8_t type) : ElementValue(reader, type) {
-    num_values = reader.readUint16();
+    num_values = reader.readUInt16();
     if (num_values != 0) {
         values = new ElementValue *[num_values];
     }
@@ -59,9 +59,9 @@ ArrayElementValue::ArrayElementValue(ClassReader &reader, std::uint8_t type) : E
 }
 
 SimpleElementValue::SimpleElementValue(ClassReader &reader, std::uint8_t type) : ElementValue(reader, type) {
-    const_value_index = reader.readUint16();
+    const_value_index = reader.readUInt16();
 }
 
 ClassElementValue::ClassElementValue(ClassReader &reader, std::uint8_t type) : ElementValue(reader, type) {
-    class_info_index = reader.readUint16();
+    class_info_index = reader.readUInt16();
 }

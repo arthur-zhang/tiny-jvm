@@ -4,7 +4,7 @@
 
 #ifndef TINY_JVM_STRING_H
 #define TINY_JVM_STRING_H
-#include "types.h"
+#include "types.hpp"
 using String  = std::wstring;
 
 String fromBytes(u1 *bytes, size_t length);

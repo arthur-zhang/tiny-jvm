@@ -5,7 +5,7 @@
 #ifndef TINY_JVM_ELEMENT_VALUE_H
 #define TINY_JVM_ELEMENT_VALUE_H
 
-#include "types.h"
+#include "types.hpp"
 #include "class_reader.h"
 
 class ElementValue {
@@ -35,8 +35,8 @@ public:
 class EnumElementValue : public ElementValue {
 public:
     EnumElementValue(ClassReader &reader, u1 type) : ElementValue(reader, type) {
-        type_name_index = reader.readUint16();
-        const_name_index = reader.readUint16();
+        type_name_index = reader.readUInt16();
+        const_name_index = reader.readUInt16();
     }
 
     u2 type_name_index;
@@ -53,7 +53,7 @@ public:
 class ElementValuePair {
 public:
     ElementValuePair(ClassReader &reader) {
-        element_name_index = reader.readUint16();
+        element_name_index = reader.readUInt16();
         value = ElementValue::readElementValue(reader);
     }
 

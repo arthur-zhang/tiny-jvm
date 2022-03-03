@@ -113,8 +113,8 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
 }
 
 AttributeInfo::AttributeInfo(ClassReader &reader) {
-    attribute_name_index = reader.readUint16();
-    attribute_length = reader.readUint32();
+    attribute_name_index = reader.readUInt16();
+    attribute_length = reader.readUInt32();
 }
 
 u2 AttributeInfo::attributeName2Tag(std::uint16_t attribute_name_index, ConstantPool *constant_pool) {
@@ -143,7 +143,7 @@ MethodParametersAttribute::~MethodParametersAttribute() {
 }
 
 BootstrapMethodsAttribute::BootstrapMethodsAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    num_bootstrap_methods = reader.readUint16();
+    num_bootstrap_methods = reader.readUInt16();
     if (num_bootstrap_methods != 0)
         bootstrap_methods = new BootstrapMethod *[num_bootstrap_methods];
     for (int pos = 0; pos < num_bootstrap_methods; pos++) {
@@ -159,12 +159,12 @@ BootstrapMethodsAttribute::~BootstrapMethodsAttribute() {
 }
 
 BootstrapMethod::BootstrapMethod(ClassReader &reader) {
-    bootstrap_method_ref = reader.readUint16();
-    num_bootstrap_arguments = reader.readUint16();
+    bootstrap_method_ref = reader.readUInt16();
+    num_bootstrap_arguments = reader.readUInt16();
     if (num_bootstrap_arguments != 0)
         bootstrap_arguments = new u2[num_bootstrap_arguments];
     for (int pos = 0; pos < num_bootstrap_arguments; pos++) {
-        bootstrap_arguments[pos] = reader.readUint16();
+        bootstrap_arguments[pos] = reader.readUInt16();
     }
 }
 
@@ -177,29 +177,29 @@ AnnotationDefaultAttribute::~AnnotationDefaultAttribute() {
 }
 
 ConstantValueAttribute::ConstantValueAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    constant_value_index = reader.readUint16();
+    constant_value_index = reader.readUInt16();
 }
 
 SourceFileAttribute::SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    source_file_index = reader.readUint16();
+    source_file_index = reader.readUInt16();
 }
 
 CodeAttribute::CodeAttribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
-    max_stack = reader.readUint16();
-    max_locals = reader.readUint16();
-    code_length = reader.readUint32();
+    max_stack = reader.readUInt16();
+    max_locals = reader.readUInt16();
+    code_length = reader.readUInt32();
     if (code_length != 0) {
         code = new u1[code_length];
         code = reader.readBytes(code_length);
     }
-    exception_table_length = reader.readUint16();
+    exception_table_length = reader.readUInt16();
     if (exception_table_length != 0) {
         exception_table = new ExceptionTable *[exception_table_length];
         for (int pos = 0; pos < exception_table_length; pos++) {
             exception_table[pos] = new ExceptionTable(reader);
         }
     }
-    attributes_count = reader.readUint16();
+    attributes_count = reader.readUInt16();
     if (attributes_count != 0)
         attributes = new AttributeInfo *[attributes_count];
     for (int pos = 0; pos < attributes_count; pos++) {

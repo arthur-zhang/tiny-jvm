@@ -1,19 +1,14 @@
 #pragma once
-//
-// Created by ya on 2022/2/28.
-//
-
-#ifndef TINY_JVM_CLASSFILE_PARSER_H
-#define TINY_JVM_CLASSFILE_PARSER_H
 
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <unordered_map>
 #include "const.h"
-#include "types.h"
+#include "types.hpp"
 #include "String.h"
-#include "constant_pool.h"
+#include "constant_pool.hpp"
+#include "constant.hpp"
 #include "field_info.h"
 #include "method_info.h"
 
@@ -43,6 +38,8 @@ public:
     AttributeInfo **attributes = nullptr;    // [attributes_count];
     void parse();
 
+    void dump();
+
 private:
     ClassReader reader;
 
@@ -65,8 +62,6 @@ private:
 };
 
 
-
 void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool);
 
-#endif //TINY_JVM_CLASSFILE_PARSER_H
 

@@ -5,10 +5,10 @@
 #ifndef TINY_JVM_ATTRIBUTE_INFO_H
 #define TINY_JVM_ATTRIBUTE_INFO_H
 
-#include "types.h"
+#include "types.hpp"
 #include "class_reader.h"
 #include "String.h"
-#include "constant_pool.h"
+#include "constant_pool.hpp"
 #include "exception_table.h"
 #include "element_value.h"
 
@@ -68,11 +68,11 @@ public:
     u2 *exception_index_table = nullptr;
 
     ExceptionTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        number_of_exceptions = reader.readUint16();
+        number_of_exceptions = reader.readUInt16();
         if (number_of_exceptions != 0)
             exception_index_table = new u2[number_of_exceptions];
         for (int pos = 0; pos < number_of_exceptions; pos++) {
-            exception_index_table[pos] = reader.readUint16();
+            exception_index_table[pos] = reader.readUInt16();
         }
     }
 
@@ -89,10 +89,10 @@ public:
     u2 inner_class_access_flags;
 
     InnerClass(ClassReader &reader) {
-        inner_class_info_index = reader.readUint16();
-        outer_class_info_index = reader.readUint16();
-        inner_name_index = reader.readUint16();
-        inner_class_access_flags = reader.readUint16();
+        inner_class_info_index = reader.readUInt16();
+        outer_class_info_index = reader.readUInt16();
+        inner_name_index = reader.readUInt16();
+        inner_class_access_flags = reader.readUInt16();
     }
 };
 
@@ -102,7 +102,7 @@ public:
     InnerClass **classes = nullptr;
 
     InnerClassesAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        number_of_classes = reader.readUint16();
+        number_of_classes = reader.readUInt16();
         if (number_of_classes != 0)
             classes = new InnerClass *[number_of_classes];
         for (int pos = 0; pos < number_of_classes; pos++) {
@@ -124,8 +124,8 @@ public:
     u2 method_index;
 
     EnclosingMethodAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        class_index = reader.readUint16();
-        method_index = reader.readUint16();
+        class_index = reader.readUInt16();
+        method_index = reader.readUInt16();
     }
 };
 
@@ -139,7 +139,7 @@ public:
     u2 signature_index;
 
     SignatureAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        signature_index = reader.readUint16();
+        signature_index = reader.readUInt16();
     }
 };
 
@@ -166,8 +166,8 @@ public:
     u2 line_number;
 
     LineNumber(ClassReader &reader) {
-        start_pc = reader.readUint16();
-        line_number = reader.readUint16();
+        start_pc = reader.readUInt16();
+        line_number = reader.readUInt16();
     }
 };
 
@@ -178,7 +178,7 @@ public:
     LineNumber **line_number_table = nullptr;        // [line_number_table_length]
 
     LineNumberTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        line_number_table_length = reader.readUint16();
+        line_number_table_length = reader.readUInt16();
         if (line_number_table_length != 0)
             line_number_table = new LineNumber *[line_number_table_length];
         for (int pos = 0; pos < line_number_table_length; pos++) {
@@ -195,11 +195,11 @@ class LocalVariable {
     u2 index;
 public:
     LocalVariable(ClassReader &reader) {
-        start_pc = reader.readUint16();
-        length = reader.readUint16();
-        name_index = reader.readUint16();
-        descriptor_index = reader.readUint16();
-        index = reader.readUint16();
+        start_pc = reader.readUInt16();
+        length = reader.readUInt16();
+        name_index = reader.readUInt16();
+        descriptor_index = reader.readUInt16();
+        index = reader.readUInt16();
     }
 
 };
@@ -210,7 +210,7 @@ public:
 
     LocalVariable **local_variable_table = nullptr;    // [local_variable_table_length]
     LocalVariableTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        local_variable_table_length = reader.readUint16();
+        local_variable_table_length = reader.readUInt16();
         if (local_variable_table_length != 0)
             local_variable_table = new LocalVariable *[local_variable_table_length];
         for (int pos = 0; pos < local_variable_table_length; pos++) {
@@ -228,11 +228,11 @@ public:
     u2 index;
 
     LocalVariableType(ClassReader &reader) {
-        start_pc = reader.readUint16();
-        length = reader.readUint16();
-        name_index = reader.readUint16();
-        signature_index = reader.readUint16();
-        index = reader.readUint16();
+        start_pc = reader.readUInt16();
+        length = reader.readUInt16();
+        name_index = reader.readUInt16();
+        signature_index = reader.readUInt16();
+        index = reader.readUInt16();
     }
 };
 
@@ -241,7 +241,7 @@ public:
     u2 local_variable_type_table_length;
     LocalVariableType **local_variable_type_table = nullptr;// [local_variable_type_table_length]
     LocalVariableTypeTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        local_variable_type_table_length = reader.readUint16();
+        local_variable_type_table_length = reader.readUInt16();
         if (local_variable_type_table_length != 0)
             local_variable_type_table = new LocalVariableType *[local_variable_type_table_length];
         for (int pos = 0; pos < local_variable_type_table_length; pos++) {
@@ -261,7 +261,7 @@ public:
 class parameter_annotations_t {    // extract from Runtime_XXX_Annotations_attributes
 public:
     parameter_annotations_t(ClassReader &reader) {
-        num_annotations = reader.readUint16();
+        num_annotations = reader.readUInt16();
         if (num_annotations != 0)
             annotations = new AnnotationElementValue *[num_annotations];
         for (int pos = 0; pos < num_annotations; pos++) {
@@ -309,7 +309,6 @@ class RuntimeInvisibleParameterAnnotations_attribute : public AttributeInfo {
 public:
     u1 num_parameters;
     parameter_annotations_t **parameter_annotations = nullptr;        // [num_parameters];
-    friend std::istream &operator>>(std::istream &f, RuntimeInvisibleParameterAnnotations_attribute &i);
 
     ~RuntimeInvisibleParameterAnnotations_attribute();
 
@@ -498,8 +497,8 @@ public:
     u2 access_flags;
 
     MethodParameter(ClassReader &reader) {
-        name_index = reader.readUint16();
-        access_flags = reader.readUint16();
+        name_index = reader.readUInt16();
+        access_flags = reader.readUInt16();
     }
 };
 

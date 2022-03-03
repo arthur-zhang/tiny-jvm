@@ -5,7 +5,7 @@
 #ifndef TINY_JVM_EXCEPTION_TABLE_H
 #define TINY_JVM_EXCEPTION_TABLE_H
 
-#include "types.h"
+#include "types.hpp"
 #include "class_reader.h"
 
 class ExceptionTable {

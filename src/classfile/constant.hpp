@@ -2,31 +2,41 @@
 // Created by ya on 2022/3/2.
 //
 
-#ifndef TINY_JVM_CONSTANT_H
-#define TINY_JVM_CONSTANT_H
+#ifndef TINY_JVM_CONSTANT_HPP
+#define TINY_JVM_CONSTANT_HPP
 
 #include "class_reader.h"
 #include "String.h"
 #include "const.h"
+#include "data_output_stream.hpp"
+
 class Constant {
 public:
-    int tag;
+    u1 tag;
 
-    Constant(ClassReader &reader, int tag_) : reader(reader), tag(tag_) {}
+    Constant(ClassReader &reader, int tag_) : reader(reader), tag(tag_) {
+        tag = reader.readUint8();
+    }
+
+    virtual void dump(DataOutputStream &os) {
+        os.writeUInt8(tag);
+    };
+
 
 protected:
     ClassReader &reader;
 };
 
-
-class CONSTANT_String_info;
-
-
 class CONSTANT_Class_info : public Constant {            // Class, String
 
 public:
     CONSTANT_Class_info(ClassReader &reader) : Constant(reader, CONSTANT_Class) {
-        index = reader.readUint16();
+        index = reader.readUInt16();
+    }
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+        os.writeUInt16(index);
     }
 
     u2 index;
@@ -36,7 +46,12 @@ class CONSTANT_String_info : public Constant {            // Class, String
 
 public:
     CONSTANT_String_info(ClassReader &reader) : Constant(reader, CONSTANT_String) {
-        index = reader.readUint16();
+        index = reader.readUInt16();
+    }
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+        os.writeUInt16(index);
     }
 
     u2 index;
@@ -47,12 +62,18 @@ class CONSTANT_FMI_info : public Constant {        // Field, Methodref, Interfac
 
 public:
     CONSTANT_FMI_info(ClassReader &reader, int tag) : Constant(reader, tag) {
-        class_index = reader.readUint16();
-        name_and_type_index = reader.readUint16();
+        class_index = reader.readUInt16();
+        name_and_type_index = reader.readUInt16();
     }
 
     u2 class_index;
     u2 name_and_type_index;
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+        os.writeUInt16(class_index);
+        os.writeUInt16(name_and_type_index);
+    }
 };
 
 class ConstantMethodref_info : public CONSTANT_FMI_info {
@@ -76,13 +97,18 @@ public:
 class CONSTANT_Integer_info : public Constant {       // Integer
 public:
     CONSTANT_Integer_info(ClassReader &reader) : Constant(reader, CONSTANT_Integer) {
-        bytes = reader.readUint32();
+        bytes = reader.readUInt32();
     }
 
     u4 bytes;
 
     int get_value() {
         return (int) bytes;
+    }
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+        os.writeUInt32(bytes);
     }
 };
 
@@ -112,7 +138,7 @@ private:
 
 public:
     CONSTANT_Float_info(ClassReader &reader) : Constant(reader, CONSTANT_Float) {
-        bytes = reader.readUint32();
+        bytes = reader.readUInt32();
     }
 
     float get_value() {
@@ -127,6 +153,11 @@ public:
             return s * m * pow(2, e - 150);
         }
     }
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+        os.writeUInt32(bytes);
+    }
 };
 
 struct CONSTANT_Long_info : public Constant {       // Long
@@ -136,12 +167,19 @@ private:
 
 public:
     CONSTANT_Long_info(ClassReader &reader) : Constant(reader, CONSTANT_Long) {
-        high_bytes = reader.readUint32();
-        low_bytes = reader.readUint32();
+        high_bytes = reader.readUInt32();
+        low_bytes = reader.readUInt32();
     }
 
     long get_value() {
         return ((long) high_bytes << 32) + low_bytes;
+    }
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+
+        os.writeUInt32(high_bytes);
+        os.writeUInt32(low_bytes);
     }
 };
 
@@ -153,8 +191,8 @@ private:
 
 public:
     CONSTANT_Double_info(ClassReader &reader) : Constant(reader, CONSTANT_Double) {
-        high_bytes = reader.readUint32();
-        low_bytes = reader.readUint32();
+        high_bytes = reader.readUInt32();
+        low_bytes = reader.readUInt32();
     }
 
     double get_value() {
@@ -172,30 +210,49 @@ public:
         }
     }
 
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+
+        os.writeUInt32(high_bytes);
+        os.writeUInt32(low_bytes);
+    }
+
 };
 
 class CONSTANT_NameAndType_info : public Constant {
 public:
-    CONSTANT_NameAndType_info(ClassReader &reader_) : Constant(reader_, CONSTANT_NameAndType) {
-        name_index = reader_.readUint16();
-        descriptor_index = reader_.readUint16();
-    }
-
-public:
     u2 name_index;
     u2 descriptor_index;
+
+    CONSTANT_NameAndType_info(ClassReader &reader_) : Constant(reader_, CONSTANT_NameAndType) {
+        name_index = reader_.readUInt16();
+        descriptor_index = reader_.readUInt16();
+    }
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+
+        os.writeUInt16(name_index);
+        os.writeUInt16(descriptor_index);
+    }
 };
 
 class CONSTANT_Utf8_info : public Constant {       // string literal
 public:
+    u2 length;
+    u1 *bytes = nullptr;
+
     CONSTANT_Utf8_info(ClassReader &reader) : Constant(reader, CONSTANT_Utf8) {
-        length = reader.readUint16();
+        length = reader.readUInt16();
         bytes = reader.readBytes(length);
     }
 
-    u2 length;
-    unsigned char *bytes = nullptr;
-    std::string str;
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+
+        os.writeUInt16(length);
+        os.writeBytes(bytes, length);
+    }
 
     String getConstant() {
         //todo
@@ -209,22 +266,34 @@ class CONSTANT_MethodHandle_info : public Constant {   // method handler
 public:
     CONSTANT_MethodHandle_info(ClassReader &reader) : Constant(reader, CONSTANT_MethodHandle) {
         reference_kind = reader.readUint8();
-        reference_index = reader.readUint16();
+        reference_index = reader.readUInt16();
     }
 
     u1 reference_kind;
     u2 reference_index;
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+
+        os.writeUInt8(reference_kind);
+        os.writeUInt16(reference_index);
+    }
 
 };
 
 class CONSTANT_MethodType_info : public Constant {   // method type
 public:
     CONSTANT_MethodType_info(ClassReader &reader) : Constant(reader, CONSTANT_MethodType) {
-        descriptor_index = reader.readUint16();
+        descriptor_index = reader.readUInt16();
     }
 
-public:
     u2 descriptor_index;
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+
+        os.writeUInt16(descriptor_index);
+    }
 };
 
 class CONSTANT_InvokeDynamic_info : public Constant {
@@ -233,15 +302,22 @@ public:
     u2 name_and_type_index;
 
     CONSTANT_InvokeDynamic_info(ClassReader &reader) : Constant(reader, CONSTANT_InvokeDynamic) {
-        bootstrap_method_attr_index = reader.readUint16();
-        name_and_type_index = reader.readUint16();
+        bootstrap_method_attr_index = reader.readUInt16();
+        name_and_type_index = reader.readUInt16();
+    }
+
+    void dump(DataOutputStream &os) override {
+        Constant::dump(os);
+
+        os.writeUInt16(bootstrap_method_attr_index);
+        os.writeUInt16(name_and_type_index);
     }
 
 };
 
 
 static Constant *readConstant(ClassReader &reader) {
-    u1 tag = reader.readUint8();
+    u1 tag = reader.peek1();
     switch (tag) {
         case CONSTANT_Integer:
             return new CONSTANT_Integer_info(reader);
@@ -277,4 +353,4 @@ static Constant *readConstant(ClassReader &reader) {
     }
 }
 
-#endif //TINY_JVM_CONSTANT_H
+#endif //TINY_JVM_CONSTANT_HPP

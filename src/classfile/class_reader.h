@@ -9,19 +9,20 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "types.h"
+#include "types.hpp"
 
 class ClassReader {
 public:
     ClassReader(const std::string &filePath) : dataStream_(filePath, std::ios::binary) {}
 
+    u1 peek1();
     u2 peek2();
 
     u1 readUint8();
 
-    u2 readUint16();
+    u2 readUInt16();
 
-    u4 readUint32();
+    u4 readUInt32();
 
     u1 *readBytes(int n);
 
