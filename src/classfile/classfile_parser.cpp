@@ -1212,5 +1212,9 @@ void ClassFile::dump() {
     for (int pos = 0; pos < methods_count; pos++) {
         methods[pos]->dump(os);
     }
+    os.writeUInt16(attributes_count);
+    for (int pos = 0; pos < attributes_count; pos++) {
+        attributes[pos]->dump(os);
+    }
     os.flush();
 }
