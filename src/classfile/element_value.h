@@ -6,13 +6,17 @@
 
 class ElementValue {
 public:
-    ElementValue(ClassReader &reader, u1 tag_) : tag(tag_) {}
+    ElementValue(ClassReader &reader, u1 tag_) : tag(tag_) {
+        tag = reader.readUint8();
+    }
 
     u1 tag;
 
     static ElementValue *readElementValue(ClassReader &reader);
 
-    virtual void dump(DataOutputStream &os) = 0;
+    virtual void dump(DataOutputStream &os) {
+        os.writeUInt8(tag);
+    };
 
     virtual ~ElementValue() = default;
 };
@@ -24,6 +28,8 @@ public:
     SimpleElementValue(ClassReader &reader, u1 type);
 
     void dump(DataOutputStream &os) override {
+        ElementValue::dump(os);
+
         os.writeUInt16(const_value_index);
     }
 };
@@ -35,6 +41,8 @@ public:
     ClassElementValue(ClassReader &reader, u1 type);
 
     void dump(DataOutputStream &os) override {
+        ElementValue::dump(os);
+
         os.writeUInt16(class_info_index);
     }
 };
@@ -50,6 +58,8 @@ public:
     u2 const_name_index;
 
     void dump(DataOutputStream &os) override {
+        ElementValue::dump(os);
+
         os.writeUInt16(type_name_index);
         os.writeUInt16(const_name_index);
     }
@@ -62,6 +72,7 @@ public:
     ArrayElementValue(ClassReader &reader, u1 type);
 
     void dump(DataOutputStream &os) override {
+        ElementValue::dump(os);
         os.writeUInt16(num_values);
         for (int pos = 0; pos < num_values; pos++) {
             values[pos]->dump(os);
@@ -102,6 +113,7 @@ public:
     ElementValuePair **element_value_pairs = nullptr;        // [num_element_value_pairs]
 
     void dump(DataOutputStream &os) override {
+        ElementValue::dump(os);
         os.writeUInt16(type_index);
         os.writeUInt16(num_element_value_pairs);
         for (int pos = 0; pos < num_element_value_pairs; pos++) {

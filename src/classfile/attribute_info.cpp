@@ -5,7 +5,7 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
     u2 attribute_name_index = reader.peek2();
     // Compare strings to find known attribute
     u2 tag = attributeName2Tag(attribute_name_index, constant_pool);
-    cout << "tag:" << tag << endl;
+//    cout << "tag:" << tag << endl;
     switch (tag) {
         case 0: {
             ConstantValueAttribute *result = new ConstantValueAttribute(reader);

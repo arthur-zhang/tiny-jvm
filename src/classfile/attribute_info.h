@@ -777,6 +777,7 @@ public:
     BootstrapMethod **bootstrap_methods = nullptr;                            // [num_bootstrap_methods];
 
     void dump(DataOutputStream &os) override {
+        AttributeInfo::dump(os);
         os.writeUInt16(num_bootstrap_methods);
         for (int pos = 0; pos < num_bootstrap_methods; pos++) {
             bootstrap_methods[pos]->dump(os);

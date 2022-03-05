@@ -5,7 +5,7 @@
 #include "element_value.h"
 
 ElementValue *ElementValue::readElementValue(ClassReader &reader) {
-    u1 tag = reader.readUint8();
+    u1 tag = reader.peek1();
     switch ((char) tag) {
         case 'B':
         case 'C':

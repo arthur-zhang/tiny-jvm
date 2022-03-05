@@ -38,7 +38,7 @@ public:
     AttributeInfo **attributes = nullptr;    // [attributes_count];
     void parse();
 
-    void dump();
+    void dump(const string &outputPath);
 
 private:
     ClassReader reader;

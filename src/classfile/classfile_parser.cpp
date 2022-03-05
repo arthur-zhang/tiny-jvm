@@ -1095,10 +1095,10 @@ void ClassFile::readMagic() {
     u1 c4 = reader.readUint8();
     magic = c1 << 24 | c2 << 16 | c3 << 8 | c4;
     if (magic != 0xCAFEBABE) {
-        cout << "Bad magic value" << endl;
+//        cout << "Bad magic value" << endl;
         exit(1);
     } else {
-        cout << "ok magic value" << endl;
+//        cout << "ok magic value" << endl;
     }
 }
 
@@ -1110,14 +1110,13 @@ void ClassFile::parse() {
     readInterfaces();
     readFields();
     readMethods();
-    print_methods(methods, methods_count, constantPool);
+//    print_methods(methods, methods_count, constantPool);
     readAttributes();
 }
 
 void ClassFile::readVersion() {
     minor_version = reader.readUInt16();
     major_version = reader.readUInt16();
-    cout << "version: " << minor_version << ":" << major_version << endl;
 }
 
 void ClassFile::readConstantPool() {
@@ -1161,11 +1160,6 @@ void ClassFile::readMethods() {
     for (int pos = 0; pos < methods_count; pos++) {
         methods[pos] = new MethodInfo(reader, constantPool, 1);
     }
-    if (methods_count != 0) {
-        std::cout << "(DEBUG) method_number: " << methods_count << std::endl;
-    } else {
-        std::cout << "(DEBUG) no method functions." << std::endl;
-    }
 }
 
 void ClassFile::readAttributes() {
@@ -1187,8 +1181,8 @@ void ClassFile::readAttributes() {
 #endif
 }
 
-void ClassFile::dump() {
-    DataOutputStream os{"/Users/arthur/cvt_dev/clion/tiny-jvm/TestDump.class"};
+void ClassFile::dump(const string &outputPath) {
+    DataOutputStream os{outputPath};
     os.writeUInt32(magic);
     os.writeUInt16(minor_version);
     os.writeUInt16(major_version);
