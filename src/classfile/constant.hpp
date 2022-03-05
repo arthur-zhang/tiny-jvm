@@ -27,7 +27,7 @@ protected:
     ClassReader &reader;
 };
 
-class CONSTANT_Class_info : public Constant {            // Class, String
+class CONSTANT_Class_info : public Constant {
 
 public:
     CONSTANT_Class_info(ClassReader &reader) : Constant(reader, CONSTANT_Class) {

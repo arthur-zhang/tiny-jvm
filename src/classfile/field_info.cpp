@@ -25,3 +25,13 @@ FieldInfo::~FieldInfo() {
         delete[] attributes;
     }
 }
+
+void FieldInfo::dump(DataOutputStream &os) {
+    os.writeUInt16(access_flags);
+    os.writeUInt16(name_index);
+    os.writeUInt16(descriptor_index);
+    os.writeUInt16(attributes_count);
+    for (int pos = 0; pos < attributes_count; pos++) {
+        attributes[pos]->dump(os);
+    }
+}

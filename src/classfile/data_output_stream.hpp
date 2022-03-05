@@ -25,7 +25,7 @@ public:
         stream_->write(reinterpret_cast<const char *>(&value), 1);
     }
 
-    void writeBytes(const u1 *bytes, int length) {
+    void writeBytes(const u1 *bytes, u4 length) {
         for (int i = 0; i < length; ++i) {
             writeUInt8(bytes[i]);
         }

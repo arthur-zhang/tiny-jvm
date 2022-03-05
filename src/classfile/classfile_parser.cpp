@@ -661,19 +661,19 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                 switch (ta->target_type) {
                     case 0x00:
                     case 0x01: {    // target_info is [type_parameter_target]
-                        auto target = (type_annotation::type_parameter_target *) ta->target_info;
+                        auto target = (type_parameter_target *) ta->target_info;
                         std::cout << i << ": [type_parameter_target] " << "#" << target->type_parameter_index
                                   << std::endl;
                         break;
                     }
                     case 0x10: {    // target_info is [supertype_target]
-                        auto target = (type_annotation::supertype_target *) ta->target_info;
+                        auto target = (supertype_target *) ta->target_info;
                         std::cout << i << ": [supertype_target] " << "#" << target->supertype_index << std::endl;
                         break;
                     }
                     case 0x11:
                     case 0x12: {    // target_info is [type_parameter_bound_target]
-                        auto target = (type_annotation::type_parameter_bound_target *) ta->target_info;
+                        auto target = (type_parameter_bound_target *) ta->target_info;
                         std::cout << i << ": [type_parameter_bound_target] " << "#" << target->type_parameter_index
                                   << " #" << target->bound_index << std::endl;
                         break;
@@ -685,19 +685,19 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                         break;
                     }
                     case 0x16: {    // target_info is [formal_parameter_target]
-                        auto target = (type_annotation::formal_parameter_target *) ta->target_info;
+                        auto target = (formal_parameter_target *) ta->target_info;
                         std::cout << i << ": [formal_parameter_target] " << "#" << target->formal_parameter_index
                                   << std::endl;
                         break;
                     }
                     case 0x17: {    // target_info is [throws_target]
-                        auto target = (type_annotation::throws_target *) ta->target_info;
+                        auto target = (throws_target *) ta->target_info;
                         std::cout << i << ": [throws_target] " << "#" << target->throws_type_index << std::endl;
                         break;
                     }
                     case 0x40:
                     case 0x41: {    // target_info is [localvar_target]
-                        auto target = (type_annotation::localvar_target *) ta->target_info;
+                        auto target = (localvar_target *) ta->target_info;
                         std::cout << i << ": [localvar_target] " << std::endl;
                         for (int pos = 0; pos < target->table_length; pos++) {
                             auto table = target->table[pos];
@@ -707,7 +707,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                         break;
                     }
                     case 0x42: {    // target_info is [catch_target]
-                        auto target = (type_annotation::catch_target *) ta->target_info;
+                        auto target = (catch_target *) ta->target_info;
                         std::cout << i << ": [catch_target] " << "#" << target->exception_table_index << std::endl;
                         break;
                     }
@@ -715,7 +715,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                     case 0x44:
                     case 0x45:
                     case 0x46: {    // target_info is [offset_target]
-                        auto target = (type_annotation::offset_target *) ta->target_info;
+                        auto target = (offset_target *) ta->target_info;
                         std::cout << i << ": [offset_target] " << "#" << target->offset << std::endl;
                         break;
                     }
@@ -724,7 +724,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                     case 0x49:
                     case 0x4A:
                     case 0x4B: {    // target_info is [type_argument_target]
-                        auto target = (type_annotation::type_argument_target *) ta->target_info;
+                        auto target = (type_argument_target *) ta->target_info;
                         std::cout << i << ": [type_argument_target] " << "#" << target->offset << " #"
                                   << target->type_argument_index << std::endl;
                         break;
@@ -735,7 +735,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                     }
                 }
                 // 3. print [target_path]
-                type_annotation::type_path *path_ptr = &ta->target_path;
+                type_path *path_ptr = ta->target_path;
                 if (path_ptr->path_length != 0)
                     std::cout << "(DEBUG)     ";
                 for (int pos = 0; pos < path_ptr->path_length; pos++) {
@@ -1193,5 +1193,24 @@ void ClassFile::dump() {
     os.writeUInt16(minor_version);
     os.writeUInt16(major_version);
     constantPool->dump(os);
+
+    os.writeUInt16(access_flags);
+    os.writeUInt16(this_class);
+    os.writeUInt16(super_class);
+
+    os.writeUInt16(interfaces_count);
+    for (int i = 0; i < interfaces_count; ++i) {
+        os.writeUInt16(interfaces[i]);
+    }
+
+    os.writeUInt16(fields_count);
+    for (int i = 0; i < fields_count; ++i) {
+        fields[i]->dump(os);
+    }
+
+    os.writeUInt16(methods_count);
+    for (int pos = 0; pos < methods_count; pos++) {
+        methods[pos]->dump(os);
+    }
     os.flush();
 }

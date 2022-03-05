@@ -1,7 +1,3 @@
-//
-// Created by ya on 2022/3/2.
-//
-
 #include "attribute_info.h"
 #include "const.h"
 
@@ -9,6 +5,7 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
     u2 attribute_name_index = reader.peek2();
     // Compare strings to find known attribute
     u2 tag = attributeName2Tag(attribute_name_index, constant_pool);
+    cout << "tag:" << tag << endl;
     switch (tag) {
         case 0: {
             ConstantValueAttribute *result = new ConstantValueAttribute(reader);
@@ -124,6 +121,11 @@ u2 AttributeInfo::attributeName2Tag(std::uint16_t attribute_name_index, Constant
     }
     std::cerr << "my jvm don't alloc a new attribute, because we don't have a compiler~" << std::endl;
     assert(false);
+}
+
+void AttributeInfo::dump(DataOutputStream &os) {
+    os.writeUInt16(attribute_name_index);
+    os.writeUInt32(attribute_length);
 };
 
 MethodParametersAttribute::MethodParametersAttribute(ClassReader &reader) : AttributeInfo(reader) {

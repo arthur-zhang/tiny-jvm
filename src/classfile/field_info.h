@@ -18,6 +18,7 @@ public:
     u2 descriptor_index;
     u2 attributes_count;
     AttributeInfo **attributes = nullptr;
+    void dump(DataOutputStream&os);
 
     ~FieldInfo();
 };

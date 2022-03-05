@@ -13,6 +13,8 @@ class MethodInfo {
 public:
     MethodInfo(ClassReader &reader, ConstantPool *constantPool, int a);
 
+    void dump(DataOutputStream &os);
+
     u2 access_flags;
     u2 name_index;
     u2 descriptor_index;
