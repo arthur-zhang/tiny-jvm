@@ -1,26 +1,26 @@
 #include "attribute_info.h"
 #include "const.h"
 #include "annotation_default.h"
-#include "runtime_visible_annotations_attribute.h"
+#include "runtime_visible_annotations_attribute.hpp"
 #include "bootstrap_methods_attribute.h"
 #include "code_attribute.h"
 #include "constant_value_attribute.h"
 #include "deprecated_attribute.h"
-#include "runtime_invisible_annotations_attribute.h"
-#include "runtime_visible_parameter_annotations_attribute.h"
-#include "runtime_invisible_parameter_annotations_attribute.h"
+#include "runtime_invisible_annotations_attribute.hpp"
+#include "runtime_visible_parameter_annotations_attribute.hpp"
+#include "runtime_invisible_parameter_annotations_attribute.hpp"
 #include "method_parameter.h"
 #include "method_prameters_attribute.h"
-#include "runtime_visible_type_annotations_attribute.h"
-#include "runtime_invisible_type_annotations_attribute.h"
+#include "runtime_visible_type_annotations_attribute.hpp"
+#include "runtime_invisible_type_annotations_attribute.hpp"
 #include "stack_map_table_attribute.h"
 #include "exception_table_attribute.h"
 #include "inner_classes_attribute.h"
 #include "enclosing_method_attribute.h"
 #include "synthetic_attribute.h"
-#include "signature_attribute.h"
+#include "signature_attribute.hpp"
 #include "source_file_attribute.h"
-#include "source_debug_extension_attribute.h"
+#include "source_debug_extension_attribute.hpp"
 #include "line_number_table_attribute.h"
 #include "local_variable_table_attribute.h"
 #include "local_variable_type_table_attribute.h"
@@ -106,7 +106,7 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
             return result;
         }
         case 18: {
-            RuntimeVisibleTypeAnnotations_attribute *result = new RuntimeVisibleTypeAnnotations_attribute(reader);
+            RuntimeVisibleTypeAnnotationsAttribute *result = new RuntimeVisibleTypeAnnotationsAttribute(reader);
             return result;
         }
         case 19: {

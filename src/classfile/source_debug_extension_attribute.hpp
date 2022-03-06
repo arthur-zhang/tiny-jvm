@@ -2,8 +2,8 @@
 // Created by ya on 2022/3/6.
 //
 
-#ifndef TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_H
-#define TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_H
+#ifndef TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_HPP
+#define TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_HPP
 
 #include "attribute_info.h"
 class SourceDebugExtensionAttribute : public AttributeInfo {
@@ -27,4 +27,4 @@ public:
 
 
 
-#endif //TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_H
+#endif //TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_HPP

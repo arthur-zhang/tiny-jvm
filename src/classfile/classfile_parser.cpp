@@ -9,22 +9,22 @@
 #include "data_output_stream.hpp"
 #include "constant.hpp"
 #include "annotation_default.h"
-#include "runtime_visible_annotations_attribute.h"
+#include "runtime_visible_annotations_attribute.hpp"
 #include "array_element_value.h"
 #include "bootstrap_methods_attribute.h"
 #include "simple_element_value.h"
 #include "enum_element_value.h"
 #include "class_element_value.h"
 #include "code_attribute.h"
-#include "runtime_visible_parameter_annotations_attribute.h"
+#include "runtime_visible_parameter_annotations_attribute.hpp"
 #include "method_prameters_attribute.h"
-#include "runtime_visible_type_annotations_attribute.h"
+#include "runtime_visible_type_annotations_attribute.hpp"
 #include "target_info_t.h"
 #include "attribute_info.h"
 #include "exception_table_attribute.h"
 #include "inner_classes_attribute.h"
 #include "enclosing_method_attribute.h"
-#include "signature_attribute.h"
+#include "signature_attribute.hpp"
 #include "source_file_attribute.h"
 #include "line_number_table_attribute.h"
 #include "constant_value_attribute.h"
@@ -669,7 +669,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                 std::cout << "(DEBUG)   RuntimeVisibleTypeAnnotations:" << std::endl;
             else
                 std::cout << "(DEBUG)   RuntimeInisibleTypeAnnotations:" << std::endl;
-            auto *annotations_ptr = (RuntimeVisibleTypeAnnotations_attribute *) ptr;
+            auto *annotations_ptr = (RuntimeVisibleTypeAnnotationsAttribute *) ptr;
             for (int i = 0; i < annotations_ptr->num_annotations; i++) {
                 type_annotation *ta = &annotations_ptr->annotations[i];
                 // 1. print [annotation]

@@ -1,9 +1,4 @@
-//
-// Created by ya on 2022/3/6.
-//
-
-#ifndef TINY_JVM_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS_ATTRIBUTE_H
-#define TINY_JVM_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS_ATTRIBUTE_H
+#pragma once
 
 #include "attribute_info.h"
 
@@ -28,6 +23,3 @@ public:
         }
     }
 };
-
-
-#endif //TINY_JVM_RUNTIME_VISIBLE_PARAMETER_ANNOTATIONS_ATTRIBUTE_H
