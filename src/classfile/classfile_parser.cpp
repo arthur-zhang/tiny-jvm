@@ -12,6 +12,9 @@
 #include "runtime_visible_annotations_attribute.h"
 #include "array_element_value.h"
 #include "bootstrap_methods_attribute.h"
+#include "simple_element_value.h"
+#include "enum_element_value.h"
+#include "class_element_value.h"
 
 wstring decodeMUTF8(unsigned char *bytearr, int len) {
     int utflen = len;
