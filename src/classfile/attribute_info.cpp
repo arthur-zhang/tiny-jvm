@@ -5,6 +5,26 @@
 #include "bootstrap_methods_attribute.h"
 #include "code_attribute.h"
 #include "constant_value_attribute.h"
+#include "deprecated_attribute.h"
+#include "runtime_invisible_annotations_attribute.h"
+#include "runtime_visible_parameter_annotations_attribute.h"
+#include "runtime_invisible_parameter_annotations_attribute.h"
+#include "method_parameter.h"
+#include "method_prameters_attribute.h"
+#include "runtime_visible_type_annotations_attribute.h"
+#include "runtime_invisible_type_annotations_attribute.h"
+#include "stack_map_table_attribute.h"
+#include "exception_table_attribute.h"
+#include "inner_classes_attribute.h"
+#include "enclosing_method_attribute.h"
+#include "synthetic_attribute.h"
+#include "signature_attribute.h"
+#include "source_file_attribute.h"
+#include "source_debug_extension_attribute.h"
+#include "line_number_table_attribute.h"
+#include "local_variable_table_attribute.h"
+#include "local_variable_type_table_attribute.h"
+
 AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
 //    cout << "attribute_name_index:" << attribute_name_index << endl;
@@ -76,7 +96,7 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
             return result;
         }
         case 16: {
-            RuntimeVisibleParameterAnnotations_attribute *result = new RuntimeVisibleParameterAnnotations_attribute(
+            RuntimeVisibleParameterAnnotationsAttribute *result = new RuntimeVisibleParameterAnnotationsAttribute(
                     reader);
             return result;
         }
@@ -90,7 +110,7 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
             return result;
         }
         case 19: {
-            RuntimeInvisibleTypeAnnotations_attribute *result = new RuntimeInvisibleTypeAnnotations_attribute(
+            RuntimeInvisibleTypeAnnotationsAttribute *result = new RuntimeInvisibleTypeAnnotationsAttribute(
                     reader);
             return result;
         }
@@ -133,29 +153,7 @@ void AttributeInfo::dump(DataOutputStream &os) {
 }
 
 
-MethodParametersAttribute::MethodParametersAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    parameters_count = reader.readUint8();
-    if (parameters_count != 0)
-        parameters = new MethodParameter *[parameters_count];
-    for (int pos = 0; pos < parameters_count; pos++) {
-        parameters[pos] = new MethodParameter(reader);
-    }
-}
 
-MethodParametersAttribute::~MethodParametersAttribute() {
-    for (int i = 0; i < parameters_count; ++i) {
-        delete parameters[i];
-    }
-    delete[]parameters;
-}
-
-
-
-
-
-SourceFileAttribute::SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    source_file_index = reader.readUInt16();
-}
 
 
 

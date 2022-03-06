@@ -1,7 +1,7 @@
 #include "runtime_visible_annotations_attribute.h"
 
 RuntimeVisibleAnnotationsAttribute::RuntimeVisibleAnnotationsAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    parameter_annotations = new parameter_annotations_t(reader);
+    parameter_annotations = new Annotations(reader);
 }
 
 void RuntimeVisibleAnnotationsAttribute::dump(DataOutputStream &os) {

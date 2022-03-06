@@ -16,6 +16,18 @@
 #include "enum_element_value.h"
 #include "class_element_value.h"
 #include "code_attribute.h"
+#include "runtime_visible_parameter_annotations_attribute.h"
+#include "method_prameters_attribute.h"
+#include "runtime_visible_type_annotations_attribute.h"
+#include "target_info_t.h"
+#include "attribute_info.h"
+#include "exception_table_attribute.h"
+#include "inner_classes_attribute.h"
+#include "enclosing_method_attribute.h"
+#include "signature_attribute.h"
+#include "source_file_attribute.h"
+#include "line_number_table_attribute.h"
+#include "constant_value_attribute.h"
 
 wstring decodeMUTF8(unsigned char *bytearr, int len) {
     int utflen = len;
@@ -641,7 +653,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                 std::cout << "(DEBUG)   RuntimeVisibleParameterAnnotations:" << std::endl;
             else
                 std::cout << "(DEBUG)   RuntimeInisibleParameterAnnotations:" << std::endl;
-            auto *annotations_ptr = (RuntimeVisibleParameterAnnotations_attribute *) ptr;
+            auto *annotations_ptr = (RuntimeVisibleParameterAnnotationsAttribute *) ptr;
             for (int i = 0; i < annotations_ptr->num_parameters; i++) {
                 for (int j = 0; j < annotations_ptr->parameter_annotations[i]->num_annotations; j++) {
                     AnnotationEntry *target = annotations_ptr->parameter_annotations[i]->annotations[j];

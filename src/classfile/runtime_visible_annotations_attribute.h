@@ -4,7 +4,7 @@
 
 class RuntimeVisibleAnnotationsAttribute : public AttributeInfo {
 public:
-    parameter_annotations_t *parameter_annotations;
+    Annotations *parameter_annotations;
 
     RuntimeVisibleAnnotationsAttribute(ClassReader &reader);
 
