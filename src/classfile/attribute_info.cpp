@@ -3,7 +3,8 @@
 #include "annotation_default.h"
 #include "runtime_visible_annotations_attribute.h"
 #include "bootstrap_methods_attribute.h"
-
+#include "code_attribute.h"
+#include "constant_value_attribute.h"
 AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
 //    cout << "attribute_name_index:" << attribute_name_index << endl;
@@ -151,55 +152,13 @@ MethodParametersAttribute::~MethodParametersAttribute() {
 
 
 
-ConstantValueAttribute::ConstantValueAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    constant_value_index = reader.readUInt16();
-}
 
 SourceFileAttribute::SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
     source_file_index = reader.readUInt16();
 }
 
-CodeAttribute::CodeAttribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
-    max_stack = reader.readUInt16();
-    max_locals = reader.readUInt16();
-    code_length = reader.readUInt32();
-    if (code_length != 0) {
-        code = new u1[code_length];
-        code = reader.readBytes(code_length);
-    }
-    exception_table_length = reader.readUInt16();
-    if (exception_table_length != 0) {
-        exception_table = new ExceptionTable *[exception_table_length];
-        for (int pos = 0; pos < exception_table_length; pos++) {
-            exception_table[pos] = new ExceptionTable(reader);
-        }
-    }
-    attributes_count = reader.readUInt16();
-    if (attributes_count != 0)
-        attributes = new AttributeInfo *[attributes_count];
-    for (int pos = 0; pos < attributes_count; pos++) {
-        attributes[pos] = readAttribute(reader, constantPool);
-    }
-}
 
-CodeAttribute::~CodeAttribute() {
-    delete[] code;
-    for (int i = 0; i < attributes_count; ++i) {
-        delete attributes[i];
-    }
-    delete[] attributes;
-    for (int i = 0; i < exception_table_length; ++i) {
-        delete exception_table[i];
-    }
-    delete[]exception_table;
-}
 
-StackMapTableAttribute::StackMapTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    // todo later
-    bytes = reader.readBytes(attribute_length);
-}
 
-StackMapTableAttribute::~StackMapTableAttribute() {
-    delete bytes;
-}
+
 

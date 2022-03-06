@@ -15,6 +15,7 @@
 #include "simple_element_value.h"
 #include "enum_element_value.h"
 #include "class_element_value.h"
+#include "code_attribute.h"
 
 wstring decodeMUTF8(unsigned char *bytearr, int len) {
     int utflen = len;

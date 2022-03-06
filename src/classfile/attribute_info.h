@@ -25,67 +25,8 @@ public:
 };
 
 
-class ConstantValueAttribute : public AttributeInfo {
-public:
-    ConstantValueAttribute(ClassReader &reader);
 
-    u2 constant_value_index;
 
-    void dump(DataOutputStream &os) override {
-        AttributeInfo::dump(os);
-        os.writeUInt16(constant_value_index);
-    }
-};
-
-class CodeAttribute : public AttributeInfo {
-public:
-    u2 max_stack;
-    u2 max_locals;
-
-    u4 code_length;
-    u1 *code;
-
-    u2 exception_table_length;
-    ExceptionTable **exception_table;
-
-    u2 attributes_count;
-    AttributeInfo **attributes;
-
-    CodeAttribute(ClassReader &reader, ConstantPool *constantPool);
-
-    void dump(DataOutputStream &os) override {
-        AttributeInfo::dump(os);
-        os.writeUInt16(max_stack);
-        os.writeUInt16(max_locals);
-        os.writeUInt32(code_length);
-        os.writeBytes(code, code_length);
-        os.writeUInt16(exception_table_length);
-        for (int i = 0; i < exception_table_length; i++) {
-            exception_table[i]->dump(os);
-        }
-        os.writeUInt16(attributes_count);
-        for (int i = 0; i < attributes_count; i++) {
-            attributes[i]->dump(os);
-        }
-    }
-
-    virtual ~CodeAttribute();
-};
-
-class StackMapTableAttribute : public AttributeInfo {
-public:
-    StackMapTableAttribute(ClassReader &reader);
-
-    void dump(DataOutputStream &os) override {
-        AttributeInfo::dump(os);
-        os.writeBytes(bytes, attribute_length);
-    }
-
-    virtual ~StackMapTableAttribute();
-
-private:
-    u1 *bytes;
-};
 
 class ExceptionTableAttribute : public AttributeInfo {
 public:

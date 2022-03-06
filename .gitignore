@@ -12,3 +12,4 @@ Makefile
 /ObjectInputFilter$Config$Global.class
 /Contended.class
 *.class
+/build
