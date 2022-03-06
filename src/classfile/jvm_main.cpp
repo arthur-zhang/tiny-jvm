@@ -9,7 +9,8 @@
 using namespace std;
 
 int main() {
-    ClassFile classFile("/Users/arthur/cvt_dev/jvm/wind_jvm/sun_src/sun/misc/Contended.class");
+    ClassFile classFile(
+            " /Users/arthur/cvt_dev/jvm/wind_jvm/sun_src/com/sun/xml/internal/bind/v2/runtime/reflect/TransducedAccessor.class");
     classFile.parse();
 }
 

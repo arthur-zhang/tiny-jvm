@@ -434,6 +434,7 @@ public:
     }
 
     void dump(DataOutputStream &os) override {
+        AttributeInfo::dump(os);
         parameter_annotations->dump(os);
     }
 };
@@ -477,6 +478,7 @@ public:
     }
 
     void dump(DataOutputStream &os) override {
+        AttributeInfo::dump(os);
         os.writeUInt8(num_parameters);
         for (int pos = 0; pos < num_parameters; pos++) {
             parameter_annotations[pos]->dump(os);

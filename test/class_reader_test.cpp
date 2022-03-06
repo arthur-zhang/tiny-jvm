@@ -73,6 +73,6 @@ TEST(test_classfile, list_dir) {
         } else {
             cout << "is equal" << endl;
         }
-
     }
+    cout << "all done";
 }
