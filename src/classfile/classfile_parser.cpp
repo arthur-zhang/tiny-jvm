@@ -8,6 +8,10 @@
 #include "String.h"
 #include "data_output_stream.hpp"
 #include "constant.hpp"
+#include "annotation_default.h"
+#include "runtime_visible_annotations_attribute.h"
+#include "array_element_value.h"
+#include "bootstrap_methods_attribute.h"
 
 wstring decodeMUTF8(unsigned char *bytearr, int len) {
     int utflen = len;
@@ -619,7 +623,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
                 std::cout << "(DEBUG)   RuntimeVisibleAnnotations:" << std::endl;
             else
                 std::cout << "(DEBUG)   RuntimeInisibleAnnotations:" << std::endl;
-            auto *annotations_ptr = (RuntimeVisibleAnnotations_attribute *) ptr;
+            auto *annotations_ptr = (RuntimeVisibleAnnotationsAttribute *) ptr;
             for (int i = 0; i < annotations_ptr->parameter_annotations->num_annotations; i++) {
                 AnnotationEntry *target = annotations_ptr->parameter_annotations->annotations[i];
                 std::cout << "(DEBUG)     " << i << ": ";

@@ -1,5 +1,8 @@
 #include "attribute_info.h"
 #include "const.h"
+#include "annotation_default.h"
+#include "runtime_visible_annotations_attribute.h"
+#include "bootstrap_methods_attribute.h"
 
 AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
@@ -64,7 +67,7 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
             return result;
         }
         case 14: {
-            RuntimeVisibleAnnotations_attribute *result = new RuntimeVisibleAnnotations_attribute(reader);
+            RuntimeVisibleAnnotationsAttribute *result = new RuntimeVisibleAnnotationsAttribute(reader);
             return result;
         }
         case 15: {
@@ -87,7 +90,7 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
         }
         case 19: {
             RuntimeInvisibleTypeAnnotations_attribute *result = new RuntimeInvisibleTypeAnnotations_attribute(
-                    reader);    // nashi
+                    reader);
             return result;
         }
         case 20: {
@@ -126,7 +129,8 @@ u2 AttributeInfo::attributeName2Tag(std::uint16_t attribute_name_index, Constant
 void AttributeInfo::dump(DataOutputStream &os) {
     os.writeUInt16(attribute_name_index);
     os.writeUInt32(attribute_length);
-};
+}
+
 
 MethodParametersAttribute::MethodParametersAttribute(ClassReader &reader) : AttributeInfo(reader) {
     parameters_count = reader.readUint8();
@@ -144,39 +148,8 @@ MethodParametersAttribute::~MethodParametersAttribute() {
     delete[]parameters;
 }
 
-BootstrapMethodsAttribute::BootstrapMethodsAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    num_bootstrap_methods = reader.readUInt16();
-    if (num_bootstrap_methods != 0)
-        bootstrap_methods = new BootstrapMethod *[num_bootstrap_methods];
-    for (int pos = 0; pos < num_bootstrap_methods; pos++) {
-        bootstrap_methods[pos] = new BootstrapMethod(reader);
-    }
-}
 
-BootstrapMethodsAttribute::~BootstrapMethodsAttribute() {
-    for (int i = 0; i < num_bootstrap_methods; ++i) {
-        delete bootstrap_methods[i];
-    }
-    delete[]bootstrap_methods;
-}
 
-BootstrapMethod::BootstrapMethod(ClassReader &reader) {
-    bootstrap_method_ref = reader.readUInt16();
-    num_bootstrap_arguments = reader.readUInt16();
-    if (num_bootstrap_arguments != 0)
-        bootstrap_arguments = new u2[num_bootstrap_arguments];
-    for (int pos = 0; pos < num_bootstrap_arguments; pos++) {
-        bootstrap_arguments[pos] = reader.readUInt16();
-    }
-}
-
-BootstrapMethod::~BootstrapMethod() {
-    delete[]bootstrap_arguments;
-}
-
-AnnotationDefaultAttribute::~AnnotationDefaultAttribute() {
-    delete default_value;
-}
 
 ConstantValueAttribute::ConstantValueAttribute(ClassReader &reader) : AttributeInfo(reader) {
     constant_value_index = reader.readUInt16();
@@ -230,11 +203,3 @@ StackMapTableAttribute::~StackMapTableAttribute() {
     delete bytes;
 }
 
-RuntimeVisibleAnnotations_attribute::RuntimeVisibleAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
-    parameter_annotations = new parameter_annotations_t(reader);
-}
-
-void RuntimeVisibleAnnotations_attribute::dump(DataOutputStream &os) {
-    AttributeInfo::dump(os);
-    parameter_annotations->dump(os);
-}

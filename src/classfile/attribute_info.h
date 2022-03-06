@@ -14,6 +14,8 @@ public:
 
     AttributeInfo(ClassReader &reader);
 
+    ~AttributeInfo() {}//todo
+
     virtual void dump(DataOutputStream &os) = 0;
 
     static AttributeInfo *readAttribute(ClassReader &reader, ConstantPool *constant_pool);
@@ -416,15 +418,6 @@ public:
     }
 };
 
-class RuntimeVisibleAnnotations_attribute : public AttributeInfo {
-public:
-    parameter_annotations_t *parameter_annotations;
-
-    RuntimeVisibleAnnotations_attribute(ClassReader &reader);
-
-    void dump(DataOutputStream &os) override;
-};
-
 class RuntimeInvisibleAnnotations_attribute : public AttributeInfo {
 public:
     parameter_annotations_t *parameter_annotations;
@@ -727,63 +720,6 @@ public:
     void dump(DataOutputStream &os) override {
         os.writeBytes(bytes, attribute_length);
     }
-};
-
-/**
- * Represents the default value of a annotation for a method info
- */
-class AnnotationDefaultAttribute : public AttributeInfo {
-public:
-    AnnotationDefaultAttribute(ClassReader &reader) : AttributeInfo(reader) {
-        default_value = ElementValue::readElementValue(reader);
-    }
-
-    ElementValue *default_value;
-
-    void dump(DataOutputStream &os) override {
-        AttributeInfo::dump(os);
-        default_value->dump(os);
-    }
-
-    virtual ~AnnotationDefaultAttribute();
-};
-
-class BootstrapMethod {
-public:
-    u2 bootstrap_method_ref;
-    u2 num_bootstrap_arguments;
-    u2 *bootstrap_arguments = nullptr;
-
-    BootstrapMethod(ClassReader &reader);
-
-    void dump(DataOutputStream &os) {
-        os.writeUInt16(bootstrap_method_ref);
-        os.writeUInt16(num_bootstrap_arguments);
-        for (int i = 0; i < num_bootstrap_arguments; i++) {
-            os.writeUInt16(bootstrap_arguments[i]);
-        }
-    }
-
-    virtual ~BootstrapMethod();
-};
-
-class BootstrapMethodsAttribute : public AttributeInfo {
-public:
-    BootstrapMethodsAttribute(ClassReader &reader);
-
-    u2 num_bootstrap_methods;
-    BootstrapMethod **bootstrap_methods = nullptr;                            // [num_bootstrap_methods];
-
-    void dump(DataOutputStream &os) override {
-        AttributeInfo::dump(os);
-        os.writeUInt16(num_bootstrap_methods);
-        for (int pos = 0; pos < num_bootstrap_methods; pos++) {
-            bootstrap_methods[pos]->dump(os);
-        }
-    }
-
-private:
-    virtual ~BootstrapMethodsAttribute();
 };
 
 /**

@@ -61,21 +61,6 @@ public:
     }
 };
 
-class ArrayElementValue : public ElementValue {
-public:
-    u2 num_values;
-    ElementValue **values = nullptr;        // [num_values]
-    ArrayElementValue(ClassReader &reader, u1 tag);
-
-    void dump(DataOutputStream &os) override {
-        ElementValue::dump(os);
-        os.writeUInt16(num_values);
-        for (int pos = 0; pos < num_values; pos++) {
-            values[pos]->dump(os);
-        }
-    }
-};
-
 
 /**
  annotation {
@@ -89,11 +74,3 @@ public:
  */
 class AnnotationEntry;
 
-class AnnotationElementValue : public ElementValue {
-public:
-    AnnotationElementValue(ClassReader &reader, u1 tag);
-
-    AnnotationEntry *annotationEntry;
-
-    void dump(DataOutputStream &os) override;
-};
