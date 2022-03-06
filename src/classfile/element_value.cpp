@@ -5,7 +5,7 @@
 #include "element_value.h"
 
 ElementValue *ElementValue::readElementValue(ClassReader &reader) {
-    u1 tag = reader.peek1();
+    u1 tag = reader.readUint8();
     switch ((char) tag) {
         case 'B':
         case 'C':
@@ -32,26 +32,41 @@ ElementValue *ElementValue::readElementValue(ClassReader &reader) {
             return new ArrayElementValue(reader, tag);
         }
         default: {
+            std::cerr << "tag:" << tag << std::endl;
             std::cerr << "can't get here. in element_value." << std::endl;
             assert(false);
         }
     }
 }
 
-ArrayElementValue::ArrayElementValue(ClassReader &reader, std::uint8_t type) : ElementValue(reader, type) {
+
+void ElementValue::dump(DataOutputStream &os) {
+    os.writeUInt8(tag);
+}
+
+ArrayElementValue::ArrayElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
     num_values = reader.readUInt16();
     if (num_values != 0) {
-        values = new ElementValue *[num_values];
+        values = new ElementValue *[num_values]();
     }
     for (int pos = 0; pos < num_values; pos++) {
         values[pos] = ElementValue::readElementValue(reader);
     }
 }
 
-SimpleElementValue::SimpleElementValue(ClassReader &reader, std::uint8_t type) : ElementValue(reader, type) {
+SimpleElementValue::SimpleElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
     const_value_index = reader.readUInt16();
 }
 
-ClassElementValue::ClassElementValue(ClassReader &reader, std::uint8_t type) : ElementValue(reader, type) {
+ClassElementValue::ClassElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
     class_info_index = reader.readUInt16();
+}
+
+AnnotationElementValue::AnnotationElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
+    annotationEntry = new AnnotationEntry(reader);
+}
+
+void AnnotationElementValue::dump(DataOutputStream &os) {
+    ElementValue::dump(os);
+    annotationEntry->dump(os);
 }

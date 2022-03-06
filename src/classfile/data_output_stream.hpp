@@ -33,6 +33,7 @@ public:
 
     void flush() {
         stream_->flush();
+        stream_->close();
     }
 
     DataOutputStream(const string &inputPath) {
@@ -40,5 +41,5 @@ public:
     }
 
 private:
-    std::ostream *stream_ = nullptr;
+    std::ofstream *stream_ = nullptr;
 };

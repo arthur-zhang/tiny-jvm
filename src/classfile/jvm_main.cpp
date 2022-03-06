@@ -9,9 +9,10 @@
 using namespace std;
 
 int main() {
-    ClassFile classFile("/Users/arthur/cvt_dev/clion/tiny-jvm/Test.class");
+    ClassFile classFile("/Users/arthur/cvt_dev/jvm/wind_jvm/sun_src/sun/misc/Contended.class");
     classFile.parse();
 }
+
 int main2() {
 //    ClassFile classFile;
 //    std::ifstream f("/Users/arthur/cvt_dev/clion/tiny-jvm/Test.class", std::ios::binary);

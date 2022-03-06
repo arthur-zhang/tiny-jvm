@@ -3,7 +3,7 @@
 
 AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
-    // Compare strings to find known attribute
+//    cout << "attribute_name_index:" << attribute_name_index << endl;
     u2 tag = attributeName2Tag(attribute_name_index, constant_pool);
 //    cout << "tag:" << tag << endl;
     switch (tag) {
@@ -228,4 +228,13 @@ StackMapTableAttribute::StackMapTableAttribute(ClassReader &reader) : AttributeI
 
 StackMapTableAttribute::~StackMapTableAttribute() {
     delete bytes;
+}
+
+RuntimeVisibleAnnotations_attribute::RuntimeVisibleAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
+    parameter_annotations = new parameter_annotations_t(reader);
+}
+
+void RuntimeVisibleAnnotations_attribute::dump(DataOutputStream &os) {
+    AttributeInfo::dump(os);
+    parameter_annotations->dump(os);
 }

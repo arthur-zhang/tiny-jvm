@@ -23,7 +23,10 @@ bool
 range_equal(InputIterator1 first1, InputIterator1 last1,
             InputIterator2 first2, InputIterator2 last2) {
     while (first1 != last1 && first2 != last2) {
-        if (*first1 != *first2) return false;
+        if (*first1 != *first2) {
+            cout << *first1 << ":::" << *first2 << endl;
+            return false;
+        }
         ++first1;
         ++first2;
     }
@@ -43,17 +46,21 @@ bool compare_files(const std::string &filename1, const std::string &filename2) {
 }
 
 TEST(test_classfile, list_dir) {
-    std::string path = "/Users/arthur/cvt_dev/jvm/wind_jvm/sun_src";
+    std::string classesDirPath = "/Users/arthur/cvt_dev/jvm/wind_jvm/sun_src";
     int i = 0;
-    for (const auto &entry: fs::recursive_directory_iterator(path)) {
+    for (const auto &entry: fs::recursive_directory_iterator(classesDirPath)) {
         if (!entry.is_regular_file()) {
             continue;
         }
+        if (entry.is_directory()) continue;
 
         const string &path = entry.path();
-        if (!path.ends_with("ObjectInputFilter.class")) {
+        if (!path.ends_with(".class")) {
             continue;
         }
+//        if (!path.ends_with("DesktopPanePainter.class")) {
+//            continue;
+//        }
 
         cout << "path:" << path << endl;
         ClassFile cf(path);
@@ -63,6 +70,9 @@ TEST(test_classfile, list_dir) {
         if (!compare_files(path, dumpFile)) {
             cout << "not equal, path: " << path;
             break;
+        } else {
+            cout << "is equal" << endl;
         }
+
     }
 }

@@ -9,3 +9,6 @@ cmake_install.cmake
 Makefile
 .DS_Store
 /TestDump.class
+/ObjectInputFilter$Config$Global.class
+/Contended.class
+*.class

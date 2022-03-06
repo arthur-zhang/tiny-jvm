@@ -399,14 +399,15 @@ public:
     parameter_annotations_t(ClassReader &reader) {
         num_annotations = reader.readUInt16();
         if (num_annotations != 0)
-            annotations = new AnnotationElementValue *[num_annotations];
+            annotations = new AnnotationEntry *[num_annotations];
         for (int pos = 0; pos < num_annotations; pos++) {
-            annotations[pos] = new AnnotationElementValue(reader, '@'); // todo
+            annotations[pos] = new AnnotationEntry(reader); // todo
         }
     }
 
     u2 num_annotations;
-    AnnotationElementValue **annotations = nullptr;    // [num_annotations]
+    AnnotationEntry **annotations = nullptr;    // [num_annotations]
+
     void dump(DataOutputStream &os) {
         os.writeUInt16(num_annotations);
         for (int pos = 0; pos < num_annotations; pos++) {
@@ -417,16 +418,11 @@ public:
 
 class RuntimeVisibleAnnotations_attribute : public AttributeInfo {
 public:
-    parameter_annotations_t parameter_annotations;
+    parameter_annotations_t *parameter_annotations;
 
-    RuntimeVisibleAnnotations_attribute(ClassReader &reader)
-            : AttributeInfo(reader), parameter_annotations(reader) {
-    }
+    RuntimeVisibleAnnotations_attribute(ClassReader &reader);
 
-    void dump(DataOutputStream &os) override {
-        AttributeInfo::dump(os);
-        parameter_annotations.dump(os);
-    }
+    void dump(DataOutputStream &os) override;
 };
 
 class RuntimeInvisibleAnnotations_attribute : public AttributeInfo {
@@ -689,13 +685,13 @@ public:
     u1 target_type;
     target_info_t *target_info = nullptr;    // [1]
     type_path *target_path;
-    AnnotationElementValue *anno = nullptr;                // [1]
+    AnnotationEntry *anno = nullptr;                // [1]
 
     type_annotation(ClassReader &reader) {
         target_type = reader.readUint8();
         target_info = new target_info_t(reader);
         target_path = new type_path(reader);
-        anno = new AnnotationElementValue(reader);
+        anno = new AnnotationEntry(reader);
     }
 
     ~type_annotation();

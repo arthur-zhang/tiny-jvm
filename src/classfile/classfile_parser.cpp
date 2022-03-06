@@ -70,7 +70,7 @@ wstring decodeMUTF8(unsigned char *bytearr, int len) {
     return wstring(chararr, chararr + chararr_count);
 }
 
-std::string recursive_parse_annotation(AnnotationElementValue *target);
+std::string recursive_parse_annotation(AnnotationEntry *target);
 
 std::string parse_inner_element_value(ElementValue *inner_ev) {
     std::stringstream ss;
@@ -99,7 +99,7 @@ std::string parse_inner_element_value(ElementValue *inner_ev) {
         }
         case '@': {
             ss << "@"
-               << recursive_parse_annotation((AnnotationElementValue *) inner_ev);    // recursive call outer function.
+               << recursive_parse_annotation((AnnotationEntry *) inner_ev);    // recursive call outer function.
             break;
         }
         case '[': {
@@ -134,13 +134,14 @@ std::string parse_inner_element_value(ElementValue *inner_ev) {
     return ss.str();
 };
 
-std::string recursive_parse_annotation(AnnotationElementValue *target) {
+std::string recursive_parse_annotation(AnnotationEntry *target) {
     std::stringstream total_str;
     total_str << "#" << target->type_index << "(";    // print key: #12
 
     // bool is_first = false;
     for (int j = 0; j < target->num_element_value_pairs; j++) {
-        total_str << "#" << target->element_value_pairs[j]->element_name_index << "=";    // inner value's key: #13
+        total_str << "#" << target->element_value_pairs[j]->element_name_index
+                  << "=";    // inner value's key: #13
         ElementValue *inner_ev = target->element_value_pairs[j]->value;
         total_str << parse_inner_element_value(inner_ev);
         if (j != target->num_element_value_pairs - 1) total_str << ",";
@@ -619,8 +620,8 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             else
                 std::cout << "(DEBUG)   RuntimeInisibleAnnotations:" << std::endl;
             auto *annotations_ptr = (RuntimeVisibleAnnotations_attribute *) ptr;
-            for (int i = 0; i < annotations_ptr->parameter_annotations.num_annotations; i++) {
-                AnnotationElementValue *target = annotations_ptr->parameter_annotations.annotations[i];
+            for (int i = 0; i < annotations_ptr->parameter_annotations->num_annotations; i++) {
+                AnnotationEntry *target = annotations_ptr->parameter_annotations->annotations[i];
                 std::cout << "(DEBUG)     " << i << ": ";
                 std::cout << recursive_parse_annotation(target) << std::endl;
             }
@@ -635,7 +636,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             auto *annotations_ptr = (RuntimeVisibleParameterAnnotations_attribute *) ptr;
             for (int i = 0; i < annotations_ptr->num_parameters; i++) {
                 for (int j = 0; j < annotations_ptr->parameter_annotations[i]->num_annotations; j++) {
-                    AnnotationElementValue *target = annotations_ptr->parameter_annotations[i]->annotations[j];
+                    AnnotationEntry *target = annotations_ptr->parameter_annotations[i]->annotations[j];
                     std::cout << "(DEBUG)     " << j << ": ";
                     std::cout << recursive_parse_annotation(target) << std::endl;
                 }
@@ -652,7 +653,7 @@ void print_attributes(AttributeInfo *ptr, ConstantPool *cp) {
             for (int i = 0; i < annotations_ptr->num_annotations; i++) {
                 type_annotation *ta = &annotations_ptr->annotations[i];
                 // 1. print [annotation]
-                AnnotationElementValue *target = ta->anno;
+                AnnotationEntry *target = ta->anno;
                 std::cout << "(DEBUG)     ";
                 std::cout << recursive_parse_annotation(target) << std::endl;
                 // 2. print [target_info]
@@ -1169,16 +1170,6 @@ void ClassFile::readAttributes() {
     for (int pos = 0; pos < attributes_count; pos++) {
         attributes[pos] = AttributeInfo::readAttribute(reader, constantPool);
     }
-#ifdef POOL_DEBUG
-    if (attributes_count != 0) {
-        std::cout << "(DEBUG) attribute_number: " << attributes_count << std::endl;
-        for (int pos = 0; pos < attributes_count; pos ++) {
-            print_attributes(attributes[pos], constant_pool);
-        }
-    } else {
-        std::cout << "(DEBUG) no class attributes." << std::endl;
-    }
-#endif
 }
 
 void ClassFile::dump(const string &outputPath) {
@@ -1211,4 +1202,5 @@ void ClassFile::dump(const string &outputPath) {
         attributes[pos]->dump(os);
     }
     os.flush();
+
 }
