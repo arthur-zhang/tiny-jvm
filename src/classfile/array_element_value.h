@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "element_value.h"
