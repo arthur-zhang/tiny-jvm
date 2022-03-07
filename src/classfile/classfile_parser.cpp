@@ -1188,7 +1188,7 @@ void ClassFile::readAttributes() {
     if (attributes_count != 0)
         attributes = new AttributeInfo *[attributes_count];
     for (int pos = 0; pos < attributes_count; pos++) {
-        attributes[pos] = AttributeInfo::readAttribute(reader, constantPool);
+        attributes[pos] = AttributeInfo::readAttributeInfo(reader, constantPool);
     }
 }
 

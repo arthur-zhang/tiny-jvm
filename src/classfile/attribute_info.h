@@ -19,7 +19,7 @@ public:
 
     virtual void dump(DataOutputStream &os) = 0;
 
-    static AttributeInfo *readAttribute(ClassReader &reader, ConstantPool *constant_pool);
+    static AttributeInfo *readAttributeInfo(ClassReader &reader, ConstantPool *constant_pool);
 
     static u2 attributeName2Tag(u2 attribute_name_index,
                                 ConstantPool *constant_pool);

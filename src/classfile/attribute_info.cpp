@@ -25,7 +25,7 @@
 #include "local_variable_table_attribute.h"
 #include "local_variable_type_table_attribute.h"
 
-AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *constant_pool) {
+AttributeInfo *AttributeInfo::readAttributeInfo(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
     u2 tag = attributeName2Tag(attribute_name_index, constant_pool);
     switch (tag) {
