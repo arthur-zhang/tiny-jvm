@@ -5,6 +5,7 @@
 #ifndef TINY_JVM_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS_ATTRIBUTE_HPP
 #define TINY_JVM_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS_ATTRIBUTE_HPP
 #include "attribute_info.h"
+#include "annotations.hpp"
 
 class RuntimeInvisibleParameterAnnotations_attribute : public AttributeInfo {
 public:

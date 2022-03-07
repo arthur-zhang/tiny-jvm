@@ -27,9 +27,7 @@
 
 AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
-//    cout << "attribute_name_index:" << attribute_name_index << endl;
     u2 tag = attributeName2Tag(attribute_name_index, constant_pool);
-//    cout << "tag:" << tag << endl;
     switch (tag) {
         case 0: {
             ConstantValueAttribute *result = new ConstantValueAttribute(reader);

@@ -6,6 +6,7 @@
 #define TINY_JVM_RUNTIME_INVISIBLE_ANNOTATIONS_ATTRIBUTE_HPP
 
 #include "attribute_info.h"
+#include "annotations.hpp"
 
 class RuntimeInvisibleAnnotations_attribute : public AttributeInfo {
 public:

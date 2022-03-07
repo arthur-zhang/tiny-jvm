@@ -1,6 +1,7 @@
 #pragma once
 
 #include "attribute_info.h"
+#include "annotations.hpp"
 
 class RuntimeVisibleParameterAnnotationsAttribute : public AttributeInfo {
 public:
