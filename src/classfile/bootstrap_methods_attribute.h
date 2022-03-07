@@ -1,6 +1,3 @@
-//
-// Created by ya on 2022/3/6.
-//
 #pragma once
 
 #include "attribute_info.h"
@@ -12,14 +9,7 @@ public:
 
     u2 num_bootstrap_methods;
     BootstrapMethod **bootstrap_methods = nullptr;                            // [num_bootstrap_methods];
-
-    void dump(DataOutputStream &os) override {
-        AttributeInfo::dump(os);
-        os.writeUInt16(num_bootstrap_methods);
-        for (int pos = 0; pos < num_bootstrap_methods; pos++) {
-            bootstrap_methods[pos]->dump(os);
-        }
-    }
+    void dump(DataOutputStream &os) override;
 
 private:
     virtual ~BootstrapMethodsAttribute();

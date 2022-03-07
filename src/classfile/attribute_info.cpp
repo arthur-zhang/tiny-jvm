@@ -29,98 +29,98 @@ AttributeInfo *AttributeInfo::readAttribute(ClassReader &reader, ConstantPool *c
     u2 attribute_name_index = reader.peek2();
     u2 tag = attributeName2Tag(attribute_name_index, constant_pool);
     switch (tag) {
-        case 0: {
+        case ATTRIBUTE_ConstantValue: {
             ConstantValueAttribute *result = new ConstantValueAttribute(reader);
             return result;
         }
-        case 1: {
+        case ATTRIBUTE_Code: {
             CodeAttribute *result = new CodeAttribute(reader, constant_pool);
             return result;
         }
-        case 2: {
+        case ATTRIBUTE_StackMapTable: {
             StackMapTableAttribute *result = new StackMapTableAttribute(reader);
             return result;
         }
-        case 3: {
+        case ATTRIBUTE_Exceptions: {
             ExceptionTableAttribute *result = new ExceptionTableAttribute(reader);
             return result;
         }
-        case 4: {
+        case ATTRIBUTE_InnerClasses: {
             InnerClassesAttribute *result = new InnerClassesAttribute(reader);
             return result;
         }
-        case 5: {
+        case ATTRIBUTE_EnclosingMethod: {
             EnclosingMethodAttribute *result = new EnclosingMethodAttribute(reader);
             return result;
         }
-        case 6: {
+        case ATTRIBUTE_Synthetic: {
             SyntheticAttribute *result = new SyntheticAttribute(reader);
             return result;
         }
-        case 7: {
+        case ATTRIBUTE_Signature: {
             SignatureAttribute *result = new SignatureAttribute(reader);
             return result;
         }
-        case 8: {
+        case ATTRIBUTE_SourceFile: {
             SourceFileAttribute *result = new SourceFileAttribute(reader);
             return result;
         }
-        case 9: {
+        case ATTRIBUTE_SourceDebugExtension: {
             SourceDebugExtensionAttribute *result = new SourceDebugExtensionAttribute(reader);
             return result;
         }
-        case 10: {
+        case ATTRIBUTE_LineNumberTable: {
             LineNumberTableAttribute *result = new LineNumberTableAttribute(reader);
             return result;
         }
-        case 11: {
+        case ATTRIBUTE_LocalVariableTable: {
             LocalVariableTableAttribute *result = new LocalVariableTableAttribute(reader);
             return result;
         }
-        case 12: {
+        case ATTRIBUTE_LocalVariableTypeTable: {
             LocalVariableTypeTableAttribute *result = new LocalVariableTypeTableAttribute(reader);
             return result;
         }
-        case 13: {
+        case ATTRIBUTE_Deprecated: {
             DeprecatedAttribute *result = new DeprecatedAttribute(reader);
             return result;
         }
-        case 14: {
+        case ATTRIBUTE_RuntimeVisibleAnnotations: {
             RuntimeVisibleAnnotationsAttribute *result = new RuntimeVisibleAnnotationsAttribute(reader);
             return result;
         }
-        case 15: {
+        case ATTRIBUTE_RuntimeInvisibleAnnotations: {
             RuntimeInvisibleAnnotations_attribute *result = new RuntimeInvisibleAnnotations_attribute(reader);
             return result;
         }
-        case 16: {
+        case ATTRIBUTE_RuntimeVisibleParameterAnnotations: {
             RuntimeVisibleParameterAnnotationsAttribute *result = new RuntimeVisibleParameterAnnotationsAttribute(
                     reader);
             return result;
         }
-        case 17: {
+        case ATTRIBUTE_RuntimeInvisibleParameterAnnotations: {
             RuntimeInvisibleParameterAnnotations_attribute *result = new RuntimeInvisibleParameterAnnotations_attribute(
                     reader);
             return result;
         }
-        case 18: {
+        case ATTRIBUTE_RuntimeVisibleTypeAnnotations: {
             RuntimeVisibleTypeAnnotationsAttribute *result = new RuntimeVisibleTypeAnnotationsAttribute(reader);
             return result;
         }
-        case 19: {
+        case ATTRIBUTE_RuntimeInvisibleTypeAnnotations: {
             RuntimeInvisibleTypeAnnotationsAttribute *result = new RuntimeInvisibleTypeAnnotationsAttribute(
                     reader);
             return result;
         }
-        case 20: {
+        case ATTRIBUTE_AnnotationDefault: {
             AnnotationDefaultAttribute *result = new AnnotationDefaultAttribute(reader);
             return result;
         }
-        case 21: {
+        case ATTRIBUTE_BootstrapMethods: {
             BootstrapMethodsAttribute *result = new BootstrapMethodsAttribute(reader);
             return result;
         }
-        case 22: {
+        case ATTRIBUTE_MethodParameters: {
             MethodParametersAttribute *result = new MethodParametersAttribute(reader);
             return result;
         }
@@ -136,7 +136,7 @@ AttributeInfo::AttributeInfo(ClassReader &reader) {
     attribute_length = reader.readUInt32();
 }
 
-u2 AttributeInfo::attributeName2Tag(std::uint16_t attribute_name_index, ConstantPool *constant_pool) {
+u2 AttributeInfo::attributeName2Tag(u2 attribute_name_index, ConstantPool *constant_pool) {
     String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
     if (attribute_table.find(str) != attribute_table.end()) {
         return attribute_table[str];

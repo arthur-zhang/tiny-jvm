@@ -2,9 +2,7 @@
 // Created by ya on 2022/3/2.
 //
 
-#ifndef TINY_JVM_CONST_H
-#define TINY_JVM_CONST_H
-
+#pragma once
 #include <unordered_map>
 #include "String.h"
 #include "types.hpp"
@@ -241,31 +239,55 @@ static std::unordered_map<u1, std::pair<std::string, int>> bccode_map{    // pai
         {0xfe, {"impdep1",         0}},
         {0xff, {"impdep2",         0}},
 };
+#define ATTRIBUTE_ConstantValue 0
+#define ATTRIBUTE_Code 1
+#define ATTRIBUTE_StackMapTable 2
+#define ATTRIBUTE_Exceptions 3
+#define ATTRIBUTE_InnerClasses 4
+#define ATTRIBUTE_EnclosingMethod 5
+#define ATTRIBUTE_Synthetic 6
+#define ATTRIBUTE_Signature 7
+#define ATTRIBUTE_SourceFile 8
+#define ATTRIBUTE_SourceDebugExtension 9
+#define ATTRIBUTE_LineNumberTable 10
+#define ATTRIBUTE_LocalVariableTable 11
+#define ATTRIBUTE_LocalVariableTypeTable 12
+#define ATTRIBUTE_Deprecated 13
+#define ATTRIBUTE_RuntimeVisibleAnnotations 14
+#define ATTRIBUTE_RuntimeInvisibleAnnotations 15
+#define ATTRIBUTE_RuntimeVisibleParameterAnnotations 16
+#define ATTRIBUTE_RuntimeInvisibleParameterAnnotations 17
+#define ATTRIBUTE_RuntimeVisibleTypeAnnotations 18
+#define ATTRIBUTE_RuntimeInvisibleTypeAnnotations 19
+#define ATTRIBUTE_AnnotationDefault 20
+#define ATTRIBUTE_BootstrapMethods 21
+#define ATTRIBUTE_MethodParameters 22
 
+#define ATTRIBUTE_INVALID 99
 static std::unordered_map<String, int> attribute_table{
-        {L"ConstantValue",                        0},
-        {L"Code",                                 1},
-        {L"StackMapTable",                        2},
-        {L"Exceptions",                           3},
-        {L"InnerClasses",                         4},
-        {L"EnclosingMethod",                      5},
-        {L"Synthetic",                            6},
-        {L"Signature",                            7},
-        {L"SourceFile",                           8},
-        {L"SourceDebugExtension",                 9},
-        {L"LineNumberTable",                      10},
-        {L"LocalVariableTable",                   11},
-        {L"LocalVariableTypeTable",               12},
-        {L"Deprecated",                           13},
-        {L"RuntimeVisibleAnnotations",            14},
-        {L"RuntimeInvisibleAnnotations",          15},
-        {L"RuntimeVisibleParameterAnnotations",   16},
-        {L"RuntimeInvisibleParameterAnnotations", 17},
-        {L"RuntimeVisibleTypeAnnotations",        18},
-        {L"RuntimeInvisibleTypeAnnotations",      19},
-        {L"AnnotationDefault",                    20},
-        {L"BootstrapMethods",                     21},
-        {L"MethodParameters",                     22},
+        {L"ConstantValue",                        ATTRIBUTE_ConstantValue},
+        {L"Code",                                 ATTRIBUTE_Code},
+        {L"StackMapTable",                        ATTRIBUTE_StackMapTable},
+        {L"Exceptions",                           ATTRIBUTE_Exceptions},
+        {L"InnerClasses",                         ATTRIBUTE_InnerClasses},
+        {L"EnclosingMethod",                      ATTRIBUTE_EnclosingMethod},
+        {L"Synthetic",                            ATTRIBUTE_Synthetic},
+        {L"Signature",                            ATTRIBUTE_Signature},
+        {L"SourceFile",                           ATTRIBUTE_SourceFile},
+        {L"SourceDebugExtension",                 ATTRIBUTE_SourceDebugExtension},
+        {L"LineNumberTable",                      ATTRIBUTE_LineNumberTable},
+        {L"LocalVariableTable",                   ATTRIBUTE_LocalVariableTable},
+        {L"LocalVariableTypeTable",               ATTRIBUTE_LocalVariableTypeTable},
+        {L"Deprecated",                           ATTRIBUTE_Deprecated},
+        {L"RuntimeVisibleAnnotations",            ATTRIBUTE_RuntimeVisibleAnnotations},
+        {L"RuntimeInvisibleAnnotations",          ATTRIBUTE_RuntimeInvisibleAnnotations},
+        {L"RuntimeVisibleParameterAnnotations",   ATTRIBUTE_RuntimeVisibleParameterAnnotations},
+        {L"RuntimeInvisibleParameterAnnotations", ATTRIBUTE_RuntimeInvisibleParameterAnnotations},
+        {L"RuntimeVisibleTypeAnnotations",        ATTRIBUTE_RuntimeVisibleTypeAnnotations},
+        {L"RuntimeInvisibleTypeAnnotations",      ATTRIBUTE_RuntimeInvisibleTypeAnnotations},
+        {L"AnnotationDefault",                    ATTRIBUTE_AnnotationDefault},
+        {L"BootstrapMethods",                     ATTRIBUTE_BootstrapMethods},
+        {L"MethodParameters",                     ATTRIBUTE_MethodParameters},
 };
 
 //=====
@@ -283,5 +305,3 @@ static std::unordered_map<String, int> attribute_table{
 #define CONSTANT_MethodHandle        15
 #define CONSTANT_MethodType            16
 #define CONSTANT_InvokeDynamic        18
-
-#endif //TINY_JVM_CONST_H
