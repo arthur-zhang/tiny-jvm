@@ -30,7 +30,7 @@ public:
     }
 
     ~ExceptionTableAttribute() {
-        delete[]exception_index_table;
+        if (number_of_exceptions > 0) delete[]exception_index_table;
     }
 };
 

@@ -6,6 +6,7 @@
 #define TINY_JVM_DEPRECATED_ATTRIBUTE_H
 
 #include "attribute_info.h"
+
 class DeprecatedAttribute : public AttributeInfo {
 public:
     u1 *bytes;
@@ -17,6 +18,10 @@ public:
     void dump(DataOutputStream &os) override {
         AttributeInfo::dump(os);
         os.writeBytes(bytes, attribute_length);
+    }
+
+    virtual ~DeprecatedAttribute() {
+        if (attribute_length > 0) delete[]bytes;
     }
 };
 

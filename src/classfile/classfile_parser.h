@@ -42,21 +42,28 @@ public:
     }
 
     ~ClassFile() {
-        delete[]bytes;
+        if (size > 0) delete[]bytes;
         delete constantPool;
-        delete[]interfaces;
-        for (int i = 0; i < fields_count; ++i) {
-            delete fields[i];
+        if (interfaces_count > 0) delete[]interfaces;
+        if (fields_count > 0) {
+            for (int i = 0; i < fields_count; ++i) {
+                delete fields[i];
+            }
+            delete fields;
         }
-        delete fields;
-        for (int i = 0; i < methods_count; ++i) {
-            delete methods[i];
+        if (methods_count > 0) {
+
+            for (int i = 0; i < methods_count; ++i) {
+                delete methods[i];
+            }
+            delete methods;
         }
-        delete methods;
-        for (int i = 0; i < attributes_count; ++i) {
-            delete attributes[i];
+        if (attributes_count > 0) {
+            for (int i = 0; i < attributes_count; ++i) {
+                delete attributes[i];
+            }
+            delete attributes;
         }
-        delete attributes;
     }
 
     u4 magic = 0;

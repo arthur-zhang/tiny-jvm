@@ -20,6 +20,10 @@ public:
         AttributeInfo::dump(os);
         parameter_annotations->dump(os);
     }
+
+    virtual ~RuntimeInvisibleAnnotations_attribute() {
+        delete parameter_annotations;
+    }
 };
 
 

@@ -6,6 +6,7 @@
 #define TINY_JVM_LOCAL_VARIABLE_TYPE_TABLE_ATTRIBUTE_H
 
 #include "attribute_info.h"
+
 class LocalVariableType {
 public:
     u2 start_pc;
@@ -42,6 +43,15 @@ public:
             local_variable_type_table = new LocalVariableType *[local_variable_type_table_length];
         for (int pos = 0; pos < local_variable_type_table_length; pos++) {
             local_variable_type_table[pos] = new LocalVariableType(reader);
+        }
+    }
+
+    virtual ~LocalVariableTypeTableAttribute() {
+        if (local_variable_type_table_length > 0) {
+            for (int pos = 0; pos < local_variable_type_table_length; pos++) {
+                delete local_variable_type_table[pos];
+            }
+            delete[]local_variable_type_table;
         }
     }
 

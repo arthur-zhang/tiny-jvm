@@ -18,7 +18,7 @@ FieldInfo::FieldInfo(ClassReader &reader, ConstantPool *constantPool) {
 }
 
 FieldInfo::~FieldInfo() {
-    if (attributes != nullptr) {
+    if (attributes_count > 0) {
         for (int i = 0; i < attributes_count; i++) {
             delete attributes[i];
         }

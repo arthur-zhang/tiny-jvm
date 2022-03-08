@@ -17,5 +17,6 @@ void StackMapTableAttribute::dump(DataOutputStream &os) {
 
 
 StackMapTableAttribute::~StackMapTableAttribute() {
-    delete bytes;
+    if (attribute_length <= 0) return;
+    delete[] bytes;
 }

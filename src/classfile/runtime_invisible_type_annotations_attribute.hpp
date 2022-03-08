@@ -7,7 +7,6 @@
 
 #include "attribute_info.h"
 
-// todo
 class RuntimeInvisibleTypeAnnotationsAttribute : public AttributeInfo {
 public:
     u1 *bytes;
@@ -18,6 +17,11 @@ public:
 
     void dump(DataOutputStream &os) override {
         os.writeBytes(bytes, attribute_length);
+    }
+
+    virtual ~RuntimeInvisibleTypeAnnotationsAttribute() {
+        if (attribute_length <= 0) return;
+        delete[]bytes;
     }
 };
 

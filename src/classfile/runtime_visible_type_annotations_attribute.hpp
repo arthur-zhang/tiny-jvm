@@ -16,6 +16,11 @@ public:
     void dump(DataOutputStream &os) override {
         os.writeBytes(bytes, attribute_length);
     }
+
+    virtual ~RuntimeVisibleTypeAnnotationsAttribute() {
+        if (attribute_length <= 0) return;
+        delete[]bytes;
+    }
 };
 
 

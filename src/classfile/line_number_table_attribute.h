@@ -38,6 +38,15 @@ public:
         }
     }
 
+    virtual ~LineNumberTableAttribute() {
+        if (line_number_table_length > 0) {
+            for (int pos = 0; pos < line_number_table_length; pos++) {
+                delete line_number_table[pos];
+            }
+            delete[]line_number_table;
+        }
+    }
+
     void dump(DataOutputStream &os) override {
         AttributeInfo::dump(os);
         os.writeUInt16(line_number_table_length);

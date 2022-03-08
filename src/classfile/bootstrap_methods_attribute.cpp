@@ -14,6 +14,7 @@ BootstrapMethodsAttribute::BootstrapMethodsAttribute(ClassReader &reader) : Attr
 }
 
 BootstrapMethodsAttribute::~BootstrapMethodsAttribute() {
+    if (num_bootstrap_methods <= 0) return;
     for (int i = 0; i < num_bootstrap_methods; ++i) {
         delete bootstrap_methods[i];
     }

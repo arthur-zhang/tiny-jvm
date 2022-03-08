@@ -15,7 +15,7 @@ BootstrapMethod::BootstrapMethod(ClassReader &reader) {
 }
 
 BootstrapMethod::~BootstrapMethod() {
-    delete[]bootstrap_arguments;
+    if (num_bootstrap_arguments > 0) delete[]bootstrap_arguments;
 }
 
 void BootstrapMethod::dump(DataOutputStream &os) {

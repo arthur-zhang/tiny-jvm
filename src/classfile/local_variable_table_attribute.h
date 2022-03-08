@@ -6,6 +6,7 @@
 #define TINY_JVM_LOCAL_VARIABLE_TABLE_ATTRIBUTE_H
 
 #include "attribute_info.h"
+
 class LocalVariable {
 public:
     u2 start_pc;
@@ -42,6 +43,15 @@ public:
             local_variable_table = new LocalVariable *[local_variable_table_length];
         for (int pos = 0; pos < local_variable_table_length; pos++) {
             local_variable_table[pos] = new LocalVariable(reader);
+        }
+    }
+
+    virtual ~LocalVariableTableAttribute() {
+        if (local_variable_table_length > 0) {
+            for (int pos = 0; pos < local_variable_table_length; pos++) {
+                delete local_variable_table[pos];
+            }
+            delete[]local_variable_table;
         }
     }
 

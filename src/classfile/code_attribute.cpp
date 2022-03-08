@@ -28,13 +28,17 @@ CodeAttribute::CodeAttribute(ClassReader &reader, ConstantPool *constantPool) : 
 }
 
 CodeAttribute::~CodeAttribute() {
-    delete[] code;
-    for (int i = 0; i < attributes_count; ++i) {
-        delete attributes[i];
+    if (code_length > 0) delete[] code;
+    if (attributes_count > 0) {
+        for (int i = 0; i < attributes_count; ++i) {
+            delete attributes[i];
+        }
+        delete[] attributes;
     }
-    delete[] attributes;
-    for (int i = 0; i < exception_table_length; ++i) {
-        delete exception_table[i];
+    if (exception_table_length > 0) {
+        for (int i = 0; i < exception_table_length; ++i) {
+            delete exception_table[i];
+        }
+        delete[]exception_table;
     }
-    delete[]exception_table;
 }

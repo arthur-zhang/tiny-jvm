@@ -17,7 +17,14 @@ public:
     }
 
     SourceFileAttribute(ClassReader &reader);
+
+    virtual ~SourceFileAttribute();
 };
 
+SourceFileAttribute::SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    source_file_index = reader.readUInt16();
+}
+
+SourceFileAttribute::~SourceFileAttribute() {}
 
 #endif //TINY_JVM_SOURCE_FILE_ATTRIBUTE_H

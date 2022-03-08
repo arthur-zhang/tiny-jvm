@@ -6,6 +6,7 @@
 #define TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_HPP
 
 #include "attribute_info.h"
+
 class SourceDebugExtensionAttribute : public AttributeInfo {
 public:
     u1 *debug_extension = nullptr;
@@ -17,6 +18,11 @@ public:
         }
     }
 
+    virtual ~SourceDebugExtensionAttribute() {
+        if (attribute_length <= 0) return;
+        delete[]debug_extension;
+    }
+
     void dump(DataOutputStream &os) override {
         AttributeInfo::dump(os);
         if (attribute_length > 0) {
@@ -24,7 +30,6 @@ public:
         }
     }
 };
-
 
 
 #endif //TINY_JVM_SOURCE_DEBUG_EXTENSION_ATTRIBUTE_HPP

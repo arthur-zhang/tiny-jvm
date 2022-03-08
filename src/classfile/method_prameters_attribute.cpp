@@ -14,6 +14,8 @@ MethodParametersAttribute::MethodParametersAttribute(ClassReader &reader) : Attr
 }
 
 MethodParametersAttribute::~MethodParametersAttribute() {
+    if (parameters_count <= 0)return;
+
     for (int i = 0; i < parameters_count; ++i) {
         delete parameters[i];
     }
