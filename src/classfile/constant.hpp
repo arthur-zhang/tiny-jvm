@@ -14,13 +14,15 @@ class Constant {
 public:
     u1 tag;
 
-    Constant(ClassReader &reader, int tag_) : reader(reader), tag(tag_) {
+    Constant(ClassReader &reader) : reader(reader) {
         tag = reader.readUint8();
     }
 
     virtual void dump(DataOutputStream &os) {
         os.writeUInt8(tag);
     };
+
+    virtual ~Constant() = default;
 
 
 protected:
@@ -30,7 +32,7 @@ protected:
 class CONSTANT_Class_info : public Constant {
 
 public:
-    CONSTANT_Class_info(ClassReader &reader) : Constant(reader, CONSTANT_Class) {
+    CONSTANT_Class_info(ClassReader &reader) : Constant(reader) {
         index = reader.readUInt16();
     }
 
@@ -45,7 +47,7 @@ public:
 class CONSTANT_String_info : public Constant {            // Class, String
 
 public:
-    CONSTANT_String_info(ClassReader &reader) : Constant(reader, CONSTANT_String) {
+    CONSTANT_String_info(ClassReader &reader) : Constant(reader) {
         index = reader.readUInt16();
     }
 
@@ -58,10 +60,10 @@ public:
 };
 
 
-class CONSTANT_FMI_info : public Constant {        // Field, Methodref, InterfaceMethodref
+class CONSTANT_FMI_info : public Constant {
 
 public:
-    CONSTANT_FMI_info(ClassReader &reader, int tag) : Constant(reader, tag) {
+    CONSTANT_FMI_info(ClassReader &reader) : Constant(reader) {
         class_index = reader.readUInt16();
         name_and_type_index = reader.readUInt16();
     }
@@ -78,31 +80,31 @@ public:
 
 class ConstantMethodref_info : public CONSTANT_FMI_info {
 public:
-    ConstantMethodref_info(ClassReader &reader) : CONSTANT_FMI_info(reader, CONSTANT_Methodref) {
+    ConstantMethodref_info(ClassReader &reader) : CONSTANT_FMI_info(reader) {
     };
 };
 
 class ConstantInterfaceMethodref_info : public CONSTANT_FMI_info {
 public:
-    ConstantInterfaceMethodref_info(ClassReader &reader) : CONSTANT_FMI_info(reader, CONSTANT_InterfaceMethodref) {
+    ConstantInterfaceMethodref_info(ClassReader &reader) : CONSTANT_FMI_info(reader) {
     };
 };
 
 class ConstantFieldref_info : public CONSTANT_FMI_info {
 public:
-    ConstantFieldref_info(ClassReader &reader) : CONSTANT_FMI_info(reader, CONSTANT_Fieldref) {
+    ConstantFieldref_info(ClassReader &reader) : CONSTANT_FMI_info(reader) {
     };
 };
 
-class CONSTANT_Integer_info : public Constant {       // Integer
+class CONSTANT_Integer_info : public Constant {
 public:
-    CONSTANT_Integer_info(ClassReader &reader) : Constant(reader, CONSTANT_Integer) {
+    CONSTANT_Integer_info(ClassReader &reader) : Constant(reader) {
         bytes = reader.readUInt32();
     }
 
     u4 bytes;
 
-    int get_value() {
+    int getConstant() {
         return (int) bytes;
     }
 
@@ -111,15 +113,6 @@ public:
         os.writeUInt32(bytes);
     }
 };
-
-#define FLOAT_INFINITY            0x7f800000
-#define FLOAT_NEGATIVE_INFINITY    0xff800000
-#define FLOAT_NAN                0x7f880000
-// define by myself
-#define DOUBLE_INFINITY            0x7ff0000000000000L
-#define DOUBLE_NEGATIVE_INFINITY    0xfff0000000000000L
-#define DOUBLE_NAN                0x7ff8000000000000L
-
 
 // constant pool: MethodHandle
 #define REF_getField                    1
@@ -132,26 +125,36 @@ public:
 #define REF_newInvokeSpecial            8
 #define REF_invokeInterface            9
 
+#define FLOAT_INFINITY            0x7f800000
+#define FLOAT_NEGATIVE_INFINITY    0xff800000
+#define FLOAT_NAN                0x7f880000
+#define FLOAT_IS_NAN(x) (((x) >= 0x7f800001 && (x) <= 0x7fffffff) \
+                            || ((x) >= 0xff800001 && (x) <= 0xffffffff))
+
 struct CONSTANT_Float_info : public Constant {       // Float
 private:
     u4 bytes;
 
 public:
-    CONSTANT_Float_info(ClassReader &reader) : Constant(reader, CONSTANT_Float) {
+    CONSTANT_Float_info(ClassReader &reader) : Constant(reader) {
         bytes = reader.readUInt32();
     }
 
-    float get_value() {
+    /** JVM Specification §4.4.4 */
+    float getConstant() {
         if (bytes == FLOAT_INFINITY) return FLOAT_INFINITY;
-        else if (bytes == FLOAT_NEGATIVE_INFINITY) return FLOAT_NEGATIVE_INFINITY;
-        else if ((bytes >= 0x7f800001 && bytes <= 0x7fffffff) || (bytes >= 0xff800001 && bytes <= 0xffffffff))
-            return FLOAT_NAN;
-        else {
-            int s = ((bytes >> 31) == 0) ? 1 : -1;
-            int e = ((bytes >> 23) & 0xff);
-            int m = (e == 0) ? (bytes & 0x7fffff) << 1 : (bytes & 0x7fffff) | 0x800000;        // $ 4.4.4
-            return s * m * pow(2, e - 150);
-        }
+        if (bytes == FLOAT_NEGATIVE_INFINITY) return FLOAT_NEGATIVE_INFINITY;
+        if (FLOAT_IS_NAN(bytes)) return FLOAT_NAN;
+
+        // v = (-1)^s * 1.m * 2^e    1<=m<2
+        // for -5.0f -> -101.0 -> -1 * 1.01*2^2 -> s=1 m=1.01 e = 2
+        int s = ((bytes >> 31) == 0) ? 1 : -1; //s stands for sign, if s = 0, v is +, if s = 1, v is -
+        int e = ((bytes >> 23) & 0xff); // e stands for exponent(8 bit)
+        int m = (e == 0)
+                ? (bytes & 0x7fffff) << 1
+                : (bytes & 0x7fffff) | 0x800000; // m stands for fraction (23bit)
+        // m * pow(2, e - 150)
+        return s * m * pow(2, e - 150);
     }
 
     void dump(DataOutputStream &os) override {
@@ -166,12 +169,12 @@ private:
     u4 low_bytes;
 
 public:
-    CONSTANT_Long_info(ClassReader &reader) : Constant(reader, CONSTANT_Long) {
+    CONSTANT_Long_info(ClassReader &reader) : Constant(reader) {
         high_bytes = reader.readUInt32();
         low_bytes = reader.readUInt32();
     }
 
-    long get_value() {
+    long getConstant() {
         return ((long) high_bytes << 32) + low_bytes;
     }
 
@@ -183,6 +186,12 @@ public:
     }
 };
 
+#define DOUBLE_INFINITY            0x7ff0000000000000L
+#define DOUBLE_NEGATIVE_INFINITY    0xfff0000000000000L
+#define DOUBLE_NAN                0x7ff8000000000000L
+#define DOUBLE_IS_NAN(x) (((x) >= 0x7ff0000000000001L && (x) <= 0x7fffffffffffffffL) \
+                            || ((x) >= 0xfff0000000000001L && (x) <= 0xffffffffffffffffL))
+
 class CONSTANT_Double_info : public Constant {       // Double
 private:
 
@@ -190,24 +199,21 @@ private:
     u4 low_bytes;
 
 public:
-    CONSTANT_Double_info(ClassReader &reader) : Constant(reader, CONSTANT_Double) {
+    CONSTANT_Double_info(ClassReader &reader) : Constant(reader) {
         high_bytes = reader.readUInt32();
         low_bytes = reader.readUInt32();
     }
 
-    double get_value() {
+    double getConstant() {
         uint64_t bytes = ((uint64_t) high_bytes << 32) + low_bytes;    // first turns to a Long
         if (bytes == DOUBLE_INFINITY) return DOUBLE_INFINITY;
-        else if (bytes == DOUBLE_NEGATIVE_INFINITY) return DOUBLE_NEGATIVE_INFINITY;
-        else if ((bytes >= 0x7ff0000000000001L && bytes <= 0x7fffffffffffffffL) ||
-                 (bytes >= 0xfff0000000000001L && bytes <= 0xffffffffffffffffL))
-            return DOUBLE_NAN;
-        else {
-            int s = ((bytes >> 63) == 0) ? 1 : -1;
-            int e = (int) ((bytes >> 52) & 0x7ffL);
-            long m = (e == 0) ? (bytes & 0xfffffffffffffL) << 1 : (bytes & 0xfffffffffffffL) | 0x10000000000000L;
-            return s * m * pow(2, e - 1075);
-        }
+        if (bytes == DOUBLE_NEGATIVE_INFINITY) return DOUBLE_NEGATIVE_INFINITY;
+        if (DOUBLE_IS_NAN(bytes)) return DOUBLE_NAN;
+
+        int s = ((bytes >> 63) == 0) ? 1 : -1;
+        int e = (int) ((bytes >> 52) & 0x7ffL);
+        long m = (e == 0) ? (bytes & 0xfffffffffffffL) << 1 : (bytes & 0xfffffffffffffL) | 0x10000000000000L;
+        return s * m * pow(2, e - 1075);
     }
 
     void dump(DataOutputStream &os) override {
@@ -216,7 +222,6 @@ public:
         os.writeUInt32(high_bytes);
         os.writeUInt32(low_bytes);
     }
-
 };
 
 class CONSTANT_NameAndType_info : public Constant {
@@ -224,7 +229,7 @@ public:
     u2 name_index;
     u2 descriptor_index;
 
-    CONSTANT_NameAndType_info(ClassReader &reader_) : Constant(reader_, CONSTANT_NameAndType) {
+    CONSTANT_NameAndType_info(ClassReader &reader_) : Constant(reader_) {
         name_index = reader_.readUInt16();
         descriptor_index = reader_.readUInt16();
     }
@@ -242,7 +247,7 @@ public:
     u2 length;
     u1 *bytes = nullptr;
 
-    CONSTANT_Utf8_info(ClassReader &reader) : Constant(reader, CONSTANT_Utf8) {
+    CONSTANT_Utf8_info(ClassReader &reader) : Constant(reader) {
         length = reader.readUInt16();
         bytes = reader.readBytes(length);
     }
@@ -255,16 +260,17 @@ public:
     }
 
     String getConstant() {
-        //todo
         return fromBytes(bytes, length);
     }
 
-    ~CONSTANT_Utf8_info();
+    ~CONSTANT_Utf8_info() {
+        if (bytes != nullptr) delete[]bytes;
+    }
 };
 
 class CONSTANT_MethodHandle_info : public Constant {   // method handler
 public:
-    CONSTANT_MethodHandle_info(ClassReader &reader) : Constant(reader, CONSTANT_MethodHandle) {
+    CONSTANT_MethodHandle_info(ClassReader &reader) : Constant(reader) {
         reference_kind = reader.readUint8();
         reference_index = reader.readUInt16();
     }
@@ -283,7 +289,7 @@ public:
 
 class CONSTANT_MethodType_info : public Constant {   // method type
 public:
-    CONSTANT_MethodType_info(ClassReader &reader) : Constant(reader, CONSTANT_MethodType) {
+    CONSTANT_MethodType_info(ClassReader &reader) : Constant(reader) {
         descriptor_index = reader.readUInt16();
     }
 
@@ -301,7 +307,7 @@ public:
     u2 bootstrap_method_attr_index;
     u2 name_and_type_index;
 
-    CONSTANT_InvokeDynamic_info(ClassReader &reader) : Constant(reader, CONSTANT_InvokeDynamic) {
+    CONSTANT_InvokeDynamic_info(ClassReader &reader) : Constant(reader) {
         bootstrap_method_attr_index = reader.readUInt16();
         name_and_type_index = reader.readUInt16();
     }

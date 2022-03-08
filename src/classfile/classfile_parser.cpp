@@ -181,12 +181,12 @@ namespace ujvm {
                 u2 index = ((ConstantValueAttribute *) ptr)->constant_value_index;
                 switch (constant_pool[index - 1]->tag) {
                     case CONSTANT_Long: {
-                        std::cout << "long " << ((CONSTANT_Long_info *) constant_pool[index - 1])->get_value() << "l"
+                        std::cout << "long " << ((CONSTANT_Long_info *) constant_pool[index - 1])->getConstant() << "l"
                                   << std::endl;
                         break;
                     }
                     case CONSTANT_Float: {
-                        float result = ((CONSTANT_Float_info *) constant_pool[index - 1])->get_value();
+                        float result = ((CONSTANT_Float_info *) constant_pool[index - 1])->getConstant();
                         std::cout << "float ";
                         if (result == FLOAT_INFINITY)
                             std::cout << "Infinityf" << std::endl;
@@ -199,12 +199,12 @@ namespace ujvm {
                         break;
                     }
                     case CONSTANT_Integer: {
-                        std::cout << "int " << ((CONSTANT_Integer_info *) constant_pool[index - 1])->get_value()
+                        std::cout << "int " << ((CONSTANT_Integer_info *) constant_pool[index - 1])->getConstant()
                                   << std::endl;
                         break;
                     }
                     case CONSTANT_Double: {
-                        double result = ((CONSTANT_Double_info *) constant_pool[index - 1])->get_value();
+                        double result = ((CONSTANT_Double_info *) constant_pool[index - 1])->getConstant();
                         std::cout << "double ";
                         if (result == DOUBLE_INFINITY)
                             std::cout << "Infinityd" << std::endl;
@@ -983,8 +983,8 @@ namespace ujvm {
     }
 
     void print_constant_pool(ConstantPool *constantPool) {
-        const vector<Constant *> &constantPoolVector = constantPool->getConstantPool();
-        for (int i = 0; i < constantPool->constantPoolCount_; i++) {
+        Constant **constantPoolVector = constantPool->getConstantPool();
+        for (int i = 0; i < constantPool->constant_pool_count_; i++) {
             switch (constantPoolVector[i]->tag) {
                 case CONSTANT_Class:
                 case CONSTANT_String: {
@@ -1012,12 +1012,12 @@ namespace ujvm {
                 }
                 case CONSTANT_Integer: {
                     CONSTANT_Integer_info *target = (CONSTANT_Integer_info *) constantPoolVector[i];
-                    printf("(DEBUG) #%4d = Integer %13s %di\n", i + 1, "", target->get_value());
+                    printf("(DEBUG) #%4d = Integer %13s %di\n", i + 1, "", target->getConstant());
                     break;
                 }
                 case CONSTANT_Float: {
                     CONSTANT_Float_info *target = (CONSTANT_Float_info *) constantPoolVector[i];
-                    float result = target->get_value();
+                    float result = target->getConstant();
                     if (result == FLOAT_INFINITY)
                         printf("(DEBUG) #%4d = Float %15s Infinityf\n", i + 1, "");
                     else if (result == FLOAT_NEGATIVE_INFINITY)
@@ -1030,13 +1030,13 @@ namespace ujvm {
                 }
                 case CONSTANT_Long: {
                     CONSTANT_Long_info *target = (CONSTANT_Long_info *) constantPoolVector[i];
-                    printf("(DEBUG) #%4d = Long %16s %ldl\n", i + 1, "", target->get_value());
+                    printf("(DEBUG) #%4d = Long %16s %ldl\n", i + 1, "", target->getConstant());
                     i++;
                     break;
                 }
                 case CONSTANT_Double: {
                     CONSTANT_Double_info *target = (CONSTANT_Double_info *) constantPoolVector[i];
-                    double result = target->get_value();
+                    double result = target->getConstant();
                     if (result == DOUBLE_INFINITY)
                         printf("(DEBUG) #%4d = Double %14s Infinityd\n", i + 1, "");
                     else if (result == DOUBLE_NEGATIVE_INFINITY)

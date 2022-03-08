@@ -1,9 +1,4 @@
-//
-// Created by ya on 2022/3/2.
-//
-
-#ifndef TINY_JVM_CONSTANT_POOL_HPP
-#define TINY_JVM_CONSTANT_POOL_HPP
+#pragma once
 
 #include <vector>
 #include "class_reader.h"
@@ -11,29 +6,38 @@
 
 using namespace std;
 
-class ConstantPool {
+class ConstantPool final {
 public:
     ConstantPool(ClassReader &reader) {
-        constantPoolCount_ = reader.readUInt16();
-        constantPool_ = vector<Constant *>(constantPoolCount_);
-        for (int i = 0; i < constantPoolCount_ - 1; ++i) {
-            constantPool_[i] = readConstant(reader);
-            if (constantPool_[i]->tag == CONSTANT_Double || constantPool_[i]->tag == CONSTANT_Long) {
+        constant_pool_count_ = reader.readUInt16();
+        constant_pool_ = new Constant *[constant_pool_count_];
+        for (int i = 0; i < constant_pool_count_ - 1; ++i) {
+            constant_pool_[i] = readConstant(reader);
+            if (constant_pool_[i]->tag == CONSTANT_Double || constant_pool_[i]->tag == CONSTANT_Long) {
                 ++i;
             }
         }
     }
 
-    u2 constantPoolCount_;
-
-    const vector<Constant *> &getConstantPool() const {
-        return constantPool_;
+    virtual ~ConstantPool() {
+        if (constant_pool_count_ <= 0)return;
+        for (int i = 0; i < constant_pool_count_; ++i) {
+            delete constant_pool_[i];
+        }
+        delete[]constant_pool_;
     }
 
+    u2 constant_pool_count_;
+
+    Constant **getConstantPool() const {
+        return constant_pool_;
+    }
+
+
     void dump(DataOutputStream &os) {
-        os.writeUInt16(constantPoolCount_);
-        for (int i = 0; i < constantPoolCount_ - 1; ++i) {
-            Constant *constant = constantPool_[i];
+        os.writeUInt16(constant_pool_count_);
+        for (int i = 0; i < constant_pool_count_ - 1; ++i) {
+            Constant *constant = constant_pool_[i];
             constant->dump(os);
             if (constant->tag == CONSTANT_Double || constant->tag == CONSTANT_Long) {
                 ++i;
@@ -42,8 +46,7 @@ public:
     }
 
 private:
-    vector<Constant *> constantPool_;
+    Constant **constant_pool_ = nullptr;
 };
 
 
-#endif //TINY_JVM_CONSTANT_POOL_HPP
