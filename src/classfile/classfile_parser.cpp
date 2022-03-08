@@ -1222,5 +1222,5 @@ void ClassFile::dump(const string &outputPath) {
         attributes[pos]->dump(os);
     }
     os.flush();
-
 }
+

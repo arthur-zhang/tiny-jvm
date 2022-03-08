@@ -1,9 +1,17 @@
 #pragma once
 
+#include <memory>
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <unordered_map>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <cstring>
+
+#include "tiny_jvm.h"
 #include "const.h"
 #include "types.hpp"
 #include "String.h"
@@ -14,10 +22,27 @@
 
 using namespace std;
 
-
 class ClassFile {
+private:
+    u1 *bytes;
+    int size;
+
 public:
-    ClassFile(const std::string &filePath) : reader(filePath) {
+    ClassFile(const std::string &filePath) {
+        std::ifstream ifs(filePath, ios::in | ios::ate | ios::binary);
+
+        size = ifs.tellg();
+        ifs.seekg(0);
+
+        bytes = new u1[size];
+        ifs.read((char *) &bytes[0], size);
+        ifs.close();
+
+        reader.init(bytes, size);
+    }
+
+    ~ClassFile() {
+        delete[]bytes;
     }
 
     u4 magic = 0;
@@ -60,8 +85,3 @@ private:
     void readAttributes();
 
 };
-
-
-void print_methods(MethodInfo **bufs, int length, ConstantPool *constant_pool);
-
-

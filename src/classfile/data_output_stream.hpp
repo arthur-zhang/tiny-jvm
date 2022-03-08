@@ -9,6 +9,10 @@ using namespace std;
 
 class DataOutputStream {
 public:
+    explicit DataOutputStream(const string &inputPath) {
+        stream_ = std::ofstream(inputPath, std::ios::out | std::ios::binary | std::ios::trunc);
+    }
+
     void writeUInt32(u4 value) {
         writeUInt8((value >> 24) & 0xFF);
         writeUInt8((value >> 16) & 0xFF);
@@ -22,7 +26,7 @@ public:
     }
 
     void writeUInt8(u1 value) {
-        stream_->write(reinterpret_cast<const char *>(&value), 1);
+        stream_.write(reinterpret_cast<const char *>(&value), 1);
     }
 
     void writeBytes(const u1 *bytes, u4 length) {
@@ -32,14 +36,16 @@ public:
     }
 
     void flush() {
-        stream_->flush();
-        stream_->close();
+        stream_.flush();
+        stream_.close();
     }
 
-    DataOutputStream(const string &inputPath) {
-        stream_ = new std::ofstream(inputPath, std::ofstream::out | std::ofstream::binary | std::ofstream::trunc);
+
+    ~DataOutputStream() {
+        stream_.flush();
+        stream_.close();
     }
 
 private:
-    std::ofstream *stream_ = nullptr;
+    std::ofstream stream_;
 };

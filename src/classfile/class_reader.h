@@ -12,10 +12,22 @@
 #include "types.hpp"
 
 class ClassReader {
+private:
+    u1 *buffer_start_ = nullptr;
+    u1 *buffer_end_ = nullptr;
+    u1 *cur_ = nullptr;
 public:
-    ClassReader(const std::string &filePath) : dataStream_(filePath, std::ios::binary) {}
+    ClassReader() {}
+
+
+    void init(u1 *bytes, size_t length) {
+        buffer_start_ = bytes;
+        buffer_end_ = buffer_start_ + length;
+        cur_ = buffer_start_;
+    }
 
     u1 peek1();
+
     u2 peek2();
 
     u1 readUint8();
@@ -26,8 +38,6 @@ public:
 
     u1 *readBytes(int n);
 
-private:
-    std::ifstream dataStream_;
 };
 
 

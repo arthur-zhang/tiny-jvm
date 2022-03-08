@@ -1,39 +1,43 @@
 #include "class_reader.h"
 
+#define READ_U2(v, p)  v = ((p)[0]<<8)|(p)[1];
+#define READ_U4(v, p)  v = ((p)[0]<<24)|((p)[1]<<16)|((p)[2]<<8)|(p)[3];
+
 u1 ClassReader::peek1() {
-    u1 first = dataStream_.peek();
-    return first;
+    return *cur_;
 }
 
 u2 ClassReader::peek2() {
-    u1 first = dataStream_.get();
-    u1 second = dataStream_.peek();
-    dataStream_.unget();
-    return ((first << 8) + second) & 0xFFFF;
+    u2 ret;
+    READ_U2(ret, cur_);
+    return ret;
 }
 
 u1 ClassReader::readUint8() {
-    u1 result;
-    dataStream_.read((char *) &result, sizeof(u1));
-    return result;
+    return *cur_++;
 }
 
 u2 ClassReader::readUInt16() {
-    u2 result;
-    dataStream_.read((char *) &result, sizeof(u2));
-    return htons(result);
+    u2 ret;
+    READ_U2(ret, cur_);
+    cur_ += 2;
+    return ret;
 }
 
 u4 ClassReader::readUInt32() {
-    u4 result;
-    dataStream_.read((char *) &result, sizeof(u4));
-    return htonl(result);
+    u4 ret;
+    READ_U4(ret, cur_);
+    cur_ += 4;
+    return ret;
 }
 
 u1 *ClassReader::readBytes(int n) {
-    u1 *bytes = new u1[n];
+    u1 *to = new u1[n];
+    u1 *ret = to;
+    u1 *from = cur_;
     for (int i = 0; i < n; ++i) {
-        bytes[i] = readUint8();
+        *to++ = *from++;
     }
-    return bytes;
+    cur_ += n;
+    return ret;
 }
