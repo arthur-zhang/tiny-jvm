@@ -11,6 +11,7 @@ namespace fs = std::filesystem;
 //    os.writeUInt32((u4) JVM_CLASSFILE_MAGIC);
 //    os.flush();
 //}
+using namespace ujvm;
 
 TEST(test_classfile, dump_file) {
     ClassFile cf{"/Users/arthur/cvt_dev/clion/tiny-jvm/Test.class"};
