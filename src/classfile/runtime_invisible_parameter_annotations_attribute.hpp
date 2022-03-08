@@ -4,6 +4,7 @@
 
 #ifndef TINY_JVM_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS_ATTRIBUTE_HPP
 #define TINY_JVM_RUNTIME_INVISIBLE_PARAMETER_ANNOTATIONS_ATTRIBUTE_HPP
+
 #include "attribute_info.h"
 #include "annotations.hpp"
 
@@ -12,7 +13,12 @@ public:
     u1 num_parameters;
     Annotations **parameter_annotations = nullptr;        // [num_parameters];
 
-    ~RuntimeInvisibleParameterAnnotations_attribute();
+    ~RuntimeInvisibleParameterAnnotations_attribute() {
+        for (int pos = 0; pos < num_parameters; pos++) {
+            delete parameter_annotations[pos];
+        }
+        delete parameter_annotations;
+    }
 
     RuntimeInvisibleParameterAnnotations_attribute(ClassReader &reader) : AttributeInfo(reader) {
         num_parameters = reader.readUint8();

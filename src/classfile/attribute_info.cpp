@@ -1,6 +1,6 @@
 #include "attribute_info.h"
 #include "const.h"
-#include "annotation_default.h"
+#include "annotation_default.hpp"
 #include "runtime_visible_annotations_attribute.hpp"
 #include "bootstrap_methods_attribute.h"
 #include "code_attribute.h"
@@ -131,11 +131,6 @@ AttributeInfo *AttributeInfo::readAttributeInfo(ClassReader &reader, ConstantPoo
     }
 }
 
-AttributeInfo::AttributeInfo(ClassReader &reader) {
-    attribute_name_index = reader.readUInt16();
-    attribute_length = reader.readUInt32();
-}
-
 u2 AttributeInfo::attributeName2Tag(u2 attribute_name_index, ConstantPool *constant_pool) {
     String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
     if (attribute_table.find(str) != attribute_table.end()) {
@@ -145,10 +140,6 @@ u2 AttributeInfo::attributeName2Tag(u2 attribute_name_index, ConstantPool *const
     assert(false);
 }
 
-void AttributeInfo::dump(DataOutputStream &os) {
-    os.writeUInt16(attribute_name_index);
-    os.writeUInt32(attribute_length);
-}
 
 
 

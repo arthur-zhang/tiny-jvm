@@ -8,7 +8,7 @@
 #include "String.h"
 #include "data_output_stream.hpp"
 #include "constant.hpp"
-#include "annotation_default.h"
+#include "annotation_default.hpp"
 #include "runtime_visible_annotations_attribute.hpp"
 #include "array_element_value.h"
 #include "bootstrap_methods_attribute.h"

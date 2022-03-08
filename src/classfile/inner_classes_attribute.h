@@ -30,7 +30,7 @@ public:
         }
     }
 
-    virtual ~InnerClassesAttribute() {
+    ~InnerClassesAttribute() {
         for (int i = 0; i < number_of_classes; ++i) {
             delete classes[i];
         }

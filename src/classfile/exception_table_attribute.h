@@ -29,7 +29,7 @@ public:
         }
     }
 
-    virtual ~ExceptionTableAttribute() {
+    ~ExceptionTableAttribute() {
         delete[]exception_index_table;
     }
 };
