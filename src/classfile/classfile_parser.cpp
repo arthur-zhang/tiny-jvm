@@ -1110,16 +1110,9 @@ void print_constant_pool(ConstantPool *constantPool) {
 }
 
 void ClassFile::readMagic() {
-    u1 c1 = reader.readUint8();
-    u1 c2 = reader.readUint8();
-    u1 c3 = reader.readUint8();
-    u1 c4 = reader.readUint8();
-    magic = c1 << 24 | c2 << 16 | c3 << 8 | c4;
+    magic = reader.readUInt32();
     if (magic != 0xCAFEBABE) {
-//        cout << "Bad magic value" << endl;
-        exit(1);
-    } else {
-//        cout << "ok magic value" << endl;
+        PANIC("Bad magic value");
     }
 }
 
