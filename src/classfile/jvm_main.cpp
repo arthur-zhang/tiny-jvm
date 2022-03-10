@@ -50,7 +50,7 @@ void error_handler(int sig) {
 }
 
 int main() {
-    signal(SIGSEGV, error_handler);   // install our handler
+    signal(SIGSEGV, error_handler);
 
     std::string classesDirPath = "/Users/arthur/cvt_dev/jvm/wind_jvm/sun_src";
     for (const auto &entry: fs::recursive_directory_iterator(classesDirPath)) {
@@ -79,13 +79,8 @@ int main() {
         if (!compare_files(classFilePath, dumpFile)) {
             cout << "not equal, path: " << classFilePath << endl;
             break;
-        } else {
-            cout << "is equal" << endl;
         }
-
-        cout << "..." << endl;
-
-//        std::filesystem::remove(dumpFile);
+        std::filesystem::remove(dumpFile);
     }
     cout << "all done";
     return 0;
