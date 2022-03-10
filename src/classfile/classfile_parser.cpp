@@ -119,14 +119,14 @@ namespace ujvm {
             case 0: {        // ConstantValue
                 std::cout << "(DEBUG)   ConstantValue: ";
                 u2 index = ((ConstantValueAttribute *) ptr)->constant_value_index;
-                switch (constant_pool[index - 1]->tag) {
+                switch (constant_pool[index]->tag) {
                     case CONSTANT_Long: {
-                        std::cout << "long " << ((CONSTANT_Long_info *) constant_pool[index - 1])->getConstant() << "l"
+                        std::cout << "long " << ((CONSTANT_Long_info *) constant_pool[index])->getConstant() << "l"
                                   << std::endl;
                         break;
                     }
                     case CONSTANT_Float: {
-                        float result = ((CONSTANT_Float_info *) constant_pool[index - 1])->getConstant();
+                        float result = ((CONSTANT_Float_info *) constant_pool[index])->getConstant();
                         std::cout << "float ";
                         if (result == FLOAT_INFINITY)
                             std::cout << "Infinityf" << std::endl;
@@ -139,12 +139,12 @@ namespace ujvm {
                         break;
                     }
                     case CONSTANT_Integer: {
-                        std::cout << "int " << ((CONSTANT_Integer_info *) constant_pool[index - 1])->getConstant()
+                        std::cout << "int " << ((CONSTANT_Integer_info *) constant_pool[index])->getConstant()
                                   << std::endl;
                         break;
                     }
                     case CONSTANT_Double: {
-                        double result = ((CONSTANT_Double_info *) constant_pool[index - 1])->getConstant();
+                        double result = ((CONSTANT_Double_info *) constant_pool[index])->getConstant();
                         std::cout << "double ";
                         if (result == DOUBLE_INFINITY)
                             std::cout << "Infinityd" << std::endl;
@@ -158,11 +158,11 @@ namespace ujvm {
                     }
                     case CONSTANT_String: {
                         // search for two times.
-                        u2 string_index = ((CONSTANT_String_info *) constant_pool[index - 1])->index;
-                        assert (constant_pool[string_index - 1]->tag == CONSTANT_Utf8);
+                        u2 string_index = ((CONSTANT_String_info *) constant_pool[index])->index;
+                        assert (constant_pool[string_index]->tag == CONSTANT_Utf8);
                         std::cout << "String ";
                         // std::wcout.imbue(std::locale(""));
-                        std::wcout << ((CONSTANT_Utf8_info *) constant_pool[string_index - 1])->getConstant()
+                        std::wcout << ((CONSTANT_Utf8_info *) constant_pool[string_index])->getConstant()
                                    << std::endl;
                         wcout.clear();        // 防止 fuckking 拉丁文。
                         break;
@@ -408,15 +408,15 @@ namespace ujvm {
                 auto *throws_ptr = (ExceptionTableAttribute *) ptr;
                 std::cout << "(DEBUG)     throws ";
                 for (int k = 0; k < throws_ptr->number_of_exceptions; k++) {        // same as print_method().
-                    assert (constant_pool[throws_ptr->exception_index_table[k] - 1]->tag ==
+                    assert (constant_pool[throws_ptr->exception_index_table[k]]->tag ==
                             CONSTANT_Class);    // throw a Exception class
                     assert (constant_pool[
                                     ((CONSTANT_Class_info *) constant_pool[throws_ptr->exception_index_table[k] -
                                                                            1])->index -
                                     1]->tag == CONSTANT_Utf8);
                     std::wcout << ((CONSTANT_Utf8_info *) constant_pool[
-                            ((CONSTANT_Class_info *) constant_pool[throws_ptr->exception_index_table[k] - 1])->index -
-                            1])->getConstant() << " ";
+                            ((CONSTANT_Class_info *) constant_pool[throws_ptr->exception_index_table[k]])->index])->getConstant()
+                               << " ";
                     // Exceptions_attribute -> CONSTANT_class_info -> CONSTANT_Utf8_info
                 }
                 std::cout << std::endl << "(DEBUG)" << std::endl;
@@ -432,7 +432,7 @@ namespace ujvm {
                     int inner_name_index = inner_ptr->classes[i]->inner_name_index;
 //				cout << "..." <<	inner_class_info_index << " "<< outer_class_info_index << " " << inner_name_index << endl;	// delete
                     wstring inner_class_info = ((CONSTANT_Utf8_info *) constant_pool[
-                            ((CONSTANT_Class_info *) constant_pool[inner_class_info_index - 1])->index -
+                            ((CONSTANT_Class_info *) constant_pool[inner_class_info_index])->index -
                             1])->getConstant();
                     // parse inner class access flags
                     u2 access_flags = inner_ptr->classes[i]->inner_class_access_flags;
@@ -500,7 +500,7 @@ namespace ujvm {
                     } else if (inner_name_index == 0 && outer_class_info_index != 0) {
                         wstring outer_class_info = (outer_class_info_index != 0)
                                                    ? ((CONSTANT_Utf8_info *) constant_pool[
-                                        ((CONSTANT_Class_info *) constant_pool[outer_class_info_index - 1])->index -
+                                        ((CONSTANT_Class_info *) constant_pool[outer_class_info_index])->index -
                                         1])->getConstant()
                                                    : L"";        // *** 防止 openjdk 8 java/lang/String parse 不了，会被 assert 给停止！
                         std::wcout << "(DEBUG)    " << ss.str().c_str() << " #" << outer_class_info_index
@@ -512,7 +512,7 @@ namespace ujvm {
                                    << inner_class_info_index << " of #" << outer_class_info_index;
                         wstring outer_class_info = (outer_class_info_index != 0)
                                                    ? ((CONSTANT_Utf8_info *) constant_pool[
-                                        ((CONSTANT_Class_info *) constant_pool[outer_class_info_index - 1])->index -
+                                        ((CONSTANT_Class_info *) constant_pool[outer_class_info_index])->index -
                                         1])->getConstant()
                                                    : L"";
                         wstring inner_name = ((CONSTANT_Utf8_info *) constant_pool[inner_name_index -
@@ -528,12 +528,12 @@ namespace ujvm {
                 std::cout << "(DEBUG) EnclosingMethod: #" << enclosing_ptr->class_index << ".#"
                           << enclosing_ptr->method_index;
                 wstring class_info = ((CONSTANT_Utf8_info *) constant_pool[
-                        ((CONSTANT_Class_info *) constant_pool[enclosing_ptr->class_index - 1])->index -
+                        ((CONSTANT_Class_info *) constant_pool[enclosing_ptr->class_index])->index -
                         1])->getConstant();
                 std::wcout << "   // " << class_info;
                 if (enclosing_ptr->method_index != 0) {
                     wstring method_info = ((CONSTANT_Utf8_info *) constant_pool[
-                            ((CONSTANT_Class_info *) constant_pool[enclosing_ptr->method_index - 1])->index -
+                            ((CONSTANT_Class_info *) constant_pool[enclosing_ptr->method_index])->index -
                             1])->getConstant();
                     std::wcout << "." << method_info;
                 }
@@ -546,7 +546,7 @@ namespace ujvm {
             }
             case 7: {    // Signature
                 auto *signature_ptr = (SignatureAttribute *) ptr;
-                assert (constant_pool[signature_ptr->signature_index - 1]->tag == CONSTANT_Utf8);
+                assert (constant_pool[signature_ptr->signature_index]->tag == CONSTANT_Utf8);
                 std::wcout << "(DEBUG)   Signature: #" << signature_ptr->signature_index << " "
                            << ((CONSTANT_Utf8_info *) constant_pool[signature_ptr->signature_index -
                                                                     1])->getConstant() << std::endl;
@@ -754,8 +754,8 @@ namespace ujvm {
                         std::cout << "(DEBUG)    NONAME"
                                   << std::endl;        // TODO: Java8 Specification $4.7.24 指出这里有可能是 0。不过还没有试验出来...
                     } else {
-                        assert(constant_pool[name_index - 1]->tag == CONSTANT_Utf8);
-                        wstring name = ((CONSTANT_Utf8_info *) constant_pool[name_index - 1])->getConstant();
+                        assert(constant_pool[name_index]->tag == CONSTANT_Utf8);
+                        wstring name = ((CONSTANT_Utf8_info *) constant_pool[name_index])->getConstant();
                         // 1. print [name]
                         std::wcout << "(DEBUG)    " << name << " ";
                         // 2. print [access_flags]
@@ -862,7 +862,7 @@ namespace ujvm {
                 flags_num++;
             }
             // parse name_index
-            assert (constant_pool->getConstantPool()[bufs[i]->name_index - 1]->tag == CONSTANT_Utf8);
+            assert (constant_pool->getConstantPool()[bufs[i]->name_index]->tag == CONSTANT_Utf8);
             std::wstring method_name = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[bufs[i]->name_index -
                                                                                                 1])->getConstant();    // get function_name
             // first parse Exception_attribute to output name!! because there should be output `throws messages`! in fact this should be written in print_attributes() function...
@@ -877,18 +877,18 @@ namespace ujvm {
                     }
                     auto *throws_ptr = (ExceptionTableAttribute *) bufs[i]->attributes[pos];
                     for (int k = 0; k < throws_ptr->number_of_exceptions; k++) {
-                        assert (constant_pool->getConstantPool()[throws_ptr->exception_index_table[k] - 1]->tag ==
+                        assert (constant_pool->getConstantPool()[throws_ptr->exception_index_table[k]]->tag ==
                                 CONSTANT_Class);    // throw a Exception class
                         assert (constant_pool->getConstantPool()[
                                         ((CONSTANT_Class_info *) constant_pool->getConstantPool()[
                                                 throws_ptr->exception_index_table[k] -
-                                                1])->index - 1]->tag == CONSTANT_Utf8);
+                                                1])->index]->tag == CONSTANT_Utf8);
                         std::wcout << ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[
                                 (
                                         (CONSTANT_Class_info *)
                                                 constant_pool->getConstantPool()[throws_ptr->exception_index_table[k] -
                                                                                  1]
-                                )->index - 1
+                                )->index
                         ])->getConstant() << " ";
                         // Exceptions_attribute -> CONSTANT_class_info -> CONSTANT_Utf8_info
                     }
@@ -896,7 +896,7 @@ namespace ujvm {
             }
             std::wcout << method_name << L";\n";
             // parse descriptor_index
-            assert (constant_pool->getConstantPool()[bufs[i]->descriptor_index - 1]->tag == CONSTANT_Utf8);
+            assert (constant_pool->getConstantPool()[bufs[i]->descriptor_index]->tag == CONSTANT_Utf8);
             std::wcout << "(DEBUG)   descriptor: "
                        << ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[bufs[i]->descriptor_index -
                                                                                    1])->getConstant()

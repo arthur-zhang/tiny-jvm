@@ -30,5 +30,3 @@ public:
     static u2 attributeName2Tag(u2 attribute_name_index,
                                 ConstantPool *constant_pool);
 };
-
-inline AttributeInfo::~AttributeInfo() {}

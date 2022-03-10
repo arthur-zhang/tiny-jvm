@@ -250,7 +250,7 @@ public:
 
     CONSTANT_Utf8_info(ClassReader &reader) : Constant(reader) {
         length = reader.readUInt16();
-        bytes = reader.readBytes(length);
+        if (length > 0) bytes = reader.readBytes(length);
     }
 
     void dump(DataOutputStream &os) override {

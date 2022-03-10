@@ -48,20 +48,20 @@ namespace ujvm {
                 for (int i = 0; i < fields_count; ++i) {
                     delete fields[i];
                 }
-                delete fields;
+                delete []fields;
             }
             if (methods_count > 0) {
 
                 for (int i = 0; i < methods_count; ++i) {
                     delete methods[i];
                 }
-                delete methods;
+                delete []methods;
             }
             if (attributes_count > 0) {
                 for (int i = 0; i < attributes_count; ++i) {
                     delete attributes[i];
                 }
-                delete attributes;
+                delete []attributes;
             }
         }
 

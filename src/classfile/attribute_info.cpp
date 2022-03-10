@@ -126,18 +126,20 @@ AttributeInfo *AttributeInfo::readAttributeInfo(ClassReader &reader, ConstantPoo
         }
         default: {
             std::cerr << "can't go there! map has not this error tag " << tag << "!" << std::endl;
-            assert(false);
+            PANIC("can't go there!");
         }
     }
 }
 
 u2 AttributeInfo::attributeName2Tag(u2 attribute_name_index, ConstantPool *constant_pool) {
-    strings::String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
+    strings::String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index])->getConstant();
     if (attribute_table.find(str) != attribute_table.end()) {
         return attribute_table[str];
     }
-    std::cerr << "my jvm don't alloc a new attribute, because we don't have a compiler~" << std::endl;
-    assert(false);
+    PANIC("attributeName2Tag failed, %d", attribute_name_index);
+}
+
+AttributeInfo::~AttributeInfo() {
 }
 
 
