@@ -1051,7 +1051,7 @@ namespace ujvm {
 
     ClassFile::ClassFile(const string &filePath) {
         size_ = std::filesystem::file_size(filePath);
-        std::ifstream ifs(filePath, ios::in | ios::binary);
+        std::ifstream ifs(filePath, std::ios::in | std::ios::binary);
 
         bytes_ = new u1[size_];
         ifs.read((char *) &bytes_[0], size_);
