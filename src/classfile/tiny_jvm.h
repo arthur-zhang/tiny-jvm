@@ -1,4 +1,7 @@
 #pragma once
+#include <cstdio>
+#include <cstdlib>
+
 #define PANIC(fmt, ...) \
     do { \
        (void) fprintf(stderr, "\n\n\n*** (panic) *** [%s:%d]: " fmt "\n\n\n", \

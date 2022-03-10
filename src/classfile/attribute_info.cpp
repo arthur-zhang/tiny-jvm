@@ -132,7 +132,7 @@ AttributeInfo *AttributeInfo::readAttributeInfo(ClassReader &reader, ConstantPoo
 }
 
 u2 AttributeInfo::attributeName2Tag(u2 attribute_name_index, ConstantPool *constant_pool) {
-    String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
+    strings::String str = ((CONSTANT_Utf8_info *) constant_pool->getConstantPool()[attribute_name_index - 1])->getConstant();
     if (attribute_table.find(str) != attribute_table.end()) {
         return attribute_table[str];
     }

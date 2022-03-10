@@ -1,9 +1,4 @@
-//
-// Created by ya on 2022/3/6.
-//
-
-#ifndef TINY_JVM_SOURCE_FILE_ATTRIBUTE_H
-#define TINY_JVM_SOURCE_FILE_ATTRIBUTE_H
+#pragma once
 
 #include "attribute_info.h"
 
@@ -16,15 +11,9 @@ public:
         os.writeUInt16(source_file_index);
     }
 
-    SourceFileAttribute(ClassReader &reader);
+    SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
+        source_file_index = reader.readUInt16();
+    }
 
-    virtual ~SourceFileAttribute();
+    virtual ~SourceFileAttribute() = default;
 };
-
-SourceFileAttribute::SourceFileAttribute(ClassReader &reader) : AttributeInfo(reader) {
-    source_file_index = reader.readUInt16();
-}
-
-SourceFileAttribute::~SourceFileAttribute() {}
-
-#endif //TINY_JVM_SOURCE_FILE_ATTRIBUTE_H

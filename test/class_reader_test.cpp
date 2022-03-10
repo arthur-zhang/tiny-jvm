@@ -13,6 +13,28 @@ namespace fs = std::filesystem;
 //}
 using namespace ujvm;
 
+u1 *getBytes(string &str) {
+    size_t len = str.length();
+    u1 *bytes = new u1[len];
+    std::copy(str.begin(), str.end(), bytes);
+    return bytes;
+}
+
+
+TEST(test_classfile, mutf8_test) {
+
+    u1 bytes[] = {104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33};
+    strings::String s = decodeMUTF8(bytes, std::size(bytes));
+    wcout << "s:" << s << endl;
+    u1 bytes2[] = {
+            104, 101, 108, 108, 111, 32, 119, 111,
+            114, 108, 100, 33, 230, 140, 150, 229,
+            157, 145, 231, 154, 132, 229, 188, 160,
+            229, 184, 136, 229, 130, 133
+    };
+    cout << "str: " << strings::toStdString(decodeMUTF8(bytes2, std::size(bytes2))) << endl;
+}
+
 TEST(test_classfile, dump_file) {
     ClassFile cf{"/Users/arthur/cvt_dev/clion/tiny-jvm/Test.class"};
     cf.parse();

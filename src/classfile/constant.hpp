@@ -9,6 +9,7 @@
 #include "String.h"
 #include "const.h"
 #include "data_output_stream.hpp"
+#include "vm_utils.h"
 
 class Constant {
 public:
@@ -242,7 +243,7 @@ public:
     }
 };
 
-class CONSTANT_Utf8_info : public Constant {       // string literal
+class CONSTANT_Utf8_info : public Constant {
 public:
     u2 length;
     u1 *bytes = nullptr;
@@ -259,12 +260,12 @@ public:
         os.writeBytes(bytes, length);
     }
 
-    String getConstant() {
-        return fromBytes(bytes, length);
+    strings::String getConstant() {
+        return decodeMUTF8(bytes, length);
     }
 
     ~CONSTANT_Utf8_info() {
-        if (bytes != nullptr) delete[]bytes;
+        delete[]bytes;
     }
 };
 

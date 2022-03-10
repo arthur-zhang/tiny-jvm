@@ -3,6 +3,7 @@
 //
 
 #pragma once
+
 #include <unordered_map>
 #include "String.h"
 #include "types.hpp"
@@ -262,9 +263,9 @@ static std::unordered_map<u1, std::pair<std::string, int>> bccode_map{    // pai
 #define ATTRIBUTE_AnnotationDefault 20
 #define ATTRIBUTE_BootstrapMethods 21
 #define ATTRIBUTE_MethodParameters 22
-
+using namespace ujvm;
 #define ATTRIBUTE_INVALID 99
-static std::unordered_map<String, int> attribute_table{
+static std::unordered_map<strings::String, int> attribute_table{
         {L"ConstantValue",                        ATTRIBUTE_ConstantValue},
         {L"Code",                                 ATTRIBUTE_Code},
         {L"StackMapTable",                        ATTRIBUTE_StackMapTable},
