@@ -1061,27 +1061,20 @@ namespace ujvm {
     }
 
     ClassFile::~ClassFile() {
-        if (size_ > 0) delete[]bytes_;
+        delete[]bytes_;
         delete constantPool;
         if (interfaces_count > 0) delete[]interfaces;
-        if (fields_count > 0) {
-            for (int i = 0; i < fields_count; ++i) {
-                delete fields[i];
-            }
-            delete[]fields;
+        for (int i = 0; i < fields_count; ++i) {
+            delete fields[i];
         }
-        if (methods_count > 0) {
-
-            for (int i = 0; i < methods_count; ++i) {
-                delete methods[i];
-            }
-            delete[]methods;
+        delete[]fields;
+        for (int i = 0; i < methods_count; ++i) {
+            delete methods[i];
         }
-        if (attributes_count > 0) {
-            for (int i = 0; i < attributes_count; ++i) {
-                delete attributes[i];
-            }
-            delete[]attributes;
+        delete[]methods;
+        for (int i = 0; i < attributes_count; ++i) {
+            delete attributes[i];
         }
+        delete[]attributes;
     }
 }

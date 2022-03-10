@@ -34,7 +34,7 @@ namespace ujvm {
         u4 magic = 0;
         u2 minor_version = 0;
         u2 major_version = 0;
-        ConstantPool *constantPool;
+        ConstantPool *constantPool = nullptr;
         u2 access_flags = 0;
         u2 this_class = 0;
         u2 super_class = 0;
