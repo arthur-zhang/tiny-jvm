@@ -2,7 +2,7 @@
 
 #include "shared/types.h"
 #include "class_reader.h"
-#include "data_output_stream.hpp"
+#include "data_output_stream.h"
 
 class ElementValue {
 public:

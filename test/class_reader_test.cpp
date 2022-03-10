@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <ujvm/classfile/data_output_stream.hpp>
+#include <ujvm/classfile/data_output_stream.h>
 #include <ujvm/classfile/const.h>
 #include <ujvm/classfile/classfile_parser.h>
 #include <filesystem>

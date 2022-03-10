@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "class_reader.h"
-#include "constant.hpp"
+#include "constant.h"
 
 using namespace std;
 

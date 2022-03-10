@@ -3,10 +3,10 @@
 #include "shared/types.h"
 #include "class_reader.h"
 #include "shared/string.h"
-#include "constant_pool.hpp"
+#include "constant_pool.h"
 #include "element_value.h"
-#include "annotations.hpp"
-#include "data_output_stream.hpp"
+#include "annotations.h"
+#include "data_output_stream.h"
 
 class AttributeInfo {
 public:

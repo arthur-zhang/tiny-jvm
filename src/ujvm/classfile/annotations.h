@@ -3,7 +3,7 @@
 #include "shared/types.h"
 #include "class_reader.h"
 #include "shared/string.h"
-#include "constant_pool.hpp"
+#include "constant_pool.h"
 #include "element_value.h"
 
 class Annotations {

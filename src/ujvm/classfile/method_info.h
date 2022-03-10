@@ -6,7 +6,7 @@
 #define TINY_JVM_METHOD_INFO_H
 
 #include "class_reader.h"
-#include "constant_pool.hpp"
+#include "constant_pool.h"
 #include "attribute_info.h"
 
 class MethodInfo {

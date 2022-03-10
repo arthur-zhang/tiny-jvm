@@ -2,13 +2,13 @@
 // Created by ya on 2022/3/2.
 //
 
-#ifndef TINY_JVM_CONSTANT_HPP
-#define TINY_JVM_CONSTANT_HPP
+#ifndef TINY_JVM_CONSTANT_H
+#define TINY_JVM_CONSTANT_H
 
 #include "class_reader.h"
 #include "shared/string.h"
 #include "const.h"
-#include "data_output_stream.hpp"
+#include "data_output_stream.h"
 #include "vm_utils.h"
 
 class Constant {
@@ -360,4 +360,4 @@ static Constant *readConstant(ClassReader &reader) {
     }
 }
 
-#endif //TINY_JVM_CONSTANT_HPP
+#endif //TINY_JVM_CONSTANT_H
