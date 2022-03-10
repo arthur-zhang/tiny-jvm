@@ -17,3 +17,23 @@ public:
 
     virtual ~ElementValue() = default;
 };
+
+class AnnotationEntry;//todo
+
+class AnnotationElementValue : public ElementValue {
+public:
+    AnnotationElementValue(ClassReader &reader, u1 tag);
+
+    AnnotationEntry *annotationEntry;
+
+    void dump(DataOutputStream &os) override;
+};
+
+class ClassElementValue : public ElementValue {
+public:
+    u2 class_info_index;
+
+    ClassElementValue(ClassReader &reader, u1 type);
+
+    void dump(DataOutputStream &os) override;
+};

@@ -3,11 +3,9 @@
 //
 
 #include "element_value.h"
-#include "annotation_element_value.h"
 #include "array_element_value.h"
 #include "simple_element_value.h"
 #include "enum_element_value.h"
-#include "class_element_value.h"
 
 ElementValue *ElementValue::readElementValue(ClassReader &reader) {
     u1 tag = reader.readUint8();
@@ -49,6 +47,21 @@ void ElementValue::dump(DataOutputStream &os) {
     os.writeUInt8(tag);
 }
 
+AnnotationElementValue::AnnotationElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
+    annotationEntry = new AnnotationEntry(reader);
+}
+
+void AnnotationElementValue::dump(DataOutputStream &os) {
+    ElementValue::dump(os);
+    annotationEntry->dump(os);
+}
 
 
+ClassElementValue::ClassElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
+    class_info_index = reader.readUInt16();
+}
 
+void ClassElementValue::dump(DataOutputStream &os) {
+    ElementValue::dump(os);
+    os.writeUInt16(class_info_index);
+}

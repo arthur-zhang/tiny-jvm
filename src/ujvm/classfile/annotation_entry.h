@@ -1,6 +1,7 @@
 #pragma once
 
 #include "element_value_pair.h"
+#include "annotation_entry.h"
 
 /**
  * represents one annotation in the annotation table

@@ -1,8 +1,6 @@
 #include "attribute_info.h"
 #include "const.h"
-#include "annotation_default.hpp"
 #include "runtime_visible_annotations_attribute.hpp"
-#include "bootstrap_methods_attribute.h"
 #include "code_attribute.h"
 #include "constant_value_attribute.h"
 #include "deprecated_attribute.h"
@@ -143,11 +141,89 @@ AttributeInfo::~AttributeInfo() {
 }
 
 
+BootstrapMethod::BootstrapMethod(ClassReader &reader) {
+    bootstrap_method_ref = reader.readUInt16();
+    num_bootstrap_arguments = reader.readUInt16();
+    if (num_bootstrap_arguments != 0)
+        bootstrap_arguments = new u2[num_bootstrap_arguments];
+    for (int pos = 0; pos < num_bootstrap_arguments; pos++) {
+        bootstrap_arguments[pos] = reader.readUInt16();
+    }
+}
+
+BootstrapMethod::~BootstrapMethod() {
+    if (num_bootstrap_arguments > 0) delete[]bootstrap_arguments;
+}
+
+void BootstrapMethod::dump(DataOutputStream &os) {
+    os.writeUInt16(bootstrap_method_ref);
+    os.writeUInt16(num_bootstrap_arguments);
+    for (int i = 0; i < num_bootstrap_arguments; i++) {
+        os.writeUInt16(bootstrap_arguments[i]);
+    }
+}
+
+BootstrapMethodsAttribute::BootstrapMethodsAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    num_bootstrap_methods = reader.readUInt16();
+    if (num_bootstrap_methods != 0)
+        bootstrap_methods = new BootstrapMethod *[num_bootstrap_methods];
+    for (int pos = 0; pos < num_bootstrap_methods; pos++) {
+        bootstrap_methods[pos] = new BootstrapMethod(reader);
+    }
+}
+
+BootstrapMethodsAttribute::~BootstrapMethodsAttribute() {
+    if (num_bootstrap_methods <= 0) return;
+    for (int i = 0; i < num_bootstrap_methods; ++i) {
+        delete bootstrap_methods[i];
+    }
+    delete[]bootstrap_methods;
+}
+
+void BootstrapMethodsAttribute::dump(DataOutputStream &os) {
+    AttributeInfo::dump(os);
+    os.writeUInt16(num_bootstrap_methods);
+    for (int pos = 0; pos < num_bootstrap_methods; pos++) {
+        bootstrap_methods[pos]->dump(os);
+    }
+}
 
 
+CodeAttribute::CodeAttribute(ClassReader &reader, ConstantPool *constantPool) : AttributeInfo(reader) {
+    max_stack = reader.readUInt16();
+    max_locals = reader.readUInt16();
+    code_length = reader.readUInt32();
+    if (code_length != 0) {
+        code = new u1[code_length];
+        code = reader.readBytes(code_length);
+    }
+    exception_table_length = reader.readUInt16();
+    if (exception_table_length != 0) {
+        exception_table = new ExceptionTable *[exception_table_length];
+        for (int pos = 0; pos < exception_table_length; pos++) {
+            exception_table[pos] = new ExceptionTable(reader);
+        }
+    }
+    attributes_count = reader.readUInt16();
+    if (attributes_count != 0)
+        attributes = new AttributeInfo *[attributes_count];
+    for (int pos = 0; pos < attributes_count; pos++) {
+        attributes[pos] = readAttributeInfo(reader, constantPool);
+    }
+}
 
-
-
-
-
-
+CodeAttribute::~CodeAttribute() {
+    if (code_length > 0) delete[] code;
+    if (attributes_count > 0) {
+        for (int i = 0; i < attributes_count; ++i) {
+            delete attributes[i];
+        }
+        delete[] attributes;
+    }
+    if (exception_table_length > 0) {
+        for (int i = 0; i < exception_table_length; ++i) {
+            delete exception_table[i];
+        }
+        delete[]exception_table;
+    }
+}

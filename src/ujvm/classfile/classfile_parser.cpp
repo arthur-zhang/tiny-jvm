@@ -8,14 +8,10 @@
 #include "shared/string.h"
 #include "data_output_stream.hpp"
 #include "constant.hpp"
-#include "annotation_default.hpp"
 #include "runtime_visible_annotations_attribute.hpp"
 #include "array_element_value.h"
-#include "bootstrap_methods_attribute.h"
 #include "simple_element_value.h"
 #include "enum_element_value.h"
-#include "class_element_value.h"
-#include "code_attribute.h"
 #include "runtime_visible_parameter_annotations_attribute.hpp"
 #include "method_prameters_attribute.h"
 #include "runtime_visible_type_annotations_attribute.hpp"
@@ -28,6 +24,7 @@
 #include "source_file_attribute.h"
 #include "line_number_table_attribute.h"
 #include "constant_value_attribute.h"
+#include "element_value.h"
 
 namespace ujvm {
 
