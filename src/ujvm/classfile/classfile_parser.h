@@ -26,44 +26,10 @@ namespace ujvm {
 
     class ClassFile final {
 
-
     public:
-        ClassFile(const std::string &filePath) {
-            std::ifstream ifs(filePath, ios::in | ios::ate | ios::binary);
-            size_ = ifs.tellg();
-            ifs.seekg(0);
+        ClassFile(const std::string &filePath);
 
-            bytes_ = new u1[size_];
-            ifs.read((char *) &bytes_[0], size_);
-            ifs.close();
-
-            reader.init(bytes_, size_);
-        }
-
-        ~ClassFile() {
-            if (size_ > 0) delete[]bytes_;
-            delete constantPool;
-            if (interfaces_count > 0) delete[]interfaces;
-            if (fields_count > 0) {
-                for (int i = 0; i < fields_count; ++i) {
-                    delete fields[i];
-                }
-                delete []fields;
-            }
-            if (methods_count > 0) {
-
-                for (int i = 0; i < methods_count; ++i) {
-                    delete methods[i];
-                }
-                delete []methods;
-            }
-            if (attributes_count > 0) {
-                for (int i = 0; i < attributes_count; ++i) {
-                    delete attributes[i];
-                }
-                delete []attributes;
-            }
-        }
+        ~ClassFile();
 
         u4 magic = 0;
         u2 minor_version = 0;
@@ -105,6 +71,5 @@ namespace ujvm {
         void readMethods();
 
         void readAttributes();
-
     };
 }

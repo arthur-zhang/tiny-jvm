@@ -1048,4 +1048,40 @@ namespace ujvm {
         }
         os.flush();
     }
+
+    ClassFile::ClassFile(const string &filePath) {
+        size_ = std::filesystem::file_size(filePath);
+        std::ifstream ifs(filePath, ios::in | ios::binary);
+
+        bytes_ = new u1[size_];
+        ifs.read((char *) &bytes_[0], size_);
+        ifs.close();
+
+        reader.init(bytes_, size_);
+    }
+
+    ClassFile::~ClassFile() {
+        if (size_ > 0) delete[]bytes_;
+        delete constantPool;
+        if (interfaces_count > 0) delete[]interfaces;
+        if (fields_count > 0) {
+            for (int i = 0; i < fields_count; ++i) {
+                delete fields[i];
+            }
+            delete[]fields;
+        }
+        if (methods_count > 0) {
+
+            for (int i = 0; i < methods_count; ++i) {
+                delete methods[i];
+            }
+            delete[]methods;
+        }
+        if (attributes_count > 0) {
+            for (int i = 0; i < attributes_count; ++i) {
+                delete attributes[i];
+            }
+            delete[]attributes;
+        }
+    }
 }
