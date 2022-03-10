@@ -8,22 +8,7 @@
 #include "shared/string.h"
 #include "data_output_stream.hpp"
 #include "constant.hpp"
-#include "runtime_visible_annotations_attribute.hpp"
-#include "array_element_value.h"
-#include "simple_element_value.h"
-#include "enum_element_value.h"
-#include "runtime_visible_parameter_annotations_attribute.hpp"
-#include "method_prameters_attribute.h"
-#include "runtime_visible_type_annotations_attribute.hpp"
-#include "target_info_t.h"
 #include "attribute_info.h"
-#include "exception_table_attribute.h"
-#include "inner_classes_attribute.h"
-#include "enclosing_method_attribute.h"
-#include "signature_attribute.hpp"
-#include "source_file_attribute.h"
-#include "line_number_table_attribute.h"
-#include "constant_value_attribute.h"
 #include "element_value.h"
 
 namespace ujvm {
@@ -610,107 +595,7 @@ namespace ujvm {
             }
             case 18:
             case 19: {    // Runtime(In)VisibleTypeAnnotations
-                if (attribute_tag == 18)
-                    std::cout << "(DEBUG)   RuntimeVisibleTypeAnnotations:" << std::endl;
-                else
-                    std::cout << "(DEBUG)   RuntimeInisibleTypeAnnotations:" << std::endl;
-                auto *annotations_ptr = (RuntimeVisibleTypeAnnotationsAttribute *) ptr;
-                for (int i = 0; i < annotations_ptr->num_annotations; i++) {
-                    type_annotation *ta = &annotations_ptr->annotations[i];
-                    // 1. print [annotation]
-                    AnnotationEntry *target = ta->anno;
-                    std::cout << "(DEBUG)     ";
-                    std::cout << recursive_parse_annotation(target) << std::endl;
-                    // 2. print [target_info]
-                    std::cout << "(DEBUG)     ";
-                    std::cout << "tag == " << hex << (int) ta->target_type
-                              << " ";    // TODO: NEW / CLASS_EXTENSIONS 信息显示
-                    switch (ta->target_type) {
-                        case 0x00:
-                        case 0x01: {    // target_info is [type_parameter_target]
-                            auto target = (type_parameter_target *) ta->target_info;
-                            std::cout << i << ": [type_parameter_target] " << "#" << target->type_parameter_index
-                                      << std::endl;
-                            break;
-                        }
-                        case 0x10: {    // target_info is [supertype_target]
-                            auto target = (supertype_target *) ta->target_info;
-                            std::cout << i << ": [supertype_target] " << "#" << target->supertype_index << std::endl;
-                            break;
-                        }
-                        case 0x11:
-                        case 0x12: {    // target_info is [type_parameter_bound_target]
-                            auto target = (type_parameter_bound_target *) ta->target_info;
-                            std::cout << i << ": [type_parameter_bound_target] " << "#" << target->type_parameter_index
-                                      << " #" << target->bound_index << std::endl;
-                            break;
-                        }
-                        case 0x13:
-                        case 0x14:
-                        case 0x15: {    // target_info is [empty_target]
-                            std::cout << i << ": [empty_target]" << std::endl;
-                            break;
-                        }
-                        case 0x16: {    // target_info is [formal_parameter_target]
-                            auto target = (formal_parameter_target *) ta->target_info;
-                            std::cout << i << ": [formal_parameter_target] " << "#" << target->formal_parameter_index
-                                      << std::endl;
-                            break;
-                        }
-                        case 0x17: {    // target_info is [throws_target]
-                            auto target = (throws_target *) ta->target_info;
-                            std::cout << i << ": [throws_target] " << "#" << target->throws_type_index << std::endl;
-                            break;
-                        }
-                        case 0x40:
-                        case 0x41: {    // target_info is [localvar_target]
-                            auto target = (localvar_target *) ta->target_info;
-                            std::cout << i << ": [localvar_target] " << std::endl;
-                            for (int pos = 0; pos < target->table_length; pos++) {
-                                auto table = target->table[pos];
-                                std::cout << "(DEBUG)       " << "index: " << table.index << ", start_pc: "
-                                          << table.start_pc << ", length: " << table.length << std::endl;
-                            }
-                            break;
-                        }
-                        case 0x42: {    // target_info is [catch_target]
-                            auto target = (catch_target *) ta->target_info;
-                            std::cout << i << ": [catch_target] " << "#" << target->exception_table_index << std::endl;
-                            break;
-                        }
-                        case 0x43:
-                        case 0x44:
-                        case 0x45:
-                        case 0x46: {    // target_info is [offset_target]
-                            auto target = (offset_target *) ta->target_info;
-                            std::cout << i << ": [offset_target] " << "#" << target->offset << std::endl;
-                            break;
-                        }
-                        case 0x47:
-                        case 0x48:
-                        case 0x49:
-                        case 0x4A:
-                        case 0x4B: {    // target_info is [type_argument_target]
-                            auto target = (type_argument_target *) ta->target_info;
-                            std::cout << i << ": [type_argument_target] " << "#" << target->offset << " #"
-                                      << target->type_argument_index << std::endl;
-                            break;
-                        }
-                        default: {
-                            std::cerr << "can't get here!" << std::endl;
-                            assert(false);
-                        }
-                    }
-                    // 3. print [target_path]
-                    type_path *path_ptr = ta->target_path;
-                    if (path_ptr->path_length != 0)
-                        std::cout << "(DEBUG)     ";
-                    for (int pos = 0; pos < path_ptr->path_length; pos++) {
-                        std::cout << "type_path_kind: " << (int) path_ptr->path[pos].type_path_kind
-                                  << "; type_argument_index: " << (int) path_ptr->path[pos].type_argument_index
-                                  << std::endl;
-                    }
-                }
+                // ignore
                 break;
             }
             case 20: {    // Annotation Default

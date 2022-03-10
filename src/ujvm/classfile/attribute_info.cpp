@@ -1,27 +1,5 @@
 #include "attribute_info.h"
 #include "const.h"
-#include "runtime_visible_annotations_attribute.hpp"
-#include "code_attribute.h"
-#include "constant_value_attribute.h"
-#include "deprecated_attribute.h"
-#include "runtime_invisible_annotations_attribute.hpp"
-#include "runtime_visible_parameter_annotations_attribute.hpp"
-#include "runtime_invisible_parameter_annotations_attribute.hpp"
-#include "method_parameter.h"
-#include "method_prameters_attribute.h"
-#include "runtime_visible_type_annotations_attribute.hpp"
-#include "runtime_invisible_type_annotations_attribute.hpp"
-#include "stack_map_table_attribute.h"
-#include "exception_table_attribute.h"
-#include "inner_classes_attribute.h"
-#include "enclosing_method_attribute.h"
-#include "synthetic_attribute.h"
-#include "signature_attribute.hpp"
-#include "source_file_attribute.h"
-#include "source_debug_extension_attribute.hpp"
-#include "line_number_table_attribute.h"
-#include "local_variable_table_attribute.h"
-#include "local_variable_type_table_attribute.h"
 
 AttributeInfo *AttributeInfo::readAttributeInfo(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();
@@ -226,4 +204,60 @@ CodeAttribute::~CodeAttribute() {
         }
         delete[]exception_table;
     }
+}
+
+ConstantValueAttribute::ConstantValueAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    constant_value_index = reader.readUInt16();
+}
+
+void ConstantValueAttribute::dump(DataOutputStream &os) {
+    AttributeInfo::dump(os);
+    os.writeUInt16(constant_value_index);
+}
+
+MethodParametersAttribute::MethodParametersAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    parameters_count = reader.readUint8();
+    if (parameters_count != 0)
+        parameters = new MethodParameter *[parameters_count];
+    for (int pos = 0; pos < parameters_count; pos++) {
+        parameters[pos] = new MethodParameter(reader);
+    }
+}
+
+MethodParametersAttribute::~MethodParametersAttribute() {
+    if (parameters_count <= 0)return;
+
+    for (int i = 0; i < parameters_count; ++i) {
+        delete parameters[i];
+    }
+    delete[]parameters;
+}
+
+StackMapTableAttribute::StackMapTableAttribute(ClassReader &reader) : AttributeInfo(reader) {
+    // todo later
+    bytes = reader.readBytes(attribute_length);
+}
+
+void StackMapTableAttribute::dump(DataOutputStream &os) {
+    AttributeInfo::dump(os);
+    os.writeBytes(bytes, attribute_length);
+}
+
+StackMapTableAttribute::~StackMapTableAttribute() {
+    if (attribute_length <= 0) return;
+    delete[] bytes;
+}
+
+ExceptionTable::ExceptionTable(ClassReader &reader) {
+    start_pc = reader.readUInt16();
+    end_pc = reader.readUInt16();
+    handler_pc = reader.readUInt16();
+    catch_type = reader.readUInt16();
+}
+
+void ExceptionTable::dump(DataOutputStream &os) {
+    os.writeUInt16(start_pc);
+    os.writeUInt16(end_pc);
+    os.writeUInt16(handler_pc);
+    os.writeUInt16(catch_type);
 }

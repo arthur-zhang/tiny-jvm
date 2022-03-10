@@ -3,9 +3,6 @@
 //
 
 #include "element_value.h"
-#include "array_element_value.h"
-#include "simple_element_value.h"
-#include "enum_element_value.h"
 
 ElementValue *ElementValue::readElementValue(ClassReader &reader) {
     u1 tag = reader.readUint8();
@@ -64,4 +61,57 @@ ClassElementValue::ClassElementValue(ClassReader &reader, u1 tag) : ElementValue
 void ClassElementValue::dump(DataOutputStream &os) {
     ElementValue::dump(os);
     os.writeUInt16(class_info_index);
+}
+
+SimpleElementValue::SimpleElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
+    const_value_index = reader.readUInt16();
+}
+
+ArrayElementValue::ArrayElementValue(ClassReader &reader, u1 tag) : ElementValue(reader, tag) {
+    num_values = reader.readUInt16();
+    if (num_values != 0) {
+        values = new ElementValue *[num_values]();
+    }
+    for (int pos = 0; pos < num_values; pos++) {
+        values[pos] = readElementValue(reader);
+    }
+}
+
+EnumElementValue::EnumElementValue(ClassReader &reader, uint8_t type) : ElementValue(reader, type) {
+    type_name_index = reader.readUInt16();
+    const_name_index = reader.readUInt16();
+}
+
+void EnumElementValue::dump(DataOutputStream &os) {
+    ElementValue::dump(os);
+    os.writeUInt16(type_name_index);
+    os.writeUInt16(const_name_index);
+}
+
+ElementValuePair::ElementValuePair(ClassReader &reader) {
+    element_name_index = reader.readUInt16();
+    value = ElementValue::readElementValue(reader);
+}
+
+void ElementValuePair::dump(DataOutputStream &os) {
+    os.writeUInt16(element_name_index);
+    value->dump(os);
+}
+
+AnnotationEntry::AnnotationEntry(ClassReader &reader) {
+    type_index = reader.readUInt16();
+    num_element_value_pairs = reader.readUInt16();
+    if (num_element_value_pairs == 0)return;
+    element_value_pairs = new ElementValuePair *[num_element_value_pairs];
+    for (int pos = 0; pos < num_element_value_pairs; pos++) {
+        element_value_pairs[pos] = new ElementValuePair(reader);
+    }
+}
+
+void AnnotationEntry::dump(DataOutputStream &os) {
+    os.writeUInt16(type_index);
+    os.writeUInt16(num_element_value_pairs);
+    for (int pos = 0; pos < num_element_value_pairs; pos++) {
+        element_value_pairs[pos]->dump(os);
+    }
 }

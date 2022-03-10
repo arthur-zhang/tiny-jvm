@@ -7,11 +7,8 @@
 
 #include "shared/types.h"
 #include "class_reader.h"
-#include "shared/string.h"
 #include "constant_pool.hpp"
-#include "exception_table.h"
 #include "element_value.h"
-#include "method_parameter.h"
 
 class target_info_t {
 public:
