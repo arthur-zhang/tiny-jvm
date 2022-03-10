@@ -944,9 +944,7 @@ namespace ujvm {
 
     void ClassFile::readMagic() {
         magic = reader.readUInt32();
-        if (magic != 0xCAFEBABE) {
-            PANIC("Bad magic value");
-        }
+        if (magic != 0xCAFEBABE) PANIC("Bad magic value");
     }
 
     void ClassFile::parse() {
