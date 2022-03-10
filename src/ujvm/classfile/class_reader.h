@@ -9,7 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include "types.hpp"
+#include "shared/types.h"
 
 class ClassReader {
 private:

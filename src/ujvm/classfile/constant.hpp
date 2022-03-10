@@ -6,7 +6,7 @@
 #define TINY_JVM_CONSTANT_HPP
 
 #include "class_reader.h"
-#include "String.h"
+#include "shared/string.h"
 #include "const.h"
 #include "data_output_stream.hpp"
 #include "vm_utils.h"

@@ -3,7 +3,6 @@ set(SOURCES ${SOURCES})
 
 message(${SOURCES})
 add_executable(tiny_jvm
-        classfile/jvm_main.cpp
         ${SOURCES}
         )
 

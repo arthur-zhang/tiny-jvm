@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.19.1)
 project(tiny_jvm)
 
 set(CMAKE_CXX_STANDARD 20)
-include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(src)
+include_directories(include)
 
 enable_testing()
 add_subdirectory(src)

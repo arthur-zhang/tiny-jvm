@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 
-#include <classfile/data_output_stream.hpp>
-#include <classfile/const.h>
-#include <classfile/classfile_parser.h>
+#include <ujvm/classfile/data_output_stream.hpp>
+#include <ujvm/classfile/const.h>
+#include <ujvm/classfile/classfile_parser.h>
 #include <filesystem>
 
 namespace fs = std::filesystem;
@@ -70,7 +70,6 @@ bool compare_files(const std::string classFilePath, const std::string dumpFile) 
 TEST(test_classfile, list_dir) {
     std::string classesDirPath = "/Users/arthur/cvt_dev/jvm/wind_jvm/sun_src";
     for (const auto &entry: fs::recursive_directory_iterator(classesDirPath)) {
-        std::cout << "entry: " << entry.path() << std::endl;
         if (!entry.is_regular_file()) {
             continue;
         }
@@ -83,19 +82,15 @@ TEST(test_classfile, list_dir) {
 
         std::string dumpFile = "/Users/arthur/cvt_dev/clion/tiny-jvm/" + entry.path().filename().string();
 
-        cout << classFilePath << endl;
         ClassFile cf(classFilePath);
         cf.parse();
         cf.dump(dumpFile);
 
-        cout << "dump done" << endl;
         if (!compare_files(classFilePath, dumpFile)) {
             cout << "not equal, path: " << classFilePath << endl;
             break;
         }
-        cout << "..." << endl;
-
-//        std::filesystem::remove(dumpFile);
+        std::filesystem::remove(dumpFile);
     }
     cout << "all done";
 }

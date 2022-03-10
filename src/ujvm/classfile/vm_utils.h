@@ -1,8 +1,8 @@
 #pragma once
 
-#include "types.hpp"
+#include "shared/types.h"
 #include "tiny_jvm.h"
-#include "String.h"
+#include "shared/string.h"
 
 using namespace ujvm;
 

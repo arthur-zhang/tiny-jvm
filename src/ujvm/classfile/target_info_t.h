@@ -5,9 +5,9 @@
 #ifndef TINY_JVM_TARGET_INFO_T_H
 #define TINY_JVM_TARGET_INFO_T_H
 
-#include "types.hpp"
+#include "shared/types.h"
 #include "class_reader.h"
-#include "String.h"
+#include "shared/string.h"
 #include "constant_pool.hpp"
 #include "exception_table.h"
 #include "element_value.h"

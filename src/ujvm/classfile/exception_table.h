@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.hpp"
+#include "shared/types.h"
 #include "class_reader.h"
 #include "data_output_stream.hpp"
 

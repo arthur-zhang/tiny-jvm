@@ -1,13 +1,8 @@
-//
-// Created by ya on 2022/3/6.
-//
+#pragma once
 
-#ifndef TINY_JVM_METHOD_PARAMETER_H
-#define TINY_JVM_METHOD_PARAMETER_H
-
-#include "types.hpp"
+#include "shared/types.h"
 #include "class_reader.h"
-#include "String.h"
+#include "shared/string.h"
 #include "constant_pool.hpp"
 #include "exception_table.h"
 #include "element_value.h"
@@ -33,6 +28,3 @@ public:
         os.writeUInt16(access_flags);
     }
 };
-
-
-#endif //TINY_JVM_METHOD_PARAMETER_H

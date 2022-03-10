@@ -13,8 +13,8 @@
 
 #include "tiny_jvm.h"
 #include "const.h"
-#include "types.hpp"
-#include "String.h"
+#include "shared/types.h"
+#include "shared/string.h"
 #include "constant_pool.hpp"
 #include "constant.hpp"
 #include "field_info.h"

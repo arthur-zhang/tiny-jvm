@@ -5,7 +5,7 @@
 #include <iostream>
 #include "classfile_parser.h"
 #include "field_info.h"
-#include "String.h"
+#include "shared/string.h"
 #include "data_output_stream.hpp"
 #include "constant.hpp"
 #include "annotation_default.hpp"

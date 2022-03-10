@@ -5,8 +5,8 @@
 #pragma once
 
 #include <unordered_map>
-#include "String.h"
-#include "types.hpp"
+#include "shared/string.h"
+#include "shared/types.h"
 #include <string>
 
 #define JVM_CLASSFILE_MAGIC  0xCAFEBABE

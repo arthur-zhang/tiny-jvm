@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "types.hpp"
+#include "shared/types.h"
 
 using namespace std;
 

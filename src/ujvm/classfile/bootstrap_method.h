@@ -1,7 +1,7 @@
 #pragma once
 
 #include "class_reader.h"
-#include "types.hpp"
+#include "shared/types.h"
 #include "data_output_stream.hpp"
 
 class BootstrapMethod {
