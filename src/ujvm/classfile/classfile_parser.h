@@ -9,12 +9,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <cstring>
+#include <shared/jstring.h>
 
 #include "tiny_jvm.h"
 #include "const.h"
 #include "shared/types.h"
-#include "shared/string.h"
 #include "constant_pool.h"
 #include "constant.h"
 #include "field_info.h"

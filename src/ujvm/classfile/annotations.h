@@ -2,7 +2,7 @@
 
 #include "shared/types.h"
 #include "class_reader.h"
-#include "shared/string.h"
+#include "shared/jstring.h"
 #include "constant_pool.h"
 #include "element_value.h"
 

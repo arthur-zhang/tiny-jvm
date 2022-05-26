@@ -5,7 +5,7 @@
 #pragma once
 
 #include <unordered_map>
-#include "shared/string.h"
+#include "shared/jstring.h"
 #include "shared/types.h"
 #include <string>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared/string.h"
+#include "shared/jstring.h"
 
 using namespace ujvm;
 

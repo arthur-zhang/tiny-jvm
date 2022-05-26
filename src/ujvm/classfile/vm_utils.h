@@ -2,7 +2,7 @@
 
 #include "shared/types.h"
 #include "tiny_jvm.h"
-#include "shared/string.h"
+#include "shared/jstring.h"
 
 using namespace ujvm;
 
