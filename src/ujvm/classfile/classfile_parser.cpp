@@ -159,7 +159,7 @@ namespace ujvm {
             case 1: {    // Code
                 std::cout << "(DEBUG)   Code: " << std::endl;
                 auto *code_ptr = (CodeAttribute *) ptr;
-                std::cout << "(DEBUG)     stack=" << code_ptr->max_stack << ", locals="
+                std::cout << "(DEBUG)     operandStack_=" << code_ptr->max_stack << ", locals="
                           << code_ptr->max_locals /*<< ", args_size=" << args_size*/
                           << std::endl;    // output arg_size need parse descriptor. not important.
                 // output bccode
@@ -341,14 +341,14 @@ namespace ujvm {
 //                    auto *frame = (StackMapTable_attribute::same_locals_1_stack_item_frame *) entry;
 //                    std::cout << "(DEBUG)       frame_type = " << dec << (int) frame->frame_type << "  /* stack_item */"
 //                              << std::endl;
-//                    std::wcout << "(DEBUG)         " << print_verfication(&frame->stack[0], 1, constant_pool)
+//                    std::wcout << "(DEBUG)         " << print_verfication(&frame->operandStack_[0], 1, constant_pool)
 //                               << std::endl;
 //                } else if (entry->frame_type == 247) {
 //                    auto *frame = (StackMapTable_attribute::same_locals_1_stack_item_frame_extended *) entry;
 //                    std::cout << "(DEBUG)       frame_type = " << dec << (int) frame->frame_type
 //                              << "  /* stack_item_extended */" << std::endl;
 //                    std::cout << "(DEBUG)         offset_delta = " << frame->offset_delta << std::endl;
-//                    std::wcout << "(DEBUG)         " << print_verfication(&frame->stack[0], 1, constant_pool)
+//                    std::wcout << "(DEBUG)         " << print_verfication(&frame->operandStack_[0], 1, constant_pool)
 //                               << std::endl;
 //                } else if (entry->frame_type >= 248 && entry->frame_type <= 250) {
 //                    auto *frame = (StackMapTable_attribute::chop_frame *) entry;
@@ -376,7 +376,7 @@ namespace ujvm {
 //                               << print_verfication(frame->locals, frame->number_of_locals, constant_pool, 0)
 //                               << std::endl;
 //                    std::wcout << "(DEBUG)         "
-//                               << print_verfication(frame->stack, frame->number_of_stack_items, constant_pool, 1)
+//                               << print_verfication(frame->operandStack_, frame->number_of_stack_items, constant_pool, 1)
 //                               << std::endl;
 //                } else {
 //                    std::cerr << "can't get here! in peek_stackmaptable_frame()" << std::endl;

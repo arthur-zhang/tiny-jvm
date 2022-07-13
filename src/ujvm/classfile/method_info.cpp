@@ -2,6 +2,9 @@
 #include "attribute_info.h"
 
 MethodInfo::MethodInfo(ClassReader &reader, ConstantPool *constantPool, int a) {
+
+    this->constantPool_ = constantPool;
+
     access_flags = reader.readUInt16();
     name_index = reader.readUInt16();
     descriptor_index = reader.readUInt16();

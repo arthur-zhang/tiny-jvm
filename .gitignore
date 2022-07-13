@@ -13,3 +13,4 @@ Makefile
 /Contended.class
 *.class
 /build
+/MyTest.java

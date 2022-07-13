@@ -3,7 +3,7 @@
 
 #include <shared/hashmap.h>
 #include <shared/jstring.h>
-#include "ujvm/kclass.h"
+#include "ujvm/class_loader.h"
 
 using namespace ujvm;
 
@@ -12,12 +12,12 @@ class SystemDictionary final {
 public:
     static SystemDictionary *get();
 
-    bool put(const strings::String &name, KClass *clazz);
+    bool put(const strings::String &name, InstanceClassStruct *clazz);
 
-    KClass *find(strings::String &name);
+    InstanceClassStruct *find(const strings::String &name);
 
 private:
-    HashMap<strings::String, KClass *> classMap_;
+    HashMap<strings::String, InstanceClassStruct *> classMap_;
 };
 
 

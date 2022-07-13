@@ -4,6 +4,9 @@
 #include <ujvm/classfile/const.h>
 #include <ujvm/classfile/classfile_parser.h>
 #include <filesystem>
+#include "ujvm/classpath/system_dictionary.h"
+#include <ujvm/runtime/thread.h>
+#include "ujvm/runtime/bytecode_interpreter.h"
 
 namespace fs = std::filesystem;
 //TEST(test_classfile, DataOutputStream) {
@@ -93,4 +96,54 @@ TEST(test_classfile, list_dir) {
         std::filesystem::remove(dumpFile);
     }
     cout << "all done";
+}
+
+
+MethodInfo *findMainMethod(ClassFile *cf) {
+    auto mc = cf->methods_count;
+    for (int i = 0; i < mc; i++) {
+        auto cp = dynamic_cast<CONSTANT_Utf8_info *>(cf->constantPool->getConstantPool()[(cf->methods[i]->name_index)]);
+        std::cout << cp->bytes << std::endl;
+        if (cp->getConstant() == L"main") {
+            return cf->methods[i];
+        }
+    }
+    return nullptr;
+}
+
+
+TEST(test_classfile, class_read_test) {
+
+    JavaThread *javaThread = new JavaThread;
+//    Threads::currentThread = javaThread;
+    Threads::currentThread = javaThread;
+
+
+    BootstrapClassLoader::get()->loadClassByName(L"MyTest");
+    BootstrapClassLoader::get()->loadClassByName(L"java/lang/System");
+    BootstrapClassLoader::get()->loadClassByName(L"java/io/PrintStream");
+
+    InstanceClassStruct *clz = SystemDictionary::get()->find(L"MyTest");
+
+    ClassFile *cf = clz->getClassFile();
+
+    auto methodInfo = findMainMethod(cf);
+
+    BytecodeInterpreter::run(clz, new Method(cf->constantPool, methodInfo), javaThread);
+//    std::cout << "this class:" << cf->this_class << std::endl;
+//    Constant *cp = cf->constantPool->getConstantPool()[cf->this_class];
+//    std::cout << "tag: " << (int) (cp->tag) << "#" << std::endl;
+//    ASSERT_EQ(cp->tag, CONSTANT_Class);
+//    auto idx = dynamic_cast<CONSTANT_Class_info *>(cp)->index;
+//    std::cout << "idx: " << idx << std::endl;
+//    auto cp2 = dynamic_cast<CONSTANT_Utf8_info *>(cf->constantPool->getConstantPool()[idx]);
+//    auto className = cp2->bytes;
+//    std::cout << "className :" << className << std::endl;
+
+
+
+
+//    std::cout << codeAttr->attribute_name_index << std::endl;
+
+
 }

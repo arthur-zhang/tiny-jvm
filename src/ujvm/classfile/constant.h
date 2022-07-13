@@ -260,7 +260,7 @@ public:
         os.writeBytes(bytes, length);
     }
 
-    strings::String getConstant() {
+    const strings::String getConstant() const {
         return decodeMUTF8(bytes, length);
     }
 
