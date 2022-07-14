@@ -1,9 +1,4 @@
-//
-// Created by ya on 2022/3/2.
-//
-
-#ifndef TINY_JVM_METHOD_INFO_H
-#define TINY_JVM_METHOD_INFO_H
+#pragma once
 
 #include "class_reader.h"
 #include "constant_pool.h"
@@ -49,6 +44,3 @@ public:
 private:
     ConstantPool *constantPool_;
 };
-
-
-#endif //TINY_JVM_METHOD_INFO_H

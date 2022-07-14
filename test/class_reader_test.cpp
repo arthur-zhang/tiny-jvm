@@ -117,33 +117,14 @@ TEST(test_classfile, class_read_test) {
     JavaThread *javaThread = new JavaThread;
 //    Threads::currentThread = javaThread;
     Threads::currentThread = javaThread;
-
-
     BootstrapClassLoader::get()->loadClassByName(L"MyTest");
     BootstrapClassLoader::get()->loadClassByName(L"java/lang/System");
     BootstrapClassLoader::get()->loadClassByName(L"java/io/PrintStream");
-
     InstanceClassStruct *clz = SystemDictionary::get()->find(L"MyTest");
-
     ClassFile *cf = clz->getClassFile();
-
     auto methodInfo = findMainMethod(cf);
-
-    BytecodeInterpreter::run(clz, new Method(cf->constantPool, methodInfo), javaThread);
-//    std::cout << "this class:" << cf->this_class << std::endl;
-//    Constant *cp = cf->constantPool->getConstantPool()[cf->this_class];
-//    std::cout << "tag: " << (int) (cp->tag) << "#" << std::endl;
-//    ASSERT_EQ(cp->tag, CONSTANT_Class);
-//    auto idx = dynamic_cast<CONSTANT_Class_info *>(cp)->index;
-//    std::cout << "idx: " << idx << std::endl;
-//    auto cp2 = dynamic_cast<CONSTANT_Utf8_info *>(cf->constantPool->getConstantPool()[idx]);
-//    auto className = cp2->bytes;
-//    std::cout << "className :" << className << std::endl;
-
-
-
-
-//    std::cout << codeAttr->attribute_name_index << std::endl;
-
-
+    JavaFrame *frame = new JavaFrame(methodInfo->getCode()->max_locals, methodInfo->getCode()->max_stack);
+    javaThread->pushFrame(frame);
+    BytecodeInterpreter::run(new Method(clz, methodInfo), javaThread);
+    delete frame;
 }

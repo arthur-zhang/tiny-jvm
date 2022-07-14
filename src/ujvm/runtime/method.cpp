@@ -3,15 +3,16 @@
 //
 
 #include "method.h"
+#include "instance_class.h"
 
-strings::String Method::getMethodName() {
-    return ((CONSTANT_Utf8_info *) cp_->getConstantPool()[methodInfo_->name_index])->getConstant();
+Method::Method(InstanceClassStruct *clazz, MethodInfo *methodInfo) : methodInfo_(methodInfo), clazz_(clazz) {
+    cp_ = clazz->getClassFile()->constantPool;
+    methodName_ = ((CONSTANT_Utf8_info *) cp_->getConstantPool()[methodInfo_->name_index])->getConstant();
+    methodDesc_ = ((CONSTANT_Utf8_info *) cp_->getConstantPool()[methodInfo_->descriptor_index])->getConstant();
+
+    parseArgsType();
+    argsSlotCount_ = calcArgsSlotCount();
 }
-
-strings::String Method::getMethodDesc() {
-    return ((CONSTANT_Utf8_info *) cp_->getConstantPool()[methodInfo_->descriptor_index])->getConstant();
-}
-
 void Method::parseArgsType() {
     bool isArray = false;
     for (int i = 0; i < methodDesc_.size(); ++i) {
@@ -70,3 +71,7 @@ int Method::calcArgsSlotCount() {
     }
     return slotCount;
 }
+
+
+
+

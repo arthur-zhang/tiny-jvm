@@ -8,33 +8,35 @@
 #include "ujvm/runtime/oop_desc.h"
 #include "method.h"
 
+class Method;
+
 class InstanceClassStruct {
 private:
     ClassFile *cf_;
     map<strings::String, Method *> methodMap_;
     map<strings::String, OopDesc *> staticValueMap_;
+    strings::String className_;
 public:
-    InstanceClassStruct(ClassFile *cf) : cf_(cf), staticValueMap_({}) {
-        for (int i = 0; i < cf->methods_count; ++i) {
-            methodMap_[cf->methods[i]->getMethodName() + cf->methods[i]->getMethodDesc()]
-                    = new Method(cf->constantPool, cf->methods[i]);
-        }
-    }
+    InstanceClassStruct(ClassFile *cf);
 
     ClassFile *getClassFile() const {
         return cf_;
     }
 
+    const strings::String &getClassName() const {
+        return className_;
+    }
 
-    const map<strings::String, Method *> &getMethodMap() const {
+
+    inline const map<strings::String, Method *> &getMethodMap() const {
         return methodMap_;
     }
 
-    Method *findMethod(const strings::String &methodName, const strings::String &methodDesc) {
+    inline Method *findMethod(const strings::String &methodName, const strings::String &methodDesc) {
         return methodMap_[methodName + methodDesc];
     }
 
-    map<strings::String, OopDesc *> &getStaticValueMap() {
+    inline map<strings::String, OopDesc *> &getStaticValueMap() {
         return staticValueMap_;
     }
 

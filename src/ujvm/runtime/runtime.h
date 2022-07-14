@@ -13,7 +13,7 @@ public:
                                  Method *method) {
         JavaFrame *frame = new JavaFrame(method->getCode()->max_locals, method->getCode()->max_stack);
         javaThread->stackFrame.push(frame);
-        BytecodeInterpreter::run(instanceClassStruct, method, javaThread);
+        BytecodeInterpreter::run(method, javaThread);
         javaThread->stackFrame.pop();
         delete frame;
     }

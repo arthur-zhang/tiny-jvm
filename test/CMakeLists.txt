@@ -7,6 +7,6 @@ add_executable(my_test ${INCLUDE_LIST} class_reader_test.cpp string_test.cpp)
 
 target_link_libraries(my_test
         ${GTEST_BOTH_LIBRARIES}
-        pthread jvm_test_lib)
+        pthread ujvm)
 
 gtest_discover_tests(my_test)
