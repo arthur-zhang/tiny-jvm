@@ -17,9 +17,7 @@ void BytecodeInterpreter::run(Method *method, JavaThread *javaThread) {
                 break;
             }
             case 0x10: { // bipush
-
                 OpcodeExecutor::Op_bipush(codeIdx, codeAttr->code, javaThread, method->getCp());
-
                 break;
             }
             case 0x1A : { // iload_0
@@ -31,10 +29,31 @@ void BytecodeInterpreter::run(Method *method, JavaThread *javaThread) {
                 break;
             }
             case 0x12: { // ldc
-                OpcodeExecutor::Op_dup(codeIdx, codeAttr->code, javaThread, method->getCp());
+                OpcodeExecutor::Op_ldc(codeIdx, codeAttr->code, javaThread, method->getCp());
+                break;
+            }
+            case 0x2A: { // aload_0
+
+                OpcodeExecutor::Op_aload0(codeIdx, codeAttr->code, javaThread, method->getCp());
+                break;
+            }
+            case 0x2B: { // aload_1
+
+                OpcodeExecutor::Op_aload1(codeIdx, codeAttr->code, javaThread, method->getCp());
+                break;
+            }
+
+            case 0xB1: { // return
+                OpcodeExecutor::Op_return(codeIdx, codeAttr->code, javaThread, method->getCp());
+
+                break;
+            }
+            case 0xB3: {// putstatic
+                OpcodeExecutor::Op_putstatic(codeIdx, codeAttr->code, javaThread, method->getCp());
                 break;
             }
             case 0xB6: { // invokevirtual
+                OpcodeExecutor::Op_invokeVirtual(codeIdx, codeAttr->code, javaThread, method->getCp());
                 break;
             }
             case 0xB7: { // invokespecial
@@ -43,9 +62,6 @@ void BytecodeInterpreter::run(Method *method, JavaThread *javaThread) {
             }
             case 0xB8: { // invokestatic
                 OpcodeExecutor::Op_invokeStatic(codeIdx, codeAttr->code, javaThread, method->getCp());
-                break;
-            }
-            case 0xB1: { // return
                 break;
             }
 

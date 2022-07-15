@@ -6,4 +6,4 @@
 
 using namespace ujvm;
 
-strings::String decodeMUTF8(const u1 *inBytes, size_t len);
+strings::String* decodeMUTF8(const u1 *inBytes, size_t len);

@@ -9,6 +9,7 @@
 #include "method.h"
 
 class Method;
+class OopDesc;
 
 class InstanceClassStruct {
 private:

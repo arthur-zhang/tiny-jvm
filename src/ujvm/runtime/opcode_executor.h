@@ -13,7 +13,7 @@
 class OpcodeExecutor {
 
 public:
-    static void Op_new(int &codeIdx, u1 *code, const JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_new(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
         u2 index = (code[codeIdx] << 8) + code[codeIdx + 1];
         codeIdx += 2;
 
@@ -24,33 +24,185 @@ public:
 
         InstanceClassStruct *clz = BootstrapClassLoader::get()->loadClassByName(className);
         InstanceOop *instance = InstanceOop::allocateInstance(clz);
-        auto size = sizeof(InstanceOop);
-        javaThread->stackFrame.top()->getOperandStack().pushRef(instance);
+        javaThread->currentFrame()->getOperandStack().pushRef(instance);
     }
 
-    static void Op_dup(int &codeIdx, u1 *code, const JavaThread *javaThread, const ConstantPool *cp) {
-        auto top = javaThread->stackFrame.top()->getOperandStack().top();
-        javaThread->stackFrame.top()->getOperandStack().pushRef(top);
+    static void Op_dup(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        auto top = javaThread->currentFrame()->getOperandStack().top();
+        javaThread->currentFrame()->getOperandStack().pushRef(top);
     }
 
-    static void Op_iconst0(int &codeIdx, u1 *code, const JavaThread *javaThread, const ConstantPool *cp) {
-        javaThread->stackFrame.top()->getOperandStack().pushInt(0);
-    }
+    static void Op_ldc(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
 
-    static void Op_bipush(int &codeIdx, u1 *code, const JavaThread *javaThread, const ConstantPool *cp) {
-        u1 byteValue = code[codeIdx];
-        javaThread->stackFrame.top()->getOperandStack().pushInt(byteValue);
+        int idx = code[codeIdx];
+        auto constantStringInfo = (CONSTANT_String_info *) cp->getConstantPool()[idx];
+        const strings::String *stringValue = ((CONSTANT_Utf8_info *) cp->getConstantPool()[constantStringInfo->index])->getConstantInHeap();
+        InstanceClassStruct *clz = BootstrapClassLoader::get()->loadClassByName(L"java/lang/String");
+
+        javaThread->currentFrame()->getOperandStack().pushRef(
+                new InstanceOopDesc(clz, const_cast<strings::String *> (stringValue)));
+
         codeIdx++;
     }
 
-    static void Op_iload0(int &codeIdx, u1 *code, const JavaThread *javaThread, const ConstantPool *cp) {
-
-        int value = javaThread->stackFrame.top()->getLocals().getSlotArray().getInt(0);
-        javaThread->stackFrame.top()->getOperandStack().pushInt(value);
+    static void Op_iconst0(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        javaThread->currentFrame()->getOperandStack().pushInt(0);
     }
 
-    static void
-    Op_invokeSpecial(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_aload0(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        auto ref = javaThread->currentFrame()->getLocals().getSlotArray().getRef(0);
+        javaThread->currentFrame()->getOperandStack().pushRef(ref);
+    }
+
+    static void Op_aload1(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        auto ref = javaThread->currentFrame()->getLocals().getSlotArray().getRef(1);
+        javaThread->currentFrame()->getOperandStack().pushRef(ref);
+    }
+
+    static void Op_bipush(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        u1 byteValue = code[codeIdx];
+        javaThread->currentFrame()->getOperandStack().pushInt(byteValue);
+        codeIdx++;
+    }
+
+    static void Op_iload0(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+
+        int value = javaThread->currentFrame()->getLocals().getSlotArray().getInt(0);
+        javaThread->currentFrame()->getOperandStack().pushInt(value);
+    }
+
+    static void Op_invokeVirtual(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        //todo
+        Op_invokeSpecial(codeIdx, code, javaThread, cp);
+    }
+
+    typedef union jvalue {
+        jboolean z;
+        jbyte b;
+        jchar c;
+        jshort s;
+        jint i;
+        jlong j;
+        jfloat f;
+        jdouble d;
+        jobject l;
+    } jvalue;
+    static void invokeNative(Method *targetMethod, std::list<void *> &args_) {
+
+        vector<void *> args(args_.begin(), args_.end());
+
+
+        auto methodArgs = targetMethod->getMethodArgs();
+
+        auto nativeMethod = targetMethod->getNativeMethod();
+        int argCount = targetMethod->getMethodArgs().size() + 2;
+        void *fn = nativeMethod->getNativeSymbol();
+
+        // prepare args type
+        ffi_type *ffiArgTypeArr[argCount];
+        ffiArgTypeArr[0] = &ffi_type_pointer;
+        ffiArgTypeArr[1] = &ffi_type_pointer;
+
+        for (int i = 0; i < targetMethod->getMethodArgs().size(); ++i) {
+            auto argValueTypeItem = targetMethod->getMethodArgs()[i];
+            switch (argValueTypeItem) {
+                case ValueType::INT:
+                    ffiArgTypeArr[i + 2] = &ffi_type_sint;
+                    break;
+                case ValueType::LONG:
+                    break;
+                case ValueType::FLOAT:
+                    //todo
+                    break;
+                case ValueType::DOUBLE:
+                    //todo
+                    break;
+                case ValueType::OBJECT:
+                    ffiArgTypeArr[i + 2] = &ffi_type_pointer;
+                    break;
+                case ValueType::ARRAY:
+                    //todo
+                    break;
+                default:
+                    break;
+            }
+        }
+        jvalue argsHolder[argCount];
+
+        // prepare args value
+        void *ffiArgs[argCount];
+
+//            void *ffiArgPtr0 = alloca(ffiArgTypeArr[0]->size);
+//            ffiArgPtr0 = Ujvm::getJNIENV();
+        ffiArgs[0] = &args[0];
+
+//            void *ffiArgPtr1 = alloca(ffiArgTypeArr[1]->size);
+//            ffiArgPtr1;
+//        ffiArgs[1] = alloca(ffiArgTypeArr[1]->size);
+
+        int localVariableIndex = 0;
+        for (int i = 1; i < argCount; ++i) {
+            auto item = (OopDesc *) args[i];
+            switch (item->getOopType()) {
+
+                case INSTANCE_OOP: {
+                    ffiArgs[i] = &item;
+                    break;
+                }
+                case OBJECT_ARRAY_OOP:
+                case TYPE_ARRAY_OOP:
+                    PANIC("not implemented>>>>>..");
+                case PRIMITIVE_OOP: {
+                    auto valueType = methodArgs[localVariableIndex];
+                    switch (valueType) {
+                        case BYTE:
+                        case BOOLEAN:
+                        case CHAR:
+                        case SHORT:
+                        case ValueType::INT: {
+                            int intValue = ((IntOopDesc *) item)->getValue();
+
+                            int *ffiArgPtr = (int *) alloca(ffi_type_sint.size);
+                            *ffiArgPtr = intValue;
+                            ffiArgs[localVariableIndex + 2] = ffiArgPtr;
+                            break;
+                        }
+                        case ValueType::LONG: {
+                            PANIC("not implemented");
+                        }
+                        case FLOAT:
+                            //todo
+                            break;
+                        case DOUBLE:
+                            //todo
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                default:
+                    break;
+
+            }
+            localVariableIndex++;
+        }
+
+        ffi_cif cif;
+        ffi_type *returnFfiType = &ffi_type_void;
+        ffi_status ffiPrepStatus = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int) argCount, returnFfiType,
+                                                ffiArgTypeArr);
+        if (ffiPrepStatus != FFI_OK) {
+            PANIC("prepare stauts not ok");
+        }
+
+        void *returnPtr = nullptr;
+//            if (returnFfiType->size > 0) {
+//                returnPtr = alloca(returnFfiType->size);
+//            }
+        ffi_call(&cif, FFI_FN(fn), returnPtr, ffiArgs);
+    }
+
+    static void Op_invokeSpecial(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
         u2 index = (code[codeIdx] << 8) + code[codeIdx + 1];
         codeIdx += 2;
 
@@ -65,43 +217,74 @@ public:
         auto methodDesc = ((CONSTANT_Utf8_info *) cp->getConstantPool()[nameAndType->descriptor_index])->getConstant();
         std::wcout << methodName << ":" << methodDesc << std::endl;
 
-//
-//        MethodInfo *targetMethod = nullptr;
-//        for (int i = 0; i < clz->getClassFile()->methods_count; ++i) {
-//            MethodInfo *methodItem = clz->getClassFile()->methods[i];
-//            auto tmpMethodName = methodItem->getMethodName();
-//            auto tmpMethodDesc = methodItem->getMethodDesc();
-//            std::wcout << "methodName_: " << tmpMethodName << std::endl;
-//            std::wcout << "methodDesc_: " << tmpMethodDesc << std::endl;
-//            if (tmpMethodName == methodName && tmpMethodDesc == methodDesc) {
-//                targetMethod = methodItem;
-//                break;
-//            }
-//        }
-//        if (!targetMethod) {
-//            PANIC("target method is null");
-//        }
+        Method *targetMethod = clz->findMethod(methodName, methodDesc);
+        if (!targetMethod) {
+            PANIC("target method is null");
+        }
+        JavaFrame *callerFrame = javaThread->currentFrame();
 
-        // push operand stack
-        // new File("xx");
-        // new #2
-        // dup
-        // ldc #3
-        // invokespecial #4
-//
-//        CodeAttribute *targetMethodCodeAttr = targetMethod->getCode();
-//        JavaFrame *frame = new JavaFrame(targetMethodCodeAttr->max_locals, targetMethodCodeAttr->max_stack);
-//        javaThread->stackFrame.push(frame);
+        if (!targetMethod->isNative()) {
+            JavaFrame *frame = new JavaFrame(targetMethod->getCode()->max_locals, targetMethod->getCode()->max_stack);
+            javaThread->pushFrame(frame);
 
-//        todo
-//        vector<CommonValue *> args;
-//        args[0] = javaThread->stackFrame.top()->getOperandStack().top(); // this
-        int argsCount = 1;
+//            vector<ValueType> &argTypes = targetMethod->getMethodArgs();
+            Locals &calleeLocals = frame->getLocals();
+            int slotCount = targetMethod->getArgsSlotCount();
+            for (int i = slotCount - 1; i >= 0; --i) {
+                auto ref = callerFrame->getOperandStack().popRef();
+                calleeLocals.getSlotArray().setRef(i, ref); //todo
+            }
 
-//        for (int i = 0; i < argsCount; ++i) {
-//            javaThread->stackFrame.top()->locals[i] = args[i];
-//        }
+            BytecodeInterpreter::run(targetMethod, javaThread);
+            return;
+        }
+        // process native
+        std::list<void *> args;
 
+        auto methodArgs = targetMethod->getMethodArgs();
+        fillArgsValue(callerFrame, targetMethod, methodArgs, args);
+        invokeNative(targetMethod, args);
+    }
+
+    static void
+    fillArgsValue(JavaFrame *callerFrame, Method *targetMethod, vector<ValueType> &methodArgs, list<void *> &args) {
+
+        for (auto it = methodArgs.rbegin(); it != methodArgs.rend(); ++it) {
+            const ValueType &valueType = *it;
+            switch (valueType) {
+                case INT:
+                    args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
+                    break;
+                case LONG:
+                    args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
+                    break;
+                case FLOAT:
+                    //todo
+                    break;
+                case DOUBLE:
+                    //todo
+                    break;
+                case OBJECT: {
+
+                    auto ref = (InstanceOopDesc *) callerFrame->getOperandStack().popRef();
+                    args.push_front(ref);
+                    break;
+                }
+                case ARRAY:
+                    //todo
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        if (targetMethod->isStatic()) {
+            args.push_front(nullptr); // todo
+        } else {
+            args.push_front(callerFrame->getOperandStack().popRef());
+        }
+
+        args.push_front(Ujvm::getJNIENV());
     }
 
     static void Op_invokeStatic(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
@@ -129,147 +312,21 @@ public:
         auto methodArgs = targetMethod->getMethodArgs();
 
 
-        std::list<OopDesc *> args;
+        std::list<void *> nativeArgs;
 
-        for (auto it = methodArgs.rbegin(); it != methodArgs.rend(); ++it) {
-            const ValueType &valueType = *it;
-            switch (valueType) {
-                case ValueType::INT:
-                    args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
-                    break;
-                case ValueType::LONG:
-                    args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
-                    break;
-                case ValueType::FLOAT:
-                    //todo
-                    break;
-                case ValueType::DOUBLE:
-                    //todo
-                    break;
-                case ValueType::OBJECT:
-                    args.push_front((OopDesc *) callerFrame->getOperandStack().popRef());
-                    break;
-                case ValueType::ARRAY:
-                    //todo
-                    break;
-                default:
-                    break;
-            }
-        }
-        if (!targetMethod->isStatic()) {
-            args.push_front((OopDesc *) callerFrame->getOperandStack().popRef());
-        }
+        fillArgsValue(callerFrame, targetMethod, methodArgs, nativeArgs);
 
 
         if (targetMethod->isNative()) {
-
-            auto nativeMethod = targetMethod->getNativeMethod();
-            int argCount = targetMethod->getMethodArgs().size() + 2;
-            void *fn = nativeMethod->getNativeSymbol();
-
-            // prepare args type
-            ffi_type *ffiArgTypeArr[argCount];
-            ffiArgTypeArr[0] = &ffi_type_pointer;
-            ffiArgTypeArr[1] = &ffi_type_pointer;
-
-            for (int i = 0; i < targetMethod->getMethodArgs().size(); ++i) {
-                auto argValueTypeItem = targetMethod->getMethodArgs()[i];
-                switch (argValueTypeItem) {
-                    case ValueType::INT:
-                        ffiArgTypeArr[i + 2] = &ffi_type_sint;
-                        break;
-                    case ValueType::LONG:
-                        break;
-                    case ValueType::FLOAT:
-                        //todo
-                        break;
-                    case ValueType::DOUBLE:
-                        //todo
-                        break;
-                    case ValueType::OBJECT:
-                        break;
-                    case ValueType::ARRAY:
-                        //todo
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            // prepare args value
-            void *ffiArgs[argCount];
-
-//            void *ffiArgPtr0 = alloca(ffiArgTypeArr[0]->size);
-//            ffiArgPtr0 = Ujvm::getJNIENV();
-            ffiArgs[0] = Ujvm::getJNIENV();
-
-//            void *ffiArgPtr1 = alloca(ffiArgTypeArr[1]->size);
-//            ffiArgPtr1;
-            ffiArgs[1] = alloca(ffiArgTypeArr[1]->size);
-
-            int localVariableIndex = 0;
-            for (auto it = args.begin(); it != args.end(); ++it) {
-                auto item = *it;
-                switch (item->getOopType()) {
-
-                    case INSTANCE_OOP:
-                    case OBJECT_ARRAY_OOP:
-                    case TYPE_ARRAY_OOP:
-                        PANIC("not implemented>>>>>..");
-                    case PRIMITIVE_OOP: {
-                        auto valueType = methodArgs[localVariableIndex];
-                        switch (valueType) {
-                            case BYTE:
-                            case BOOLEAN:
-                            case CHAR:
-                            case SHORT:
-                            case ValueType::INT: {
-                                int intValue = ((IntOopDesc *) item)->getValue();
-
-                                int *ffiArgPtr = (int *) alloca(ffi_type_sint.size);
-                                *ffiArgPtr = intValue;
-                                ffiArgs[localVariableIndex + 2] = ffiArgPtr;
-                                break;
-                            }
-                            case ValueType::LONG: {
-                                PANIC("not implemented");
-                            }
-                            case FLOAT:
-                                //todo
-                                break;
-                            case DOUBLE:
-                                //todo
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                    default:
-                        break;
-
-                }
-            }
-
-            ffi_cif cif;
-            ffi_type *returnFfiType = &ffi_type_void;
-            ffi_status ffiPrepStatus = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int) argCount, returnFfiType,
-                                                    ffiArgTypeArr);
-            if (ffiPrepStatus != FFI_OK) {
-                PANIC("prepare stauts not ok");
-            }
-
-            void *returnPtr = nullptr;
-//            if (returnFfiType->size > 0) {
-//                returnPtr = alloca(returnFfiType->size);
-//            }
-            ffi_call(&cif, FFI_FN(fn), returnPtr, ffiArgs);
+            invokeNative(targetMethod, nativeArgs);
             return;
         }
 
+        std::list<OopDesc *> args;
         CodeAttribute *targetMethodCodeAttr = targetMethod->getCode();
 
         JavaFrame *frame = new JavaFrame(targetMethodCodeAttr->max_locals, targetMethodCodeAttr->max_stack);
-        javaThread->stackFrame.push(frame);
+        javaThread->pushFrame(frame);
 
 
         Locals &locals = frame->getLocals();
@@ -321,22 +378,38 @@ public:
             localVariableIndex++;
         }
         BytecodeInterpreter::run(targetMethod, javaThread);
+//        javaThread->popFrame();
+//        delete frame;
+    }
+
+    static void Op_return(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        auto frame = javaThread->popFrame();
         delete frame;
     }
 
-    static void Op_getStatic(int &codeIdx, u1 *code, const JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_putstatic(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
         u2 index = (code[codeIdx] << 8) + code[codeIdx + 1];
         codeIdx += 2;
+        ConstantFieldref_info *constantFieldRefInfo = dynamic_cast<ConstantFieldref_info *>(cp->getConstantPool()[index]);
+        CONSTANT_Class_info *classInfo = (CONSTANT_Class_info *) cp->getConstantPool()[constantFieldRefInfo->class_index];
+        CONSTANT_NameAndType_info *nameAndTypeInfo = (CONSTANT_NameAndType_info *) cp->getConstantPool()[constantFieldRefInfo->name_and_type_index];
+        CONSTANT_Utf8_info *classNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[classInfo->index]);
+        CONSTANT_Utf8_info *fieldNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[nameAndTypeInfo->name_index]);
+        InstanceClassStruct *classInstance = SystemDictionary::get()->find(classNameUtf8Info->getConstant());
+        auto fieldName = fieldNameUtf8Info->getConstant();
+        classInstance->getStaticValueMap()[fieldName] = new InstanceOopDesc(classInstance,
+                                                                            javaThread->currentFrame()->getOperandStack().popRef());
+    }
 
+    static void Op_getStatic(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
+        u2 index = (code[codeIdx] << 8) + code[codeIdx + 1];
+        codeIdx += 2;
         std::cout << "Index is :" << +index << std::endl;
         ConstantFieldref_info *constantFieldRefInfo = dynamic_cast<ConstantFieldref_info *>(cp->getConstantPool()[index]);
 
         CONSTANT_Class_info *classInfo = (CONSTANT_Class_info *) cp->getConstantPool()[constantFieldRefInfo->class_index];
         CONSTANT_NameAndType_info *nameAndTypeInfo = (CONSTANT_NameAndType_info *) cp->getConstantPool()[constantFieldRefInfo->name_and_type_index];
 
-        std::cout << "tag is " << +(constantFieldRefInfo->tag) << std::endl;
-        std::cout << "class_index: " << constantFieldRefInfo->class_index << std::endl;
-        std::cout << "name_and_type_index: " << constantFieldRefInfo->name_and_type_index << std::endl;
 
         CONSTANT_Utf8_info *classNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[classInfo->index]);
         std::wcout << "className: " << classNameUtf8Info->getConstant() << std::endl;
@@ -349,11 +422,18 @@ public:
         std::wcout << "fieldDesc:" << fieldDescUtf8Info->getConstant() << std::endl;
         const strings::String fieldName = fieldNameUtf8Info->getConstant();
         OopDesc *fieldValue = classInstance->getStaticValueMap()[fieldName];
-        //todo
-//        switch (fieldValue) {
-//
-//        }
-//        javaThread->stackFrame.top()->getOperandStack().push(fieldValue);
-        std::cout << ">>>>>>>>>>>" << std::endl;
+        switch (fieldValue->getOopType()) {
+            case INSTANCE_OOP:
+            case OBJECT_ARRAY_OOP:
+            case TYPE_ARRAY_OOP:
+                javaThread->currentFrame()->getOperandStack().pushRef(fieldValue);
+                break;
+            case PRIMITIVE_OOP:
+                PANIC("not implemented: getstatic ");
+                //todo
+                break;
+            default:
+                break;
+        }
     }
 };

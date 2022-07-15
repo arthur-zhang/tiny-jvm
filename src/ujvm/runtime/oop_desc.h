@@ -26,7 +26,14 @@ public:
 class InstanceOopDesc : public OopDesc {
 
 public:
-    InstanceOopDesc(InstanceClassStruct *clazz) : OopDesc(clazz, OopType::INSTANCE_OOP) {}
+    InstanceOopDesc(InstanceClassStruct *clazz, jobject ref) : ref_(ref), OopDesc(clazz, OopType::INSTANCE_OOP) {}
+
+    const void *getRef() const {
+        return ref_;
+    }
+
+private:
+    jobject ref_;
 };
 
 

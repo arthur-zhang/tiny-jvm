@@ -52,6 +52,8 @@ public:
         return methodDesc_;
     }
 
+    int getArgsSlotCount() const;
+
     NativeMethod *getNativeMethod() {
         if (this->isNative()) {
             if (nativeMethod_ == nullptr) {

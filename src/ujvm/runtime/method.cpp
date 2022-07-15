@@ -72,6 +72,10 @@ int Method::calcArgsSlotCount() {
     return slotCount;
 }
 
+int Method::getArgsSlotCount() const {
+    return argsSlotCount_;
+}
+
 
 
 

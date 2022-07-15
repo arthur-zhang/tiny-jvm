@@ -5,6 +5,7 @@
 typedef std::uint8_t u1;
 typedef std::uint16_t u2;
 typedef std::uint32_t u4;
+typedef signed char jbyte;
 
 typedef int jint;
 typedef long long jlong; // long long: 64bit, long: 32bit

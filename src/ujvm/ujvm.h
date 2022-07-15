@@ -5,7 +5,7 @@
 class Ujvm {
 public:
     static JNIENV *getJNIENV() {
-        JNIENV *jnienv = new JNIENV;
+        static JNIENV *jnienv = new JNIENV;
         return jnienv;
     }
 };

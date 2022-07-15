@@ -261,6 +261,10 @@ public:
     }
 
     const strings::String getConstant() const {
+        return *decodeMUTF8(bytes, length);
+    }
+
+    const strings::String *getConstantInHeap() const {
         return decodeMUTF8(bytes, length);
     }
 

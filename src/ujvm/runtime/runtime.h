@@ -12,10 +12,10 @@ public:
     static void callStaticMethod(InstanceClassStruct *instanceClassStruct, JavaThread *javaThread,
                                  Method *method) {
         JavaFrame *frame = new JavaFrame(method->getCode()->max_locals, method->getCode()->max_stack);
-        javaThread->stackFrame.push(frame);
+        javaThread->pushFrame(frame);
         BytecodeInterpreter::run(method, javaThread);
-        javaThread->stackFrame.pop();
-        delete frame;
+//        javaThread->popFrame();
+//        delete frame;
     }
 };
 

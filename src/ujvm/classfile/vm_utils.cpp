@@ -1,7 +1,7 @@
 
 #include "vm_utils.h"
 
-strings::String decodeMUTF8(const u1 *inBytes, size_t len) {
+strings::String* decodeMUTF8(const u1 *inBytes, size_t len) {
     u2 out[len];
     u2 a, b, c;
     int count = 0;
@@ -29,5 +29,5 @@ strings::String decodeMUTF8(const u1 *inBytes, size_t len) {
             PANIC("bad byte");
         }
     }
-    return strings::String(out, out + pos);
+    return new strings::String(out, out + pos);
 }

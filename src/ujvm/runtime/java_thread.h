@@ -10,11 +10,6 @@
 
 class JavaThread {
 public:
-    std::stack<JavaFrame *> stackFrame;
-
-    JavaThread() {
-    }
-
     void pushFrame(JavaFrame *frame) {
         stackFrame.push(frame);
     }
@@ -28,6 +23,9 @@ public:
     JavaFrame *currentFrame() {
         return stackFrame.top();
     }
+
+private:
+    std::stack<JavaFrame *> stackFrame;
 };
 
 

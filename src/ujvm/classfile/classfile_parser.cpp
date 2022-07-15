@@ -879,8 +879,8 @@ namespace ujvm {
                 case CONSTANT_Utf8: {
                     CONSTANT_Utf8_info *target = (CONSTANT_Utf8_info *) constantPoolVector[i];
                     printf("(DEBUG) #%4d = Utf8 %16s ", i + 1, "");
-                    strings::String str = decodeMUTF8(target->bytes, target->length);
-                    cout << strings::toStdString(str) << endl;
+                    strings::String* str = decodeMUTF8(target->bytes, target->length);
+                    cout << strings::toStdString(*str) << endl;
                     break;
                 }
                 case CONSTANT_MethodHandle: {

@@ -112,7 +112,7 @@ public:
     }
 
     jobject top() {
-        return slotArray_.getRef(pos_);
+        return slotArray_.getRef(pos_ - 1);
     }
 };
 
