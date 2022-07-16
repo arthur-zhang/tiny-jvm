@@ -2,7 +2,7 @@
 
 
 #include <shared/hashmap.h>
-#include <shared/jstring.h>
+#include "shared/jstring.h"
 #include "ujvm/class_loader.h"
 
 using namespace ujvm;

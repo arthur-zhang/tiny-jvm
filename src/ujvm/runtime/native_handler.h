@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <jstring.h>
+#include "shared/jstring.h"
 
 #include <unordered_map>
 #include "ujvm/native/java_lang_system.h"

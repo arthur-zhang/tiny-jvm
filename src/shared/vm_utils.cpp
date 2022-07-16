@@ -1,5 +1,5 @@
 
-#include "vm_utils.h"
+#include "shared/vm_utils.h"
 
 strings::String* decodeMUTF8(const u1 *inBytes, size_t len) {
     u2 out[len];

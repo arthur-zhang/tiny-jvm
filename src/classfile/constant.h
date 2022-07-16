@@ -2,7 +2,7 @@
 
 #include "class_reader.h"
 #include "shared/jstring.h"
-#include "const.h"
+#include "shared/const.h"
 #include "data_output_stream.h"
 #include "shared/vm_utils.h"
 

@@ -7,8 +7,16 @@ include_directories(${FFI_INCLUDE_DIRS})
 link_libraries(${FFI_LIBRARIES})
 
 message(${SOURCES})
-set(INCLUDE_LIST ../include/shared/fs.h ../include/shared/jstring.h ../include/shared/types.h)
-add_library(ujvm SHARED ${SOURCES} ${INCLUDE_LIST})
+set(INCLUDE_LIST
+        shared/fs.h
+        shared/jstring.h
+        shared/types.h
+        shared/vm_utils.h
+        )
+add_library(java SHARED ${SOURCES} ${INCLUDE_LIST})
 
-target_link_libraries(ujvm ffi)
+target_link_libraries(java classfile shared ujvm ffi)
 #add_library(jvm_test_lib STATIC ${SOURCES})
+add_subdirectory(classfile)
+add_subdirectory(shared)
+add_subdirectory(ujvm)

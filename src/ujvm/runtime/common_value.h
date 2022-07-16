@@ -5,7 +5,7 @@
 #ifndef TINY_JVM_COMMON_VALUE_H
 #define TINY_JVM_COMMON_VALUE_H
 
-#include <shared/types.h>
+#include "shared/types.h"
 
 //class CommonValue {
 //public:

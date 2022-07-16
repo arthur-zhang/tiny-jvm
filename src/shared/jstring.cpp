@@ -1,4 +1,4 @@
-#include <shared/jstring.h>
+#include "jstring.h"
 #include <codecvt>
 #include <locale>
 
