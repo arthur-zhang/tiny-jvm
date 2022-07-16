@@ -1,7 +1,7 @@
 #pragma once
 
 #include "java_thread.h"
-#include "ujvm/classfile/method_info.h"
+#include "classfile/method_info.h"
 #include "ujvm/classpath/system_dictionary.h"
 #include "instance_oop.h"
 #include "bytecode_interpreter.h"

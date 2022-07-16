@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ujvm/classfile/constant_pool.h>
-#include <ujvm/classfile/method_info.h>
+#include "classfile/constant_pool.h"
+#include "classfile/method_info.h"
 #include "ujvm/runtime/instance_class.h"
 #include "oop_value_type.h"
 #include "native_method.h"

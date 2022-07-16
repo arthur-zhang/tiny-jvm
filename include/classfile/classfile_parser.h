@@ -9,15 +9,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <shared/jstring.h>
+#include "shared/jstring.h"
 
-#include "tiny_jvm.h"
-#include "const.h"
+#include "shared/tiny_jvm.h"
+#include "shared/const.h"
 #include "shared/types.h"
-#include "constant_pool.h"
-#include "constant.h"
-#include "field_info.h"
-#include "method_info.h"
+#include "classfile/constant_pool.h"
+#include "classfile/constant.h"
+#include "classfile/field_info.h"
+#include "classfile/method_info.h"
 
 using namespace std;
 

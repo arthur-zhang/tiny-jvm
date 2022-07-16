@@ -1,13 +1,8 @@
-//
-// Created by ya on 2022/3/2.
-//
-
-#ifndef TINY_JVM_FIELD_INFO_H
-#define TINY_JVM_FIELD_INFO_H
+#pragma once
 
 #include "class_reader.h"
-#include "constant_pool.h"
-#include "attribute_info.h"
+#include "classfile/constant_pool.h"
+#include "classfile/attribute_info.h"
 
 class FieldInfo {
 public:
@@ -23,5 +18,3 @@ public:
 
     ~FieldInfo();
 };
-
-#endif //TINY_JVM_FIELD_INFO_H

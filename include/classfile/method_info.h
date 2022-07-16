@@ -1,9 +1,9 @@
 #pragma once
 
 #include "class_reader.h"
-#include "constant_pool.h"
-#include "attribute_info.h"
-#include <shared/jstring.h>
+#include "classfile/constant_pool.h"
+#include "classfile/attribute_info.h"
+#include "shared/jstring.h"
 
 class MethodInfo {
 public:

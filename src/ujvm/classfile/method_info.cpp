@@ -1,5 +1,5 @@
-#include "method_info.h"
-#include "attribute_info.h"
+#include "classfile/method_info.h"
+#include "classfile/attribute_info.h"
 
 MethodInfo::MethodInfo(ClassReader &reader, ConstantPool *constantPool, int a) {
 

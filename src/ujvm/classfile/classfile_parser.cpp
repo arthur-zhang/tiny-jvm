@@ -3,13 +3,13 @@
 //
 #include <map>
 #include <iostream>
-#include "classfile_parser.h"
-#include "field_info.h"
+#include "classfile/classfile_parser.h"
+#include "classfile/field_info.h"
 #include "shared/jstring.h"
-#include "data_output_stream.h"
-#include "constant.h"
-#include "attribute_info.h"
-#include "element_value.h"
+#include "classfile/data_output_stream.h"
+#include "classfile/constant.h"
+#include "classfile/attribute_info.h"
+#include "classfile/element_value.h"
 
 namespace ujvm {
 

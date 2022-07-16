@@ -2,7 +2,7 @@
 
 #include <map>
 #include "shared/types.h"
-#include "ujvm/classfile/classfile_parser.h"
+#include "classfile/classfile_parser.h"
 #include "ujvm/runtime/instance_class.h"
 
 //namespace ujvm {

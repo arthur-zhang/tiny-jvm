@@ -1,15 +1,10 @@
-//
-// Created by ya on 2022/3/2.
-//
-
-#ifndef TINY_JVM_CONSTANT_H
-#define TINY_JVM_CONSTANT_H
+#pragma once
 
 #include "class_reader.h"
 #include "shared/jstring.h"
 #include "const.h"
 #include "data_output_stream.h"
-#include "vm_utils.h"
+#include "shared/vm_utils.h"
 
 class Constant {
 public:
@@ -363,5 +358,3 @@ static Constant *readConstant(ClassReader &reader) {
             assert(false);
     }
 }
-
-#endif //TINY_JVM_CONSTANT_H

@@ -1,4 +1,4 @@
-#include "class_reader.h"
+#include "classfile/class_reader.h"
 
 #define READ_U2(v, p)  v = ((p)[0]<<8)|(p)[1];
 #define READ_U4(v, p)  v = ((p)[0]<<24)|((p)[1]<<16)|((p)[2]<<8)|(p)[3];

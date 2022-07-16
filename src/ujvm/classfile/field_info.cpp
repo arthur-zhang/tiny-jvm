@@ -2,8 +2,8 @@
 // Created by ya on 2022/3/2.
 //
 
-#include "field_info.h"
-#include "attribute_info.h"
+#include "classfile/field_info.h"
+#include "classfile/attribute_info.h"
 
 FieldInfo::FieldInfo(ClassReader &reader, ConstantPool *constantPool) {
     access_flags = reader.readUInt16();

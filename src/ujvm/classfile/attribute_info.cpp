@@ -1,5 +1,5 @@
-#include "attribute_info.h"
-#include "const.h"
+#include "classfile/attribute_info.h"
+#include "shared/const.h"
 
 AttributeInfo *AttributeInfo::readAttributeInfo(ClassReader &reader, ConstantPool *constant_pool) {
     u2 attribute_name_index = reader.peek2();

@@ -5,7 +5,7 @@
 #include "shared/jstring.h"
 #include "constant_pool.h"
 #include "element_value.h"
-#include "annotations.h"
+#include "classfile/annotations.h"
 #include "data_output_stream.h"
 
 class AttributeInfo {

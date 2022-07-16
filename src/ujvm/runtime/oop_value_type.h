@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ujvm/classfile/tiny_jvm.h"
+#include "shared/tiny_jvm.h"
 
 enum OopType {
     INSTANCE_OOP,
