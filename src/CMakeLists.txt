@@ -15,7 +15,7 @@ set(INCLUDE_LIST
         )
 add_library(java SHARED ${SOURCES} ${INCLUDE_LIST})
 
-target_link_libraries(java classfile shared ujvm ffi)
+#target_link_libraries(java classfile shared ujvm ffi)
 #add_library(jvm_test_lib STATIC ${SOURCES})
 add_subdirectory(classfile)
 add_subdirectory(shared)

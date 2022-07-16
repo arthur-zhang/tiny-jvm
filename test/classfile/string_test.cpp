@@ -8,7 +8,6 @@ using namespace ujvm;
 
 TEST(test_ujvm, string_replace) {
     strings::String str = L"aabbccddaa";
-//    std::wcout << strings::replaceAll(str, L".i", L"/") << std::endl;
     strings::String ret = strings::replaceAll(str, L"b", L"");
     std::wcout << ret << std::endl;
     ret = strings::replaceAll(str, L"b", L"xx");
