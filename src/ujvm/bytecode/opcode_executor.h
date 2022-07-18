@@ -14,9 +14,10 @@
 class OpcodeExecutor {
 
 public:
-    static void Op_new(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_new(JavaThread *javaThread) {
         CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
         u2 index = codeReader.readU2(javaThread->pc_);
+        const ConstantPool *cp = javaThread->currentFrame()->getMethod()->getCp();
 
         CONSTANT_Class_info *classInfo = dynamic_cast<CONSTANT_Class_info *>(cp->getConstantPool()[index]);
 
@@ -28,15 +29,17 @@ public:
         javaThread->currentFrame()->getOperandStack().pushRef(instance);
     }
 
-    static void Op_dup(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_dup(JavaThread *javaThread) {
         auto top = javaThread->currentFrame()->getOperandStack().top();
         javaThread->currentFrame()->getOperandStack().pushRef(top);
     }
 
-    static void Op_ldc(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_ldc(JavaThread *javaThread) {
 
         CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
         int idx = codeReader.readU1(javaThread->pc_);
+        const ConstantPool *cp = javaThread->currentFrame()->getMethod()->getCp();
+
         auto constantStringInfo = (CONSTANT_String_info *) cp->getConstantPool()[idx];
         const strings::String *stringValue = ((CONSTANT_Utf8_info *) cp->getConstantPool()[constantStringInfo->index])->getConstantInHeap();
         InstanceKlass *clz = BootstrapClassLoader::get()->loadClassByName(L"java/lang/String");
@@ -46,35 +49,34 @@ public:
 
     }
 
-    static void Op_iconst0(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_iconst0(JavaThread *javaThread) {
         javaThread->currentFrame()->getOperandStack().pushInt(0);
     }
 
-    static void Op_aload0(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_aload0(JavaThread *javaThread) {
         auto ref = javaThread->currentFrame()->getLocals().getSlotArray().getRef(0);
         javaThread->currentFrame()->getOperandStack().pushRef(ref);
     }
 
-    static void Op_aload1(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_aload1(JavaThread *javaThread) {
         auto ref = javaThread->currentFrame()->getLocals().getSlotArray().getRef(1);
         javaThread->currentFrame()->getOperandStack().pushRef(ref);
     }
 
-    static void Op_bipush(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_bipush(JavaThread *javaThread) {
         Method *method = javaThread->currentFrame()->getMethod();
         u1 byteValue = method->getCodeReader().readU1(javaThread->pc_);
         javaThread->currentFrame()->getOperandStack().pushInt(byteValue);
     }
 
-    static void Op_iload0(JavaThread *javaThread, const ConstantPool *cp) {
-
+    static void Op_iload0(JavaThread *javaThread) {
         int value = javaThread->currentFrame()->getLocals().getSlotArray().getInt(0);
         javaThread->currentFrame()->getOperandStack().pushInt(value);
     }
 
-    static void Op_invokeVirtual(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_invokeVirtual(JavaThread *javaThread) {
         //todo
-        Op_invokeSpecial(javaThread, cp);
+        Op_invokeSpecial(javaThread);
     }
 
     static void invokeNative(Method *targetMethod, std::list<void *> &args_) {
@@ -191,10 +193,11 @@ public:
         ffi_call(&cif, FFI_FN(fn), returnPtr, ffiArgs);
     }
 
-    static void Op_invokeSpecial(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_invokeSpecial(JavaThread *javaThread) {
         CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
 
         u2 index = codeReader.readU2(javaThread->pc_);
+        const ConstantPool *cp = javaThread->currentFrame()->getMethod()->getCp();
 
         ConstantMethodref_info *method = dynamic_cast<ConstantMethodref_info *>(cp->getConstantPool()[index]);
         CONSTANT_Class_info *classInfo = dynamic_cast<CONSTANT_Class_info *>(cp->getConstantPool()[method->class_index]);
@@ -282,10 +285,13 @@ public:
         args.push_front(Ujvm::getJNIENV());
     }
 
-    static void Op_invokeStatic(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_invokeStatic(JavaThread *javaThread) {
         CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
 
         u2 index = codeReader.readU2(javaThread->pc_);
+
+        const ConstantPool *cp = javaThread->currentFrame()->getMethod()->getCp();
+
 
         ConstantMethodref_info *method = dynamic_cast<ConstantMethodref_info *>(cp->getConstantPool()[index]);
         CONSTANT_Class_info *classInfo = dynamic_cast<CONSTANT_Class_info *>(cp->getConstantPool()[method->class_index]);
@@ -378,13 +384,14 @@ public:
         javaThread->pc_ = frame.getReturnPc();
     }
 
-    static void Op_return(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_return(JavaThread *javaThread) {
     }
 
-    static void Op_putstatic(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_putstatic(JavaThread *javaThread) {
         CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
-
         u2 index = codeReader.readU2(javaThread->pc_);
+        const ConstantPool *cp = javaThread->currentFrame()->getMethod()->getCp();
+
         ConstantFieldref_info *constantFieldRefInfo = dynamic_cast<ConstantFieldref_info *>(cp->getConstantPool()[index]);
         CONSTANT_Class_info *classInfo = (CONSTANT_Class_info *) cp->getConstantPool()[constantFieldRefInfo->class_index];
         CONSTANT_NameAndType_info *nameAndTypeInfo = (CONSTANT_NameAndType_info *) cp->getConstantPool()[constantFieldRefInfo->name_and_type_index];
@@ -396,9 +403,11 @@ public:
                                                                           javaThread->currentFrame()->getOperandStack().popRef()));
     }
 
-    static void Op_getStatic(JavaThread *javaThread, const ConstantPool *cp) {
+    static void Op_getStatic(JavaThread *javaThread) {
         CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
         u2 index = codeReader.readU2(javaThread->pc_);
+
+        const ConstantPool *cp = javaThread->currentFrame()->getMethod()->getCp();
 
         std::cout << "Index is :" << +index << std::endl;
         ConstantFieldref_info *constantFieldRefInfo = dynamic_cast<ConstantFieldref_info *>(cp->getConstantPool()[index]);
