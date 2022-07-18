@@ -34,7 +34,7 @@ TEST(test_hellowold, class_read_test) {
     BootstrapClassLoader::get()->loadClassByName(L"java/lang/Object");
     BootstrapClassLoader::get()->loadClassByName(L"java/lang/System");
     BootstrapClassLoader::get()->loadClassByName(L"java/io/PrintStream");
-    InstanceClassStruct *clz = SystemDictionary::get()->find(L"MyTest");
+    InstanceKlass *clz = SystemDictionary::get()->find(L"MyTest");
     ClassFile *cf = clz->getClassFile();
     auto methodInfo = findMainMethod(cf);
     JavaFrame *frame = new JavaFrame(methodInfo->getCode()->max_locals, methodInfo->getCode()->max_stack);

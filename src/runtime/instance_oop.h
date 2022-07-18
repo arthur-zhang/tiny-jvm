@@ -10,12 +10,12 @@
 
 class InstanceOop {
 public:
-    InstanceClassStruct *clazz;
+    InstanceKlass *clazz;
     map<strings::String, u1 *> fieldMap;
 
-    InstanceOop(InstanceClassStruct *clazz) : clazz(clazz) {}
+    InstanceOop(InstanceKlass *clazz) : clazz(clazz) {}
 
-    static InstanceOop *allocateInstance(InstanceClassStruct *clazz) {
+    static InstanceOop *allocateInstance(InstanceKlass *clazz) {
         InstanceOop *oop = new InstanceOop(clazz);
         return oop;
     }

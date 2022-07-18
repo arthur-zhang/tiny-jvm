@@ -9,7 +9,7 @@
 
 class Runtime {
 public:
-    static void callStaticMethod(InstanceClassStruct *instanceClassStruct, JavaThread *javaThread,
+    static void callStaticMethod(InstanceKlass *instanceClassStruct, JavaThread *javaThread,
                                  Method *method) {
         JavaFrame *frame = new JavaFrame(method->getCode()->max_locals, method->getCode()->max_stack);
         javaThread->pushFrame(frame);

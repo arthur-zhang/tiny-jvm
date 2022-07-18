@@ -9,7 +9,7 @@ strings::String parseClassName(ClassFile *cf) {
     return ((CONSTANT_Utf8_info *) cf->constantPool->getConstantPool()[classInfo->index])->getConstant();
 }
 
-InstanceClassStruct::InstanceClassStruct(ClassFile *cf) : cf_(cf), staticValueMap_({}) {
+InstanceKlass::InstanceKlass(ClassFile *cf) : cf_(cf), staticValueMap_({}) {
     className_ = parseClassName(cf);
     for (int i = 0; i < cf->methods_count; ++i) {
         methodMap_[cf->methods[i]->getMethodName() + cf->methods[i]->getMethodDesc()]

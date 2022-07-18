@@ -22,7 +22,7 @@ public:
         CONSTANT_Utf8_info *classNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[classInfo->index]);
         const auto className = classNameUtf8Info->getConstant();
 
-        InstanceClassStruct *clz = BootstrapClassLoader::get()->loadClassByName(className);
+        InstanceKlass *clz = BootstrapClassLoader::get()->loadClassByName(className);
         InstanceOop *instance = InstanceOop::allocateInstance(clz);
         javaThread->currentFrame()->getOperandStack().pushRef(instance);
     }
@@ -37,7 +37,7 @@ public:
         int idx = code[codeIdx];
         auto constantStringInfo = (CONSTANT_String_info *) cp->getConstantPool()[idx];
         const strings::String *stringValue = ((CONSTANT_Utf8_info *) cp->getConstantPool()[constantStringInfo->index])->getConstantInHeap();
-        InstanceClassStruct *clz = BootstrapClassLoader::get()->loadClassByName(L"java/lang/String");
+        InstanceKlass *clz = BootstrapClassLoader::get()->loadClassByName(L"java/lang/String");
 
         javaThread->currentFrame()->getOperandStack().pushRef(
                 new InstanceOopDesc(clz, const_cast<strings::String *> (stringValue)));
@@ -395,7 +395,7 @@ public:
         CONSTANT_NameAndType_info *nameAndTypeInfo = (CONSTANT_NameAndType_info *) cp->getConstantPool()[constantFieldRefInfo->name_and_type_index];
         CONSTANT_Utf8_info *classNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[classInfo->index]);
         CONSTANT_Utf8_info *fieldNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[nameAndTypeInfo->name_index]);
-        InstanceClassStruct *classInstance = SystemDictionary::get()->find(classNameUtf8Info->getConstant());
+        InstanceKlass *classInstance = SystemDictionary::get()->find(classNameUtf8Info->getConstant());
         auto fieldName = fieldNameUtf8Info->getConstant();
         classInstance->getStaticValueMap()[fieldName] = new InstanceOopDesc(classInstance,
                                                                             javaThread->currentFrame()->getOperandStack().popRef());
@@ -414,7 +414,7 @@ public:
         CONSTANT_Utf8_info *classNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[classInfo->index]);
         std::wcout << "className: " << classNameUtf8Info->getConstant() << std::endl;
 
-        InstanceClassStruct *classInstance = SystemDictionary::get()->find(classNameUtf8Info->getConstant());
+        InstanceKlass *classInstance = SystemDictionary::get()->find(classNameUtf8Info->getConstant());
 
         CONSTANT_Utf8_info *fieldNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[nameAndTypeInfo->name_index]);
         CONSTANT_Utf8_info *fieldDescUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[nameAndTypeInfo->descriptor_index]);

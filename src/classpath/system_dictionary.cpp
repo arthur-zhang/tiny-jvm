@@ -4,11 +4,11 @@
 
 #include "system_dictionary.h"
 
-bool SystemDictionary::put(const strings::String &name, InstanceClassStruct *clazz) {
+bool SystemDictionary::put(const strings::String &name, InstanceKlass *clazz) {
     return this->classMap_.insert(std::make_pair(name, clazz)).second;
 }
 
-InstanceClassStruct *SystemDictionary::find(const strings::String &name) {
+InstanceKlass *SystemDictionary::find(const strings::String &name) {
 
     auto ite = this->classMap_.find(name);
     if (ite == this->classMap_.end()) return nullptr;

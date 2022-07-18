@@ -12,12 +12,12 @@ class SystemDictionary final {
 public:
     static SystemDictionary *get();
 
-    bool put(const strings::String &name, InstanceClassStruct *clazz);
+    bool put(const strings::String &name, InstanceKlass *clazz);
 
-    InstanceClassStruct *find(const strings::String &name);
+    InstanceKlass *find(const strings::String &name);
 
 private:
-    HashMap<strings::String, InstanceClassStruct *> classMap_;
+    HashMap<strings::String, InstanceKlass *> classMap_;
 };
 
 

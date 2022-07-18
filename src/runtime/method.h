@@ -11,7 +11,7 @@ class Method {
 private:
     ConstantPool *cp_;
     MethodInfo *methodInfo_;
-    InstanceClassStruct *clazz_;
+    InstanceKlass *clazz_;
 
     strings::String methodName_;
     strings::String methodDesc_;
@@ -26,7 +26,7 @@ private:
     int calcArgsSlotCount();
 
 public:
-    Method(InstanceClassStruct *clazz, MethodInfo *methodInfo);
+    Method(InstanceKlass *clazz, MethodInfo *methodInfo);
 
     CodeAttribute *getCode() const {
         return methodInfo_->getCode();
@@ -40,7 +40,7 @@ public:
         return cp_;
     }
 
-    InstanceClassStruct *getClazz() const {
+    InstanceKlass *getClazz() const {
         return clazz_;
     }
 

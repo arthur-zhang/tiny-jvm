@@ -9,7 +9,7 @@
 
 
 //todo
-class InstanceClassStruct;
+class InstanceKlass;
 
 class BootstrapClassLoader {
 public:
@@ -18,8 +18,8 @@ public:
         return &loader;
     }
 
-    InstanceClassStruct *loadClass(u1 *classBytes, size_t classSize);
+    InstanceKlass *loadClass(u1 *classBytes, size_t classSize);
 
-    InstanceClassStruct *loadClassByName(const strings::String &name);
+    InstanceKlass *loadClassByName(const strings::String &name);
 };
 //}

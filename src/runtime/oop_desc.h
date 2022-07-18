@@ -4,17 +4,17 @@
 #include "oop_value_type.h"
 
 
-class InstanceClassStruct;
+class InstanceKlass;
 
 class OopDesc {
 
 private:
-    InstanceClassStruct *clazz_ = nullptr;
+    InstanceKlass *clazz_ = nullptr;
     OopType oopType_;
 public:
-    OopDesc(InstanceClassStruct *clazz, OopType oopType) : clazz_(clazz), oopType_(oopType) {}
+    OopDesc(InstanceKlass *clazz, OopType oopType) : clazz_(clazz), oopType_(oopType) {}
 
-    InstanceClassStruct *getClazz() const {
+    InstanceKlass *getClazz() const {
         return clazz_;
     }
 
@@ -26,7 +26,7 @@ public:
 class InstanceOopDesc : public OopDesc {
 
 public:
-    InstanceOopDesc(InstanceClassStruct *clazz, jobject ref) : ref_(ref), OopDesc(clazz, OopType::INSTANCE_OOP) {}
+    InstanceOopDesc(InstanceKlass *clazz, jobject ref) : ref_(ref), OopDesc(clazz, OopType::INSTANCE_OOP) {}
 
     const void *getRef() const {
         return ref_;

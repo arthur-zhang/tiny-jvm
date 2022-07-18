@@ -8,7 +8,7 @@
 #include "runtime/instance_class.h"
 #include "runtime/thread.h"
 
-InstanceClassStruct *BootstrapClassLoader::loadClass(u1 *classBytes, size_t classSize) {
+InstanceKlass *BootstrapClassLoader::loadClass(u1 *classBytes, size_t classSize) {
     return nullptr;
 }
 
@@ -29,7 +29,7 @@ static vector<strings::String> searchDirList = {
 };
 
 
-InstanceClassStruct *loadRawClassX(const strings::String &className) {
+InstanceKlass *loadRawClassX(const strings::String &className) {
 
     strings::String tmpPath;
     for (const auto &item: searchDirList) {
@@ -42,7 +42,7 @@ InstanceClassStruct *loadRawClassX(const strings::String &className) {
         }
         auto *cf = new ujvm::ClassFile(strings::toStdString(tmpPath));
         cf->parse();
-        return new InstanceClassStruct(cf);
+        return new InstanceKlass(cf);
     }
 
     return nullptr;
@@ -50,15 +50,15 @@ InstanceClassStruct *loadRawClassX(const strings::String &className) {
 
 //ClassSearchResult *searchClass(const strings::String &className) {
 //    strings::String fileName = strings::replaceAll(className, L".", L"/");
-//    InstanceClassStruct *kClass = loadRawClassX(fileName);
+//    InstanceKlass *kClass = loadRawClassX(fileName);
 //    if (kClass) {
 //        return new ClassSearchResult();
 //    }
 //
 //}
 
-InstanceClassStruct *BootstrapClassLoader::loadClassByName(const strings::String &className) {
-    InstanceClassStruct *clazz = SystemDictionary::get()->find(className);
+InstanceKlass *BootstrapClassLoader::loadClassByName(const strings::String &className) {
+    InstanceKlass *clazz = SystemDictionary::get()->find(className);
     if (clazz != nullptr) return clazz;
     clazz = loadRawClassX(className);
     if (clazz != nullptr) {

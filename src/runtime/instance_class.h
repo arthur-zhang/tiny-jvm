@@ -6,25 +6,24 @@
 #include "classfile/class_loader.h"
 #include "oop_desc.h"
 #include "method.h"
+#include "klass.h"
 
 class Method;
+
 class OopDesc;
 
-class InstanceClassStruct {
+// 每个 InstanceKlass 对象表示一个具体的 Java 类（这里的 Java 类不包括 Java 数组）
+class InstanceKlass : public Klass {
 private:
     ClassFile *cf_;
     map<strings::String, Method *> methodMap_;
     map<strings::String, OopDesc *> staticValueMap_;
-    strings::String className_;
+
 public:
-    InstanceClassStruct(ClassFile *cf);
+    InstanceKlass(ClassFile *cf);
 
     ClassFile *getClassFile() const {
         return cf_;
-    }
-
-    const strings::String &getClassName() const {
-        return className_;
     }
 
 

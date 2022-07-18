@@ -5,7 +5,7 @@
 #include "method.h"
 #include "instance_class.h"
 
-Method::Method(InstanceClassStruct *clazz, MethodInfo *methodInfo) : methodInfo_(methodInfo), clazz_(clazz) {
+Method::Method(InstanceKlass *clazz, MethodInfo *methodInfo) : methodInfo_(methodInfo), clazz_(clazz) {
     cp_ = clazz->getClassFile()->constantPool;
     methodName_ = ((CONSTANT_Utf8_info *) cp_->getConstantPool()[methodInfo_->name_index])->getConstant();
     methodDesc_ = ((CONSTANT_Utf8_info *) cp_->getConstantPool()[methodInfo_->descriptor_index])->getConstant();
