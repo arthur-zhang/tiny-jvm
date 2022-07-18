@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include "java_io_printstream.h"
-#include "ujvm/runtime/oop_desc.h"
+#include "runtime/oop_desc.h"
 
 
 void Java_java_io_PrintStream_printlnNative(jobject env, jobject jobj, jobject str) {

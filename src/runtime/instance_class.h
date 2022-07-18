@@ -4,8 +4,7 @@
 #include "shared/types.h"
 #include "classfile/classfile_parser.h"
 #include "ujvm/class_loader.h"
-#include "ujvm/runtime/common_value.h"
-#include "ujvm/runtime/oop_desc.h"
+#include "oop_desc.h"
 #include "method.h"
 
 class Method;

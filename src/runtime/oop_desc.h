@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ujvm/runtime/instance_class.h"
+#include "instance_class.h"
 #include "oop_value_type.h"
 
 

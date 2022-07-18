@@ -5,15 +5,10 @@
 #include "classfile/classfile_parser.h"
 #include <filesystem>
 #include "ujvm/classpath/system_dictionary.h"
-#include "ujvm/runtime/thread.h"
-#include "ujvm/runtime/bytecode_interpreter.h"
+#include "runtime/thread.h"
+#include "bytecode/bytecode_interpreter.h"
 
 namespace fs = std::filesystem;
-//TEST(test_classfile, DataOutputStream) {
-//    DataOutputStream os("/Users/arthur/cvt_dev/clion/tiny-jvm/TestDump.class");
-//    os.writeUInt32((u4) JVM_CLASSFILE_MAGIC);
-//    os.flush();
-//}
 using namespace ujvm;
 
 
