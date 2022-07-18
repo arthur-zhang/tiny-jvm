@@ -16,6 +16,8 @@ public:
 
     virtual void start();
 
+    u4 pc_ = 0;
+
 private:
     FrameList stackFrame;
 };

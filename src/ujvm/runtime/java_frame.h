@@ -116,6 +116,8 @@ class JavaFrame {
 private:
     Stack operandStack_;
     Locals locals_;
+    Method *method_;
+    int returnPc_;
 public:
     Stack &getOperandStack() {
         return operandStack_;
@@ -125,13 +127,29 @@ public:
         return locals_;
     }
 
-    explicit JavaFrame(int maxLocals, int maxStack) : locals_(maxLocals), operandStack_(maxStack) {}
-
-    static JavaFrame *newFrame(int maxLocals, int maxStack) {
-        return new JavaFrame(maxLocals, maxStack);
+    Method *getMethod() const {
+        return method_;
     }
 
+//    explicit JavaFrame(int maxLocals, int maxStack) : locals_(maxLocals), operandStack_(maxStack) {}
+
+    JavaFrame(Method *method) : method_(method), locals_(method->getMaxLocals()), operandStack_(method->getMaxStack()) {
+
+    }
+
+    void setReturnPc(int nextPc) {
+        returnPc_ = nextPc;
+    }
+
+    int getReturnPc() const {
+        return returnPc_;
+    }
+
+//    static JavaFrame *newFrame(int maxLocals, int maxStack) {
+//        return new JavaFrame(maxLocals, maxStack);
+//    }
+
     static JavaFrame *newFrame(Method *method) {
-        return new JavaFrame(method->getMaxLocals(), method->getMaxStack());
+        return new JavaFrame(method);
     }
 };

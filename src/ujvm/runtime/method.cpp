@@ -16,6 +16,9 @@ Method::Method(InstanceKlass *clazz, MethodInfo *methodInfo) : methodInfo_(metho
         maxLocals_ = methodInfo_->getCode()->max_locals;
         maxStack_ = methodInfo_->getCode()->max_stack;
     }
+    if (methodInfo->getCode()) {
+        codeReader_ = CodeReader(methodInfo->getCode()->code, methodInfo->getCode()->code_length);
+    }
 }
 
 void Method::parseArgsType() {
@@ -87,6 +90,10 @@ int Method::getMaxStack() const {
 
 int Method::getMaxLocals() const {
     return maxLocals_;
+}
+
+CodeReader &Method::getCodeReader() {
+    return codeReader_;
 }
 
 

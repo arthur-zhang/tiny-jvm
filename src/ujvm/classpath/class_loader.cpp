@@ -68,7 +68,7 @@ InstanceKlass *BootstrapClassLoader::loadClassByName(const strings::String &clas
 
     auto method = clazz->findMethod(L"<clinit>", L"()V");
     if (method != nullptr) {
-        Runtime::callStaticMethod(clazz, Threads::currentThread, method);
+        Runtime::callStaticMethod(Threads::currentThread, method);
     }
     return clazz;
 }

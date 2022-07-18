@@ -5,6 +5,7 @@
 #include "instance_class.h"
 #include "oop_value_type.h"
 #include "native_method.h"
+#include "code_reader.h"
 
 
 class Method {
@@ -22,17 +23,22 @@ private:
     int maxLocals_;
     int maxStack_;
 
+
     // (I[ILjava/lang/String;[Ljava/lang/Thread;Ljava/lang/Long;)V
     void parseArgsType();
 
     int calcArgsSlotCount();
 
+    CodeReader codeReader_;
 public:
     Method(InstanceKlass *clazz, MethodInfo *methodInfo);
 
     CodeAttribute *getCode() const {
         return methodInfo_->getCode();
     }
+
+    CodeReader &getCodeReader() ;
+
 
     int getMaxLocals() const;
 

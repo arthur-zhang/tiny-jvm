@@ -9,13 +9,14 @@
 
 class Runtime {
 public:
-    static void callStaticMethod(InstanceKlass *instanceClassStruct, JavaThread *javaThread,
-                                 Method *method) {
-        JavaFrame *frame = new JavaFrame(method->getCode()->max_locals, method->getCode()->max_stack);
-        javaThread->pushFrame(frame);
-        BytecodeInterpreter::run(method, javaThread);
-//        javaThread->popFrame();
-//        delete frame;
+    static void callStaticMethod(JavaThread *javaThread, Method *method) {
+        JavaFrame frame = JavaFrame(method);
+        frame.setReturnPc(javaThread->pc_);
+        javaThread->pushFrame(&frame);
+
+        BytecodeInterpreter::interpret(method, javaThread);
+        javaThread->popFrame();
+        javaThread->pc_ = frame.getReturnPc();
     }
 };
 
