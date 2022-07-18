@@ -19,7 +19,7 @@ public:
         return ret;
     }
 
-    bool ended(u4 &pc) {
+    bool ended(u4 &pc) const {
         return pc >= codeLen_;
     }
 

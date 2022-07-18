@@ -3,76 +3,73 @@
 #include "bytecode_interpreter.h"
 #include "opcode_executor.h"
 
-void BytecodeInterpreter::interpret(Method *method, JavaThread *javaThread) {
+void BytecodeInterpreter::interpret(JavaThread *javaThread) {
+    Method *method = javaThread->currentFrame()->getMethod();
     CodeReader &codeReader = method->getCodeReader();
     std::cout << ">>>>>>>>>>>>>>>>>" << std::endl;
     u4 &pc = javaThread->pc_;
 
     while (!codeReader.ended(pc)) {
-        u1 bc = codeReader.readU1(pc);
-        switch (bc) {
-            case 0x03: { // iconst_0
+        switch (codeReader.readU1(pc)) {
+            case OPC_ICONST_0: {
                 OpcodeExecutor::Op_iconst0(javaThread);
                 break;
             }
-            case 0x10: { // bipush
+            case OPC_BIPUSH: {
                 OpcodeExecutor::Op_bipush(javaThread);
                 break;
             }
-            case 0x1A : { // iload_0
+            case OPC_ILOAD_0 : {
                 OpcodeExecutor::Op_iload0(javaThread);
                 break;
             }
-            case 0xBB: { //new
+            case OPC_NEW: { //new
                 OpcodeExecutor::Op_new(javaThread);
                 break;
             }
-            case 0x12: { // ldc
+            case OPC_LDC: { // ldc
                 OpcodeExecutor::Op_ldc(javaThread);
                 break;
             }
-            case 0x2A: { // aload_0
-
+            case OPC_ALOAD_0: { // aload_0
                 OpcodeExecutor::Op_aload0(javaThread);
                 break;
             }
-            case 0x2B: { // aload_1
-
+            case OPC_ALOAD_1: { // aload_1
                 OpcodeExecutor::Op_aload1(javaThread);
                 break;
             }
 
-            case 0xB1: { // return
+            case OPC_RETURN: { // return
                 OpcodeExecutor::Op_return(javaThread);
-
                 break;
             }
-            case 0xB3: {// putstatic
+            case OPC_PUTSTATIC: {// putstatic
                 OpcodeExecutor::Op_putstatic(javaThread);
                 break;
             }
-            case 0xB6: { // invokevirtual
+            case OPC_INVOKEVIRTUAL: { // invokevirtual
                 OpcodeExecutor::Op_invokeVirtual(javaThread);
                 break;
             }
-            case 0xB7: { // invokespecial
+            case OPC_INVOKESPECIAL: { // invokespecial
                 OpcodeExecutor::Op_invokeSpecial(javaThread);
                 break;
             }
-            case 0xB8: { // invokestatic
+            case OPC_INVOKESTATIC: { // invokestatic
                 OpcodeExecutor::Op_invokeStatic(javaThread);
                 break;
             }
 
-            case 0xB2: { // getstatic
+            case OPC_GETSTATIC: { // getstatic
                 OpcodeExecutor::Op_getStatic(javaThread);
                 break;
             }
-            case 0x59:
+            case OPC_DUP:
                 OpcodeExecutor::Op_dup(javaThread);
                 break;
             default:
-                PANIC("bytecode not implemented....%d", bc);
+                PANIC("bytecode not implemented....%d");
         }
     }
 }

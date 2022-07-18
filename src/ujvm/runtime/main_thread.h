@@ -21,7 +21,7 @@ public:
         if (!mainMethod) PANIC("main method not found");
         mainMethod_ = mainMethod;
         this->pushFrame(mainMethod_);
-        BytecodeInterpreter::interpret(mainMethod_, this);
+        BytecodeInterpreter::interpret(this);
     }
 
 private:

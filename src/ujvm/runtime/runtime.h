@@ -14,7 +14,7 @@ public:
         frame.setReturnPc(javaThread->pc_);
         javaThread->pushFrame(&frame);
 
-        BytecodeInterpreter::interpret(method, javaThread);
+        BytecodeInterpreter::interpret(javaThread);
         javaThread->popFrame();
         javaThread->pc_ = frame.getReturnPc();
     }

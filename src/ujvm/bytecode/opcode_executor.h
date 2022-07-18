@@ -231,7 +231,7 @@ public:
             }
 
             javaThread->pc_ = 0;
-            BytecodeInterpreter::interpret(targetMethod, javaThread);
+            BytecodeInterpreter::interpret(javaThread);
             javaThread->popFrame();
             javaThread->pc_ = frame.getReturnPc();
             return;
@@ -379,7 +379,7 @@ public:
             }
             localVariableIndex++;
         }
-        BytecodeInterpreter::interpret(targetMethod, javaThread);
+        BytecodeInterpreter::interpret(javaThread);
         javaThread->popFrame();
         javaThread->pc_ = frame.getReturnPc();
     }
