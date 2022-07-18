@@ -16,5 +16,4 @@ typedef short jshort;
 typedef double jdouble;
 typedef unsigned char jboolean;
 typedef unsigned short jchar;
-
 #define JAVA_NATIVE extern "C"

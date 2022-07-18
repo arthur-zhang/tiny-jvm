@@ -87,6 +87,7 @@ public:
         jdouble d;
         jobject l;
     } jvalue;
+
     static void invokeNative(Method *targetMethod, std::list<void *> &args_) {
 
         vector<void *> args(args_.begin(), args_.end());
@@ -397,8 +398,8 @@ public:
         CONSTANT_Utf8_info *fieldNameUtf8Info = dynamic_cast<CONSTANT_Utf8_info *>(cp->getConstantPool()[nameAndTypeInfo->name_index]);
         InstanceKlass *classInstance = SystemDictionary::get()->find(classNameUtf8Info->getConstant());
         auto fieldName = fieldNameUtf8Info->getConstant();
-        classInstance->getStaticValueMap()[fieldName] = new InstanceOopDesc(classInstance,
-                                                                            javaThread->currentFrame()->getOperandStack().popRef());
+        classInstance->setStaticFieldValue(fieldName, new InstanceOopDesc(classInstance,
+                                                                          javaThread->currentFrame()->getOperandStack().popRef()));
     }
 
     static void Op_getStatic(int &codeIdx, u1 *code, JavaThread *javaThread, const ConstantPool *cp) {
@@ -421,7 +422,7 @@ public:
         std::wcout << "fieldName:" << fieldNameUtf8Info->getConstant() << std::endl;
         std::wcout << "fieldDesc:" << fieldDescUtf8Info->getConstant() << std::endl;
         const strings::String fieldName = fieldNameUtf8Info->getConstant();
-        OopDesc *fieldValue = classInstance->getStaticValueMap()[fieldName];
+        OopDesc *fieldValue = classInstance->getStaticFieldValue(fieldName);
         switch (fieldValue->getOopType()) {
             case INSTANCE_OOP:
             case OBJECT_ARRAY_OOP:

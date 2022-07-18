@@ -7,10 +7,13 @@
 #include "oop_desc.h"
 #include "method.h"
 #include "klass.h"
+#include "shared/jstring.h"
 
 class Method;
 
 class OopDesc;
+
+using namespace ujvm;
 
 // 每个 InstanceKlass 对象表示一个具体的 Java 类（这里的 Java 类不包括 Java 数组）
 class InstanceKlass : public Klass {
@@ -26,7 +29,6 @@ public:
         return cf_;
     }
 
-
     inline const map<strings::String, Method *> &getMethodMap() const {
         return methodMap_;
     }
@@ -35,10 +37,13 @@ public:
         return methodMap_[methodName + methodDesc];
     }
 
-    inline map<strings::String, OopDesc *> &getStaticValueMap() {
-        return staticValueMap_;
+    inline void setStaticFieldValue(strings::String &fieldName, oop fieldValue) {
+        staticValueMap_[fieldName] = fieldValue;
     }
 
+    inline oop getStaticFieldValue(const strings::String &fieldName) {
+        return staticValueMap_[fieldName];
+    }
 
 };
 
