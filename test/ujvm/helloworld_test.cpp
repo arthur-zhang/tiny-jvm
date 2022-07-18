@@ -7,6 +7,7 @@
 #include <ujvm/runtime/system_dictionary.h>
 #include <ujvm/runtime/thread.h>
 #include <ujvm/bytecode/bytecode_interpreter.h>
+#include <ujvm/runtime/main_thread.h>
 
 namespace fs = std::filesystem;
 using namespace ujvm;
@@ -27,18 +28,13 @@ MethodInfo *findMainMethod(ClassFile *cf) {
 
 TEST(test_hellowold, class_read_test) {
 
-    JavaThread *javaThread = new JavaThread;
-//    Threads::currentThread = javaThread;
-    Threads::currentThread = javaThread;
-    BootstrapClassLoader::get()->loadClassByName(L"MyTest");
-    BootstrapClassLoader::get()->loadClassByName(L"java/lang/Object");
-    BootstrapClassLoader::get()->loadClassByName(L"java/lang/System");
-    BootstrapClassLoader::get()->loadClassByName(L"java/io/PrintStream");
-    InstanceKlass *clz = SystemDictionary::get()->find(L"MyTest");
-    ClassFile *cf = clz->getClassFile();
-    auto methodInfo = findMainMethod(cf);
-    JavaFrame *frame = new JavaFrame(methodInfo->getCode()->max_locals, methodInfo->getCode()->max_stack);
-    javaThread->pushFrame(frame);
-    BytecodeInterpreter::run(new Method(clz, methodInfo), javaThread);
+
+
+    MainThread mainThread(L"MyTest");
+    Threads::currentThread = &mainThread;
+
+    mainThread.start();
+
+
 //    delete frame;
 }

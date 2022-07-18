@@ -6,23 +6,15 @@
 
 class JavaThread {
 public:
-    void pushFrame(JavaFrame *frame) {
-        stackFrame.push(frame);
-    }
+    void pushFrame(JavaFrame *frame);
 
-    void pushFrame(Method *method) {
-        stackFrame.push(JavaFrame::newFrame(method));
-    }
+    void pushFrame(Method *method);
 
-    JavaFrame *popFrame() {
-        JavaFrame *ret = stackFrame.top();
-        stackFrame.pop();
-        return ret;
-    }
+    JavaFrame *popFrame();
 
-    JavaFrame *currentFrame() {
-        return stackFrame.top();
-    }
+    JavaFrame *currentFrame();
+
+    virtual void start();
 
 private:
     FrameList stackFrame;
