@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ujvm/jni/jni.h"
+#include "jni/jni.h"
 
 class Ujvm {
 public:

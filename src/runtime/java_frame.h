@@ -7,7 +7,7 @@
 
 #include <stack>
 #include <map>
-#include "ujvm/class_loader.h"
+#include "classfile/class_loader.h"
 
 struct Slot {
 public:

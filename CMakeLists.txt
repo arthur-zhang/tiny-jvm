@@ -8,7 +8,6 @@ include_directories(include)
 include_directories(include/shared)
 
 
-
 set(INCLUDE_LIST src/shared/jstring.h src/shared/fs.h)
 enable_testing()
 add_subdirectory(src)

@@ -3,7 +3,7 @@
 #include <map>
 #include "shared/types.h"
 #include "classfile/classfile_parser.h"
-#include "ujvm/class_loader.h"
+#include "classfile/class_loader.h"
 #include "oop_desc.h"
 #include "method.h"
 

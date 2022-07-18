@@ -4,7 +4,7 @@
 #include "shared/const.h"
 #include "classfile/classfile_parser.h"
 #include <filesystem>
-#include "ujvm/classpath/system_dictionary.h"
+#include "classpath/system_dictionary.h"
 #include "runtime/thread.h"
 #include "bytecode/bytecode_interpreter.h"
 
