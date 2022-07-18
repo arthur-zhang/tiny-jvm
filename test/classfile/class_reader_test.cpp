@@ -4,9 +4,9 @@
 #include "shared/const.h"
 #include "classfile/classfile_parser.h"
 #include <filesystem>
-#include "classpath/system_dictionary.h"
+#include "runtime/system_dictionary.h"
 #include "runtime/thread.h"
-#include "bytecode/bytecode_interpreter.h"
+#include "runtime/bytecode/bytecode_interpreter.h"
 
 namespace fs = std::filesystem;
 //TEST(test_classfile, DataOutputStream) {

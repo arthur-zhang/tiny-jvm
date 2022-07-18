@@ -3,7 +3,8 @@
 #include <map>
 #include "shared/types.h"
 #include "classfile/classfile_parser.h"
-#include "runtime/instance_class.h"
+#include <ujvm/runtime/instance_class.h>
+
 
 //namespace ujvm {
 

@@ -1,7 +1,7 @@
 #include <iostream>
+#include <ujvm/runtime/instance_class.h>
 #include "bytecode_interpreter.h"
-#include "runtime/instance_class.h"
-#include "runtime/opcode_executor.h"
+#include "opcode_executor.h"
 
 void BytecodeInterpreter::run(Method *method, JavaThread *javaThread) {
     auto codeAttr = method->getCode();

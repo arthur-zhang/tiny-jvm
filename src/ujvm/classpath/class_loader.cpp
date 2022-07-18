@@ -3,10 +3,10 @@
 //
 
 #include "class_loader.h"
-#include "classpath/system_dictionary.h"
-#include "runtime/runtime.h"
-#include "runtime/instance_class.h"
-#include "runtime/thread.h"
+#include "ujvm/runtime/system_dictionary.h"
+#include <ujvm/runtime/runtime.h>
+#include <ujvm/runtime/instance_class.h>
+#include <ujvm/runtime/thread.h>
 
 InstanceKlass *BootstrapClassLoader::loadClass(u1 *classBytes, size_t classSize) {
     return nullptr;

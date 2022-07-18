@@ -7,6 +7,6 @@ add_executable(my_test helloworld_test.cpp)
 
 target_link_libraries(my_test
         ${GTEST_BOTH_LIBRARIES}
-        pthread classfile runtime shared classpath bytecode)
+        pthread ujvm classfile shared)
 
 gtest_discover_tests(my_test)

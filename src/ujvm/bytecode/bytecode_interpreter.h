@@ -1,6 +1,7 @@
 #pragma once
-#include "runtime/method.h"
-#include "runtime/java_thread.h"
+
+#include <ujvm/runtime/method.h>
+#include <ujvm/runtime/java_thread.h>
 
 class BytecodeInterpreter {
 public:

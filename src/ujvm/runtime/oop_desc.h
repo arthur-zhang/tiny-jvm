@@ -22,7 +22,6 @@ public:
         return oopType_;
     }
 };
-typedef OopDesc* oop;
 
 class InstanceOopDesc : public OopDesc {
 

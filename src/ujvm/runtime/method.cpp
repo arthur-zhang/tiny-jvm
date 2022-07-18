@@ -12,7 +12,12 @@ Method::Method(InstanceKlass *clazz, MethodInfo *methodInfo) : methodInfo_(metho
 
     parseArgsType();
     argsSlotCount_ = calcArgsSlotCount();
+    if (methodInfo_->getCode()) {
+        maxLocals_ = methodInfo_->getCode()->max_locals;
+        maxStack_ = methodInfo_->getCode()->max_stack;
+    }
 }
+
 void Method::parseArgsType() {
     bool isArray = false;
     for (int i = 0; i < methodDesc_.size(); ++i) {
@@ -74,6 +79,14 @@ int Method::calcArgsSlotCount() {
 
 int Method::getArgsSlotCount() const {
     return argsSlotCount_;
+}
+
+int Method::getMaxStack() const {
+    return maxStack_;
+}
+
+int Method::getMaxLocals() const {
+    return maxLocals_;
 }
 
 

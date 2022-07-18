@@ -3,12 +3,13 @@
 #include <ffi.h>
 #include <stack>
 #include <list>
-#include "java_thread.h"
-#include "classpath/system_dictionary.h"
-#include "instance_oop.h"
-#include "oop_value_type.h"
-#include "bytecode/bytecode_interpreter.h"
-#include "shared/ujvm.h"
+#include <ujvm/runtime/java_thread.h>
+#include <ujvm/runtime/system_dictionary.h>
+#include <ujvm/runtime/instance_oop.h>
+#include <ujvm/runtime/instance_class.h>
+#include <ujvm/runtime/oop_value_type.h>
+#include "bytecode_interpreter.h"
+#include <shared/ujvm.h>
 
 class OpcodeExecutor {
 

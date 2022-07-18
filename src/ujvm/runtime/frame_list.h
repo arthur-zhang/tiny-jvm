@@ -1,32 +1,29 @@
 //
-// Created by arthur on 2022/6/26.
+// Created by arthur on 2022/7/18.
 //
 
-#ifndef TINY_JVM_JAVA_THREAD_H
-#define TINY_JVM_JAVA_THREAD_H
+#pragma once
 
 #include <stack>
 #include "java_frame.h"
 
-class JavaThread {
+class FrameList {
 public:
-    void pushFrame(JavaFrame *frame) {
+    void push(JavaFrame *frame) {
         stackFrame.push(frame);
     }
 
-    JavaFrame *popFrame() {
+    JavaFrame *pop() {
         JavaFrame *ret = stackFrame.top();
         stackFrame.pop();
         return ret;
     }
 
-    JavaFrame *currentFrame() {
+    JavaFrame *top() {
         return stackFrame.top();
     }
 
 private:
     std::stack<JavaFrame *> stackFrame;
+
 };
-
-
-#endif //TINY_JVM_JAVA_THREAD_H

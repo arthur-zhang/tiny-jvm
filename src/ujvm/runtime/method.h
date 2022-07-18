@@ -19,6 +19,8 @@ private:
     vector<ValueType> argTypes_;
     int argsSlotCount_;
     NativeMethod *nativeMethod_;
+    int maxLocals_;
+    int maxStack_;
 
     // (I[ILjava/lang/String;[Ljava/lang/Thread;Ljava/lang/Long;)V
     void parseArgsType();
@@ -31,6 +33,10 @@ public:
     CodeAttribute *getCode() const {
         return methodInfo_->getCode();
     }
+
+    int getMaxLocals() const;
+
+    int getMaxStack() const;
 
     vector<ValueType> &getMethodArgs() {
         return argTypes_;

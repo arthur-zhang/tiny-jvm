@@ -2,9 +2,9 @@
 
 #include "java_thread.h"
 #include "classfile/method_info.h"
-#include "classpath/system_dictionary.h"
+#include "system_dictionary.h"
 #include "instance_oop.h"
-#include "bytecode/bytecode_interpreter.h"
+#include <ujvm/bytecode/bytecode_interpreter.h>
 #include <stack>
 
 class Runtime {

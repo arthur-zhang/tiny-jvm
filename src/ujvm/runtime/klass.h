@@ -1,5 +1,9 @@
 #pragma once
 
+#include "shared/jstring.h"
+
+using namespace ujvm;
+
 // Klass 对象表示 Java 类的元数据
 class Klass {
 public:

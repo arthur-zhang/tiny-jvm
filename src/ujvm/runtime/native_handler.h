@@ -7,7 +7,7 @@
 #include "shared/jstring.h"
 
 #include <unordered_map>
-#include "native/java_lang_system.h"
+#include "ujvm/native/java_lang_system.h"
 using namespace ujvm;
 static std::unordered_map<strings::String, std::function<void *(strings::String &)>> registerMap;
 

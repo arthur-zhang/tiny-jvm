@@ -3,7 +3,8 @@
 
 #include "shared/hashmap.h"
 #include "shared/jstring.h"
-#include "classfile/class_loader.h"
+#include <ujvm/classpath/class_loader.h>
+#include <ujvm/runtime/instance_class.h>
 
 using namespace ujvm;
 

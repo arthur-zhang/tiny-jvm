@@ -4,9 +4,9 @@
 #include "shared/const.h"
 #include "classfile/classfile_parser.h"
 #include <filesystem>
-#include "classpath/system_dictionary.h"
-#include "runtime/thread.h"
-#include "bytecode/bytecode_interpreter.h"
+#include <ujvm/runtime/system_dictionary.h>
+#include <ujvm/runtime/thread.h>
+#include <ujvm/bytecode/bytecode_interpreter.h>
 
 namespace fs = std::filesystem;
 using namespace ujvm;

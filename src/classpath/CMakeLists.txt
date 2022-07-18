@@ -1,6 +1,0 @@
-file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.hpp *.h *.cpp)
-set(SOURCES ${SOURCES})
-include_directories(../shared)
-message(${SOURCES})
-add_library(classpath SHARED ${SOURCES})
-#target_link_libraries(classpath runtime)

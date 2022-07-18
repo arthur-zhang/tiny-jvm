@@ -17,4 +17,20 @@ InstanceKlass::InstanceKlass(ClassFile *cf) : cf_(cf), staticValueMap_({}) {
     }
 }
 
+Method *InstanceKlass::findMethod(const strings::String &methodName, const strings::String &methodDesc) {
+    return methodMap_[methodName + methodDesc];
+}
+
+void InstanceKlass::setStaticFieldValue(strings::String &fieldName, OOP fieldValue) {
+    staticValueMap_[fieldName] = fieldValue;
+}
+
+OOP InstanceKlass::getStaticFieldValue(const strings::String &fieldName) {
+    return staticValueMap_[fieldName];
+}
+
+ClassFile *InstanceKlass::getClassFile() const {
+    return cf_;
+}
+
 

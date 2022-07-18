@@ -1,13 +1,8 @@
-//
-// Created by arthur on 2022/6/26.
-//
-
-#ifndef TINY_JVM_JAVA_FRAME_H
-#define TINY_JVM_JAVA_FRAME_H
+#pragma once
 
 #include <stack>
 #include <map>
-#include "classfile/class_loader.h"
+#include "ujvm/classpath/class_loader.h"
 
 struct Slot {
 public:
@@ -135,7 +130,8 @@ public:
     static JavaFrame *newFrame(int maxLocals, int maxStack) {
         return new JavaFrame(maxLocals, maxStack);
     }
+
+    static JavaFrame *newFrame(Method *method) {
+        return new JavaFrame(method->getMaxLocals(), method->getMaxStack());
+    }
 };
-
-
-#endif //TINY_JVM_JAVA_FRAME_H
