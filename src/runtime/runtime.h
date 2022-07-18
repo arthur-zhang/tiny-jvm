@@ -4,7 +4,7 @@
 #include "classfile/method_info.h"
 #include "ujvm/classpath/system_dictionary.h"
 #include "instance_oop.h"
-#include "bytecode_interpreter.h"
+#include "bytecode/bytecode_interpreter.h"
 #include <stack>
 
 class Runtime {

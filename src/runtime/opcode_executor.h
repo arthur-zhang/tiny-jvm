@@ -7,7 +7,7 @@
 #include "ujvm/classpath/system_dictionary.h"
 #include "instance_oop.h"
 #include "oop_value_type.h"
-#include "bytecode_interpreter.h"
+#include "bytecode/bytecode_interpreter.h"
 #include "ujvm/ujvm.h"
 
 class OpcodeExecutor {
