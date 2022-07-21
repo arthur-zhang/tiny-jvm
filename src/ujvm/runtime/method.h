@@ -44,7 +44,7 @@ public:
 
     int getMaxStack() const;
 
-    vector<ValueType> &getMethodArgs() {
+    vector<ValueType> &getMethodArgTypes() {
         return argTypes_;
     }
 

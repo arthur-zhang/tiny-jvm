@@ -78,37 +78,26 @@ public:
     static void callNativeMethod(JavaThread *javaThread, Method *targetMethod) {
 
         JavaFrame *callerFrame = javaThread->currentFrame();
+        auto nativeMethod = targetMethod->getNativeMethod();
+        void *fn = nativeMethod->getNativeSymbol();
 
-        std::list<void *> args_;
+        auto methodArgs = targetMethod->getMethodArgTypes();
+        int nativeMethodArgCount = methodArgs.size() + 2;
 
-        auto methodArgs = targetMethod->getMethodArgs();
-        auto nativeRealArgs = vector<ValueType>(methodArgs.size() + 2);
-        nativeRealArgs[0] = ValueType::OBJECT;
-        nativeRealArgs[1] = ValueType::OBJECT;
+        auto nativeRealArgTypes = vector<ValueType>(nativeMethodArgCount);
+        nativeRealArgTypes[0] = ValueType::OBJECT;
+        nativeRealArgTypes[1] = ValueType::OBJECT;
         for (int i = 0; i < methodArgs.size(); ++i) {
-            nativeRealArgs[i + 2] = methodArgs[i];
+            nativeRealArgTypes[i + 2] = methodArgs[i];
         }
 
+        vector<void *> args = fillNativeMethodArgs(callerFrame, targetMethod, methodArgs);
 
-        fillArgsValue(callerFrame, targetMethod, methodArgs, args_);
-        vector<void *> args(args_.begin(), args_.end());
+        void *ffiArgs[nativeMethodArgCount];
+        ffi_type *ffiArgTypeArr[nativeMethodArgCount];
 
-        auto nativeMethod = targetMethod->getNativeMethod();
-        int argCount = targetMethod->getMethodArgs().size() + 2;
-        void *fn = nativeMethod->getNativeSymbol();
-        void *ffiArgs[argCount];
-
-        // prepare args type
-        ffi_type *ffiArgTypeArr[argCount];
-        ffiArgTypeArr[0] = &ffi_type_pointer;
-        ffiArgTypeArr[1] = &ffi_type_pointer;
-
-        ffiArgs[0] = args[0];
-        ffiArgs[1] = args[1];
-
-
-        for (int i = 0; i < nativeRealArgs.size(); ++i) {
-            auto argValueTypeItem = nativeRealArgs[i];
+        for (int i = 0; i < nativeRealArgTypes.size(); ++i) {
+            auto argValueTypeItem = nativeRealArgTypes[i];
             switch (argValueTypeItem) {
                 case BYTE:
                 case BOOLEAN:
@@ -146,7 +135,8 @@ public:
 
         ffi_cif cif;
         ffi_type *returnFfiType = &ffi_type_void;
-        ffi_status ffiPrepStatus = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int) argCount, returnFfiType,
+        ffi_status ffiPrepStatus = ffi_prep_cif(&cif, FFI_DEFAULT_ABI, (unsigned int) nativeMethodArgCount,
+                                                returnFfiType,
                                                 ffiArgTypeArr);
         if (ffiPrepStatus != FFI_OK) {
             PANIC("prepare stauts not ok");
@@ -180,18 +170,24 @@ public:
         javaThread->pc_ = frame.getReturnPc();
     }
 
+    static vector<void *>
+    fillNativeMethodArgs(JavaFrame *callerFrame, Method *targetMethod, vector<ValueType> &methodArgs) {
 
-    static void
-    fillArgsValue(JavaFrame *callerFrame, Method *targetMethod, vector<ValueType> &methodArgs, list<void *> &args) {
-
+        list<void *> args;
         for (auto it = methodArgs.rbegin(); it != methodArgs.rend(); ++it) {
             const ValueType &valueType = *it;
             switch (valueType) {
                 case INT:
+                case BYTE:
+                case BOOLEAN:
+                case CHAR:
+                case SHORT: {
                     args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
                     break;
+                }
                 case LONG:
-                    args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
+//                    args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
+                    PANIC("not implemented");
                     break;
                 case FLOAT:
                     //todo
@@ -200,7 +196,6 @@ public:
                     //todo
                     break;
                 case OBJECT: {
-
                     auto ref = (InstanceOopDesc *) callerFrame->getOperandStack().popRef();
                     args.push_front(ref);
                     break;
@@ -220,6 +215,7 @@ public:
         }
 
         args.push_front(Ujvm::getJNIENV());
+        return vector(args.begin(), args.end());
     }
 
     static void invokeMethod(JavaThread *javaThread) {
