@@ -27,6 +27,14 @@ public:
         elements_[pos].ref = ref;
     }
 
+    Slot getSlot(size_t pos) {
+        return elements_[pos];
+    }
+
+    void setSlot(size_t pos, Slot slot) {
+        elements_[pos] = slot;
+    }
+
 
     jobject getRef(int pos) {
         return elements_[pos].ref;
@@ -75,6 +83,10 @@ public:
     SlotArray &getSlotArray() {
         return slotArray_;
     }
+
+    void setSlot(size_t pos, Slot slot) {
+        slotArray_.setSlot(pos, slot);
+    }
 };
 
 class Stack final {
@@ -108,6 +120,10 @@ public:
 
     jobject top() {
         return slotArray_.getRef(pos_ - 1);
+    }
+
+    Slot popSlot() {
+        return slotArray_.getSlot(--pos_);
     }
 };
 
