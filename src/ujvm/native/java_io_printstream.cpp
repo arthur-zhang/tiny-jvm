@@ -12,3 +12,7 @@ void Java_java_io_PrintStream_printlnNative(jobject env, jobject jobj, jobject s
     std::cout << "hello, printme" << std::endl;
     std::wcout << *ptr << std::endl;
 }
+
+void Java_java_io_PrintStream_printlnNativeLong(jobject env, jobject jobj, jlong value) {
+    std::wcout << "println: " << value << std::endl;
+}

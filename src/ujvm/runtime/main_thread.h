@@ -5,6 +5,8 @@
 #pragma once
 
 #include "java_thread.h"
+#include <ujvm/runtime/system_dictionary.h>
+#include <ujvm/bytecode/bytecode_interpreter.h>
 
 class MainThread : public JavaThread {
 public:

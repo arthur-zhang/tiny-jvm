@@ -5,5 +5,5 @@
 
 class BytecodeInterpreter {
 public:
-    static void interpret(JavaThread *javaThread);
+    static OOP interpret(JavaThread *javaThread);
 };

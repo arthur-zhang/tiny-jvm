@@ -2,7 +2,7 @@
 // Created by arthur on 2022/6/29.
 //
 #include "instance_class.h"
-#include "classfile/constant.h"
+#include "classfile/constant.hpp"
 
 strings::String parseClassName(ClassFile *cf) {
     auto classInfo = (CONSTANT_Class_info *) cf->constantPool->getConstantPool()[cf->this_class];

@@ -4,7 +4,4 @@
 
 #include "main_thread.h"
 
-void MainThread::start() {
-
-}
 

@@ -170,8 +170,8 @@ public:
         low_bytes = reader.readUInt32();
     }
 
-    long getConstant() {
-        return ((long) high_bytes << 32) + low_bytes;
+    jlong getConstant() {
+        return ((jlong) high_bytes << 32) + low_bytes;
     }
 
     void dump(DataOutputStream &os) override {

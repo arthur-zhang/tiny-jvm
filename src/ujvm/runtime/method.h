@@ -18,6 +18,7 @@ private:
     strings::String methodDesc_;
     strings::String methodKey;
     vector<ValueType> argTypes_;
+    ValueType returnType_;
     int argsSlotCount_;
     NativeMethod *nativeMethod_;
     int maxLocals_;
@@ -25,7 +26,9 @@ private:
 
 
     // (I[ILjava/lang/String;[Ljava/lang/Thread;Ljava/lang/Long;)V
-    void parseArgsType();
+    vector<ValueType> parseArgsType();
+
+    ValueType parseReturnType();
 
     int calcArgsSlotCount();
 
@@ -37,7 +40,7 @@ public:
         return methodInfo_->getCode();
     }
 
-    CodeReader &getCodeReader() ;
+    CodeReader &getCodeReader();
 
 
     int getMaxLocals() const;
@@ -47,6 +50,8 @@ public:
     vector<ValueType> &getMethodArgTypes() {
         return argTypes_;
     }
+
+    ValueType getReturnType() const;
 
     ConstantPool *getCp() const {
         return cp_;

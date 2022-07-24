@@ -105,6 +105,11 @@ public:
         return slotArray_.getInt(--pos_);
     }
 
+    void pushLong(jlong value) {
+        slotArray_.setLong(pos_, value);
+        pos_ += 2;
+    }
+
     jlong popLong() {
         pos_ -= 2;
         return slotArray_.getLong(pos_);

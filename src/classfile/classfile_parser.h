@@ -15,7 +15,7 @@
 #include "shared/const.h"
 #include "shared/types.h"
 #include "classfile/constant_pool.h"
-#include "classfile/constant.h"
+#include "classfile/constant.hpp"
 #include "classfile/field_info.h"
 #include "classfile/method_info.h"
 

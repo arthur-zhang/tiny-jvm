@@ -1,7 +1,3 @@
-//
-// Created by ya on 2022/3/2.
-//
-
 #pragma once
 
 #include <unordered_map>
@@ -306,3 +302,5 @@ static std::unordered_map<strings::String, int> attribute_table{
 #define CONSTANT_MethodHandle        15
 #define CONSTANT_MethodType            16
 #define CONSTANT_InvokeDynamic        18
+
+extern std::unordered_map<u1, std::pair<std::string, int>> byteCodeMap;

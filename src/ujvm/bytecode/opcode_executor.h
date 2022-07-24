@@ -34,6 +34,11 @@ public:
         javaThread->currentFrame()->getOperandStack().pushRef(top);
     }
 
+    static void Op_lstore_1(JavaThread *javaThread) {
+        auto v = javaThread->currentFrame()->getOperandStack().popLong();
+        javaThread->currentFrame()->getLocals().getSlotArray().setLong(1, v);
+    }
+
     static void Op_ldc(JavaThread *javaThread) {
 
         CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
@@ -49,8 +54,21 @@ public:
 
     }
 
-    static void Op_iconst0(JavaThread *javaThread) {
+    static void Op_LDC2_W(JavaThread *javaThread) {
+        CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
+        u2 idx = codeReader.readU2(javaThread->pc_);
+
+        const ConstantPool *cp = javaThread->currentFrame()->getMethod()->getCp();
+
+        CONSTANT_Long_info *longInfo = dynamic_cast<CONSTANT_Long_info *>(cp->getConstantPool()[idx]);
+        jlong longValue = longInfo->getConstant();
+        javaThread->currentFrame()->getOperandStack().pushLong(longValue);
+    }
+
+
+    static OOP Op_iconst0(JavaThread *javaThread) {
         javaThread->currentFrame()->getOperandStack().pushInt(0);
+        return nullptr;
     }
 
     static void Op_aload0(JavaThread *javaThread) {
@@ -69,29 +87,75 @@ public:
         javaThread->currentFrame()->getOperandStack().pushInt(byteValue);
     }
 
-    static void Op_iload0(JavaThread *javaThread) {
-        int value = javaThread->currentFrame()->getLocals().getSlotArray().getInt(0);
+    static void Op_iloadx(JavaThread *javaThread, size_t pos) {
+        int value = javaThread->currentFrame()->getLocals().getSlotArray().getInt(pos);
         javaThread->currentFrame()->getOperandStack().pushInt(value);
     }
 
+    static void Op_iload0(JavaThread *javaThread) {
+        Op_iloadx(javaThread, 0);
+    }
 
-    static void callNativeMethod(JavaThread *javaThread, Method *targetMethod) {
+    static void Op_iload1(JavaThread *javaThread) {
+        Op_iloadx(javaThread, 1);
+    }
+
+    static void Op_lloadx(JavaThread *javaThread, size_t pos) {
+        jlong value = javaThread->currentFrame()->getLocals().getSlotArray().getLong(pos);
+        javaThread->currentFrame()->getOperandStack().pushLong(value);
+    }
+
+    static void Op_lload1(JavaThread *javaThread) {
+        Op_lloadx(javaThread, 1);
+    }
+
+    static void Op_lload2(JavaThread *javaThread) {
+        Op_lloadx(javaThread, 2);
+    }
+
+    static void Op_i2l(JavaThread *javaThread) {
+        jint v = javaThread->currentFrame()->getOperandStack().popInt();
+        javaThread->currentFrame()->getOperandStack().pushLong((jlong) v);
+    }
+
+    static void Op_ladd(JavaThread *javaThread) {
+        jlong v1 = javaThread->currentFrame()->getOperandStack().popLong();
+        jlong v2 = javaThread->currentFrame()->getOperandStack().popLong();
+        javaThread->currentFrame()->getOperandStack().pushLong(v1 + v2);
+    }
+
+    static OOP Op_lreturn(JavaThread *javaThread) {
+        jlong v = javaThread->currentFrame()->getOperandStack().popLong();
+        return new LongOopDesc(v);
+    }
+
+
+    static void Op_aload(JavaThread *javaThread) {
+        CodeReader &codeReader = javaThread->currentFrame()->getMethod()->getCodeReader();
+        u1 idx = codeReader.readU1(javaThread->pc_);
+
+        jobject value = javaThread->currentFrame()->getLocals().getSlotArray().getRef(idx);
+        javaThread->currentFrame()->getOperandStack().pushRef(value);
+    }
+
+
+    static OOP callNativeMethod(JavaThread *javaThread, Method *targetMethod) {
 
         JavaFrame *callerFrame = javaThread->currentFrame();
         auto nativeMethod = targetMethod->getNativeMethod();
         void *fn = nativeMethod->getNativeSymbol();
 
-        auto methodArgs = targetMethod->getMethodArgTypes();
-        int nativeMethodArgCount = methodArgs.size() + 2;
+        auto methodArgTypes = targetMethod->getMethodArgTypes();
+        int nativeMethodArgCount = methodArgTypes.size() + 2;
 
         auto nativeRealArgTypes = vector<ValueType>(nativeMethodArgCount);
         nativeRealArgTypes[0] = ValueType::OBJECT;
         nativeRealArgTypes[1] = ValueType::OBJECT;
-        for (int i = 0; i < methodArgs.size(); ++i) {
-            nativeRealArgTypes[i + 2] = methodArgs[i];
+        for (int i = 0; i < methodArgTypes.size(); ++i) {
+            nativeRealArgTypes[i + 2] = methodArgTypes[i];
         }
 
-        vector<void *> args = fillNativeMethodArgs(callerFrame, targetMethod, methodArgs);
+        vector<void *> args = fillNativeMethodArgs(callerFrame, targetMethod, methodArgTypes);
 
         void *ffiArgs[nativeMethodArgCount];
         ffi_type *ffiArgTypeArr[nativeMethodArgCount];
@@ -111,8 +175,15 @@ public:
                     ffiArgs[i] = ffiArgPtr;
                     break;
                 }
-                case ValueType::LONG:
+                case ValueType::LONG:{
+                    ffiArgTypeArr[i] = &ffi_type_slong;
+                    jlong longValue = ((LongOopDesc *) args[i])->getValue();
+                    long *ffiArgPtr = (long *) alloca(ffi_type_sint.size);
+                    *ffiArgPtr = longValue;
+                    ffiArgs[i] = ffiArgPtr;
                     break;
+                }
+
                 case ValueType::FLOAT:
                     //todo
                     break;
@@ -150,7 +221,7 @@ public:
     }
 
 
-    static void callNonNativeMethod(JavaThread *javaThread, Method *targetMethod) {
+    static OOP callNonNativeMethod(JavaThread *javaThread, Method *targetMethod) {
         JavaFrame *callerFrame = javaThread->currentFrame();
         JavaFrame frame = JavaFrame(targetMethod);
         frame.setReturnPc(javaThread->pc_);
@@ -165,9 +236,12 @@ public:
         }
 
         javaThread->pc_ = 0;
-        BytecodeInterpreter::interpret(javaThread);
+        OOP ret = BytecodeInterpreter::interpret(javaThread);
+        auto returnType = targetMethod->getReturnType();
         javaThread->popFrame();
         javaThread->pc_ = frame.getReturnPc();
+        return ret;
+
     }
 
     static vector<void *>
@@ -185,10 +259,10 @@ public:
                     args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
                     break;
                 }
-                case LONG:
-//                    args.push_front(new IntOopDesc(callerFrame->getOperandStack().popInt()));
-                    PANIC("not implemented");
+                case LONG: {
+                    args.push_front(new LongOopDesc(callerFrame->getOperandStack().popLong()));
                     break;
+                }
                 case FLOAT:
                     //todo
                     break;
@@ -233,17 +307,45 @@ public:
         CONSTANT_NameAndType_info *nameAndType = dynamic_cast<CONSTANT_NameAndType_info *>(cp->getConstantPool()[method->name_and_type_index]);
         auto methodName = ((CONSTANT_Utf8_info *) cp->getConstantPool()[nameAndType->name_index])->getConstant();
         auto methodDesc = ((CONSTANT_Utf8_info *) cp->getConstantPool()[nameAndType->descriptor_index])->getConstant();
-        std::wcout << methodName << ":" << methodDesc << std::endl;
 
         Method *targetMethod = clz->findMethod(methodName, methodDesc);
         if (!targetMethod) {
             PANIC("target method is null");
         }
+        OOP ret;
 
         if (targetMethod->isNative()) {
-            callNativeMethod(javaThread, targetMethod);
+            ret = callNativeMethod(javaThread, targetMethod);
         } else {
-            callNonNativeMethod(javaThread, targetMethod);
+            ret = callNonNativeMethod(javaThread, targetMethod);
+        }
+        ValueType returnType = targetMethod->getReturnType();
+        switch (returnType) {
+            case VOID:
+            default:
+                break;
+            case BYTE:
+            case BOOLEAN:
+            case CHAR:
+            case SHORT:
+            case INT: {
+                IntOopDesc *intOopDesc = (IntOopDesc *) ret;
+                javaThread->currentFrame()->getOperandStack().pushInt(intOopDesc->getValue());
+                break;
+            }
+            case FLOAT:
+                break;
+            case LONG: {
+                LongOopDesc *longOopDesc = (LongOopDesc *) ret;
+                javaThread->currentFrame()->getOperandStack().pushLong(longOopDesc->getValue());
+                break;
+            }
+            case DOUBLE:
+                break;
+            case OBJECT:
+                break;
+            case ARRAY:
+                break;
         }
     }
 

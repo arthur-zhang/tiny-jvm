@@ -7,7 +7,7 @@
 #include "classfile/field_info.h"
 #include "shared/jstring.h"
 #include "classfile/data_output_stream.h"
-#include "classfile/constant.h"
+#include "classfile/constant.hpp"
 #include "classfile/attribute_info.h"
 #include "classfile/element_value.h"
 
