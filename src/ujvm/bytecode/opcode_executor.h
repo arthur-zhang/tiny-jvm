@@ -175,7 +175,7 @@ public:
                     ffiArgs[i] = ffiArgPtr;
                     break;
                 }
-                case ValueType::LONG:{
+                case ValueType::LONG: {
                     ffiArgTypeArr[i] = &ffi_type_slong;
                     jlong longValue = ((LongOopDesc *) args[i])->getValue();
                     long *ffiArgPtr = (long *) alloca(ffi_type_sint.size);
